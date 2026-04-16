@@ -60,7 +60,7 @@ const MENU_ITEMS = [
     id: "settings",
     label: "Settings",
     icon: "settings" as const,
-    href: "/(tabs)/settings",
+    href: "/settings",
   },
   {
     id: "help",
@@ -152,7 +152,7 @@ export default function ProfileTabScreen() {
               key={item.id}
               onPress={() => {
                 if (item.id === "settings") {
-                  router.push("/(tabs)/settings");
+                  router.push("/settings");
                 } else {
                   // Edit Profile, Help - can push placeholder routes later
                 }
