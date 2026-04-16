@@ -44,16 +44,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* <Tabs.Screen
-        name="leaderboard"
-        options={{
-          title: "Stats",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="insert-chart" size={24} color={color} />
-          ),
-        }}
-      /> */}
-      <Tabs.Screen name="leaderboard" options={{ href: null }} />
+
       <Tabs.Screen
         name="practice"
         options={{
@@ -64,11 +55,11 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="theory"
+        name="exams"
         options={{
-          title: "Theory",
+          title: "Exam",
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="school" size={24} color={color} />
+            <MaterialIcons name="book" size={24} color={color} />
           ),
         }}
       />
@@ -82,15 +73,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
+        name="conversations"
         options={{
-          title: "Settings",
+          title: "Conversations",
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="settings" size={24} color={color} />
+            <MaterialIcons name="chat" size={24} color={color} />
           ),
         }}
       />
-      <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>
   );
 }
