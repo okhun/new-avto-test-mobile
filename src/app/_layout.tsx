@@ -2,15 +2,14 @@ import { api } from "@/services/api/axios";
 import "@/services/api/interceptors";
 import { setLogoutCallback } from "@/services/api/interceptors";
 import "@/src/config/reanimated";
+import type { GetMeResponse } from "@/src/features/auth/types/auth.types";
 import { QueryProvider } from "@/src/providers";
 import { useAuthStore } from "@/src/store/auth.store";
-import type { ProfileResponse } from "@/src/types/auth.types";
 import { Stack } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AuthBootstrapProvider } from "../providers/AuthBootstrapProvider";
 import "./../../global.css";
 
 export const unstable_settings = {
@@ -36,14 +35,16 @@ function useBootstrapAuth() {
 
       if (hasStored) {
         try {
-          const { data } = await api.get<ProfileResponse>("/auth/me");
+          const { data } = await api.get<GetMeResponse>("/auth/me");
           if (data) {
             store.setUser({
               id: data.id,
-              username: data.username,
-              coins: data.coins,
-              gamesPlayed: data.gamesPlayed,
-              gamesWon: data.gamesWon,
+              email: data.email,
+              phoneNumber: data.phoneNumber,
+              avatarUrl: data.avatarUrl ?? null,
+              provider: data.provider,
+              isGuest: data.isGuest,
+              displayName: data.displayName,
             });
           }
         } catch {
@@ -57,31 +58,28 @@ function useBootstrapAuth() {
 }
 
 export default function RootLayout() {
-  // useBootstrapAuth();
+  useBootstrapAuth();
 
   return (
     <GestureHandlerRootView className="flex-1">
       <QueryProvider>
         <SafeAreaProvider>
-          <AuthBootstrapProvider>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="auth" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="onboarding"
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="ticket-exam"
-                options={{ headerShown: false, title: "Ticket Exam" }}
-              />
-              <Stack.Screen
-                name="modal"
-                options={{ presentation: "modal", title: "Modal" }}
-              />
-            </Stack>
-          </AuthBootstrapProvider>
+          {/* <AuthBootstrapProvider> */}
+          <Stack>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="auth" options={{ headerShown: false }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="ticket-exam"
+              options={{ headerShown: false, title: "Ticket Exam" }}
+            />
+            <Stack.Screen
+              name="modal"
+              options={{ presentation: "modal", title: "Modal" }}
+            />
+          </Stack>
+          {/* </AuthBootstrapProvider> */}
         </SafeAreaProvider>
       </QueryProvider>
     </GestureHandlerRootView>

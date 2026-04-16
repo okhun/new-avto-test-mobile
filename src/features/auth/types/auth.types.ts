@@ -1,21 +1,15 @@
 export interface LoginDto {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterDto {
-  username: string;
+  email: string;
   password: string;
   displayName: string;
 }
 
-export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: User;
-}
-
-export interface RegisterResponse {
+export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   user: User;
@@ -23,10 +17,12 @@ export interface RegisterResponse {
 
 export interface GetMeResponse {
   id: string;
-  username: string;
-  coins: number;
-  gamesPlayed: number;
-  gamesWon: number;
+  displayName: string;
+  email: string;
+  phoneNumber: string | null;
+  avatarUrl: string | null;
+  provider: string | null;
+  isGuest: boolean;
 }
 
 export interface User {

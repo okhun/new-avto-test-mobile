@@ -7,16 +7,16 @@ import {
   register,
 } from "@/src/features/auth/api/auth.api";
 import type {
+  AuthResponse,
+  GetMeResponse,
   GuestLoginDto,
   LoginDto,
-  LoginResponse,
   RegisterDto,
 } from "@/src/features/auth/types/auth.types";
 import { useAuthStore } from "@/src/store/auth.store";
-import type { ProfileResponse } from "@/src/types/auth.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-async function handleAuthSuccess(response: { data: LoginResponse }) {
+async function handleAuthSuccess(response: { data: AuthResponse }) {
   const { accessToken, refreshToken } = response.data;
   const store = useAuthStore.getState();
 
@@ -24,14 +24,16 @@ async function handleAuthSuccess(response: { data: LoginResponse }) {
   store.setRefreshToken(refreshToken);
 
   try {
-    const { data } = await api.get<ProfileResponse>("/auth/me");
+    const { data } = await api.get<GetMeResponse>("/auth/me");
     if (data) {
       store.setUser({
         id: data.id,
-        username: data.username,
-        coins: data.coins,
-        gamesPlayed: data.gamesPlayed,
-        gamesWon: data.gamesWon,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        avatarUrl: data.avatarUrl ?? null,
+        provider: data.provider,
+        isGuest: data.isGuest,
+        displayName: data.displayName,
       });
     }
   } catch {

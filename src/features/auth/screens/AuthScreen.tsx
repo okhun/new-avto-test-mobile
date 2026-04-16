@@ -10,11 +10,12 @@ import {
   useLogin,
   useRegister,
 } from "@/src/features/auth/hook/useAuth";
+import type { GetMeResponse } from "@/src/features/auth/types/auth.types";
 import { useAuthStore } from "@/src/store/auth.store";
-import type { ProfileResponse } from "@/src/types/auth.types";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Application from "expo-application";
 import * as Linking from "expo-linking";
+import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useRef, useState } from "react";
 import {
@@ -69,21 +70,18 @@ function ScaleButton({
 
 interface FormErrors {
   displayName?: string;
-  username?: string;
+  email?: string;
   password?: string;
 }
 
-function validateLogin(username: string, password: string): FormErrors | null {
+function validateLogin(email: string, password: string): FormErrors | null {
   const errors: FormErrors = {};
-  const trimmed = username.trim();
+  const trimmed = email.trim();
 
   if (!trimmed) {
-    errors.username = "Email or username is required";
-  } else if (
-    trimmed.includes("@") &&
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)
-  ) {
-    errors.username = "Please enter a valid email";
+    errors.email = "Email is required";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+    errors.email = "Please enter a valid email";
   }
 
   if (!password) {
@@ -97,7 +95,7 @@ function validateLogin(username: string, password: string): FormErrors | null {
 
 function validateRegister(
   displayName: string,
-  username: string,
+  email: string,
   password: string
 ): FormErrors | null {
   const errors: FormErrors = {};
@@ -108,7 +106,7 @@ function validateRegister(
     errors.displayName = "Display name must be at least 2 characters";
   }
 
-  const loginErrors = validateLogin(username, password);
+  const loginErrors = validateLogin(email, password);
   if (loginErrors) {
     Object.assign(errors, loginErrors);
   }
@@ -136,10 +134,10 @@ function extractApiError(error: unknown): string {
 }
 
 export default function AuthScreen() {
-  //   const router = useRouter();
+  const router = useRouter();
   const [tab, setTab] = useState<"login" | "register">("login");
   const [displayName, setDisplayName] = useState("");
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -174,16 +172,16 @@ export default function AuthScreen() {
     Keyboard.dismiss();
     clearErrors();
 
-    const validationErrors = validateLogin(username, password);
+    const validationErrors = validateLogin(email, password);
     if (validationErrors) {
       setErrors(validationErrors);
       return;
     }
 
     loginMutation.mutate(
-      { username: username.trim(), password },
+      { email: email.trim(), password },
       {
-        // onSuccess: () => router.replace("/(tabs)"),
+        onSuccess: () => router.replace("/(tabs)"),
         onError: (error) => setServerError(extractApiError(error)),
       }
     );
@@ -193,7 +191,7 @@ export default function AuthScreen() {
     Keyboard.dismiss();
     clearErrors();
 
-    const validationErrors = validateRegister(displayName, username, password);
+    const validationErrors = validateRegister(displayName, email, password);
     if (validationErrors) {
       setErrors(validationErrors);
       return;
@@ -201,12 +199,12 @@ export default function AuthScreen() {
 
     registerMutation.mutate(
       {
-        username: username.trim(),
+        email: email.trim(),
         password,
         displayName: displayName.trim(),
       },
       {
-        // onSuccess: () => router.replace("/(tabs)"),
+        onSuccess: () => router.replace("/(tabs)"),
         onError: (error) => setServerError(extractApiError(error)),
       }
     );
@@ -244,20 +242,22 @@ export default function AuthScreen() {
           store.setAccessToken(response.data.accessToken);
           store.setRefreshToken(response.data.refreshToken);
           try {
-            const { data: meData } = await api.get<ProfileResponse>("/auth/me");
+            const { data: meData } = await api.get<GetMeResponse>("/auth/me");
             if (meData) {
               store.setUser({
                 id: meData.id,
-                username: meData.username,
-                coins: meData.coins,
-                gamesPlayed: meData.gamesPlayed,
-                gamesWon: meData.gamesWon,
+                email: meData.email,
+                phoneNumber: meData.phoneNumber,
+                avatarUrl: meData.avatarUrl ?? null,
+                provider: meData.provider,
+                isGuest: meData.isGuest,
+                displayName: meData.displayName,
               });
             }
           } catch {
             await store.logout();
           }
-          //   router.replace("/(tabs)");
+          router.replace("/(tabs)");
         } else {
           setServerError(
             "Authentication failed. No authorization code received."
@@ -289,7 +289,7 @@ export default function AuthScreen() {
     guestLoginMutation.mutate(
       { deviceId, platform: Platform.OS as "ios" | "android" },
       {
-        // onSuccess: () => router.replace("/(tabs)"),
+        onSuccess: () => router.replace("/(tabs)"),
         onError: (error) =>
           Alert.alert("Guest Login Failed", extractApiError(error)),
       }
@@ -385,11 +385,11 @@ export default function AuthScreen() {
               <TextInput
                 ref={usernameRef}
                 placeholder="Email or username"
-                value={username}
+                value={email}
                 onChangeText={(t) => {
-                  setUsername(t);
-                  if (errors.username)
-                    setErrors((e) => ({ ...e, username: undefined }));
+                  setEmail(t);
+                  if (errors.email)
+                    setErrors((e) => ({ ...e, email: undefined }));
                 }}
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -399,13 +399,13 @@ export default function AuthScreen() {
                 onSubmitEditing={() => passwordRef.current?.focus()}
                 editable={!isAnyLoading}
                 className={`rounded-xl border bg-white px-4 py-4 text-sm ${
-                  errors.username ? "border-red-400" : "border-gray-200"
+                  errors.email ? "border-red-400" : "border-gray-200"
                 }`}
                 placeholderTextColor="#9ca3af"
               />
-              {errors.username ? (
+              {errors.email ? (
                 <Text className="mt-1 px-1 text-xs text-red-500">
-                  {errors.username}
+                  {errors.email}
                 </Text>
               ) : null}
             </View>

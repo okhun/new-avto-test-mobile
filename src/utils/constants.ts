@@ -1,6 +1,6 @@
 export const API_CONFIG = {
   BASE_URL:
-    process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.104:3000/api/v1",
+    process.env.EXPO_PUBLIC_API_URL || "https://dev-api.avto-test.uz/api/v1",
   TIMEOUT: 10000,
 };
 

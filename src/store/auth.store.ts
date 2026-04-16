@@ -1,49 +1,17 @@
+import type { GetMeResponse } from "@/src/features/auth/types/auth.types";
 import * as SecureStore from "expo-secure-store";
 import { create } from "zustand";
 import { STORAGE_KEYS } from "../utils/constants";
 
-export enum AuthProvider {
-  GOOGLE = "google",
-  FACEBOOK = "facebook",
-  APPLE = "apple",
-}
-export interface PlayerProfile {
-  id: string;
-  displayName: string;
-  email: string | null;
-  avatarUrl: string | null;
-  accountType: string;
-  coins: number;
-  gems: number;
-  level: number;
-  xp: number;
-  stats: {
-    gamesPlayed: number;
-    gamesWon: number;
-    winRate: number;
-    rating: number;
-    rankTier: number;
-  };
-  linkedProviders: AuthProvider[];
-}
-interface User {
-  id: string;
-  username: string;
-  avatarUrl?: string;
-  coins: number;
-  gamesPlayed?: number;
-  gamesWon?: number;
-}
-
 interface AuthState {
   // State
-  user: User | null;
+  user: GetMeResponse | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
 
   // Actions
-  setUser: (user: User) => void;
+  setUser: (user: GetMeResponse) => void;
   setAccessToken: (accessToken: string) => void;
   setRefreshToken: (refreshToken: string) => void;
   setLoading: (loading: boolean) => void;
@@ -60,18 +28,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
 
   // Actions
-  setUser: (user) => {
+  setUser: async (user) => {
     set({ user, isAuthenticated: true, isLoading: false });
-    // Persist user data
-    SecureStore.setItemAsync(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+    await SecureStore.setItemAsync(
+      STORAGE_KEYS.USER_DATA,
+      JSON.stringify(user)
+    );
   },
 
-  setAccessToken: (accessToken: string) => {
-    SecureStore.setItemAsync(STORAGE_KEYS.AUTH_TOKEN, accessToken);
+  setAccessToken: async (accessToken: string) => {
+    await SecureStore.setItemAsync(STORAGE_KEYS.AUTH_TOKEN, accessToken);
   },
 
-  setRefreshToken: (refreshToken: string) => {
-    SecureStore.setItemAsync(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+  setRefreshToken: async (refreshToken: string) => {
+    await SecureStore.setItemAsync(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
   },
 
   setLoading: (isLoading) => set({ isLoading }),
@@ -99,7 +69,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.log("accessToken", accessToken);
       const userData = await SecureStore.getItemAsync(STORAGE_KEYS.USER_DATA);
       if (accessToken && userData) {
-        const user = JSON.parse(userData) as User;
+        const user = JSON.parse(userData) as GetMeResponse;
         set({
           user,
           isAuthenticated: true,
