@@ -1,8 +1,8 @@
 import { api } from "@/services/api/axios";
 import "@/services/api/interceptors";
 import { setLogoutCallback } from "@/services/api/interceptors";
+import type { GetMeResponse, User } from "@/src/features/auth/types/auth.types";
 import { useAuthStore } from "@/src/store/auth.store";
-import type { ProfileResponse, User } from "@/src/types/auth.types";
 import React, { createContext, useContext, useEffect, useRef } from "react";
 
 interface AuthContextValue {
@@ -37,14 +37,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (hasStored) {
       try {
-        const { data } = await api.get<ProfileResponse>("/auth/me");
+        const { data } = await api.get<GetMeResponse>("/users/me");
         if (data) {
           store.setUser({
             id: data.id,
-            username: data.username,
-            coins: data.coins,
-            gamesPlayed: data.gamesPlayed,
-            gamesWon: data.gamesWon,
+            email: data.email,
+            phoneNumber: data.phoneNumber,
+            avatarUrl: data.avatarUrl ?? null,
+            provider: data.provider,
+            isGuest: data.isGuest,
+            displayName: data.displayName,
           });
         }
       } catch {
@@ -60,14 +62,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     store.setRefreshToken(refreshToken);
 
     try {
-      const { data } = await api.get<ProfileResponse>("/auth/me");
+      const { data } = await api.get<GetMeResponse>("/users/me");
       if (data) {
         store.setUser({
           id: data.id,
-          username: data.username,
-          coins: data.coins,
-          gamesPlayed: data.gamesPlayed ?? 0,
-          gamesWon: data.gamesWon,
+          email: data.email,
+          phoneNumber: data.phoneNumber,
+          avatarUrl: data.avatarUrl ?? null,
+          provider: data.provider,
+          isGuest: data.isGuest,
+          displayName: data.displayName,
         });
       }
     } catch {

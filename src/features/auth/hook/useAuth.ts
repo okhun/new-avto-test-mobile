@@ -24,7 +24,7 @@ async function handleAuthSuccess(response: { data: AuthResponse }) {
   store.setRefreshToken(refreshToken);
 
   try {
-    const { data } = await api.get<GetMeResponse>("/auth/me");
+    const { data } = await api.get<GetMeResponse>("/users/me");
     if (data) {
       store.setUser({
         id: data.id,

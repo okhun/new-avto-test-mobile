@@ -20,7 +20,7 @@ export const guestLogin = (data: GuestLoginDto) =>
 
 export const logout = () => api.post<void>("/auth/logout");
 
-export const getMe = () => api.get<GetMeResponse>("/auth/me");
+export const getMe = () => api.get<GetMeResponse>("/users/me");
 
 export const getGoogleAuthUrl = () =>
   api.get<SocialAuthUrlResponse>("/auth/google");

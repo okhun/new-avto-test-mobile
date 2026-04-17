@@ -1,5 +1,5 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import React, { useState } from "react";
+import React from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -48,13 +48,6 @@ function ScalePressable({
 }
 
 export default function HomeTabScreen() {
-  const [tab, setTab] = useState<"login" | "register">("login");
-
-  const switchTab = (newTab: "login" | "register") => {
-    setTab(newTab);
-  };
-
-  console.log("tab", tab);
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: BACKGROUND_LIGHT }}
@@ -91,12 +84,7 @@ export default function HomeTabScreen() {
               </Text>
             </View>
           </View>
-          <Pressable
-            className="h-12 w-12 items-center justify-center"
-            onPress={() => {
-              switchTab(tab === "login" ? "register" : "login");
-            }}
-          >
+          <Pressable className="h-12 w-12 items-center justify-center">
             <MaterialIcons name="notifications" size={24} color={TEXT_DARK} />
           </Pressable>
         </View>
@@ -152,9 +140,7 @@ export default function HomeTabScreen() {
         {/* CTA */}
         <View className="px-4 py-3">
           <ScalePressable
-            onPress={() => {
-              switchTab("register");
-            }}
+            onPress={() => {}}
             style={{ backgroundColor: PRIMARY }}
             className="flex-1  rounded-xl px-5 py-4 shadow-lg"
           >
@@ -166,16 +152,6 @@ export default function HomeTabScreen() {
             </View>
           </ScalePressable>
         </View>
-        {tab === "login" && (
-          <View>
-            <Text>Login</Text>
-          </View>
-        )}
-        {tab === "register" && (
-          <View>
-            <Text>Register</Text>
-          </View>
-        )}
 
         {/* Section Header */}
         <View className="flex-row items-center justify-between px-4 pb-2 pt-6">

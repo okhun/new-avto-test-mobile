@@ -26,7 +26,8 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-const getAccessToken = () => SecureStore.getItemAsync(STORAGE_KEYS.AUTH_TOKEN);
+const getAccessToken = async () =>
+  await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_TOKEN);
 
 const getRefreshToken = () =>
   SecureStore.getItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
@@ -43,6 +44,7 @@ const clearTokens = async () => {
 api.interceptors.request.use(
   async (config) => {
     const token = await getAccessToken();
+    console.log("token", token);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

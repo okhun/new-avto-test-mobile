@@ -35,7 +35,7 @@ function useBootstrapAuth() {
 
       if (hasStored) {
         try {
-          const { data } = await api.get<GetMeResponse>("/auth/me");
+          const { data } = await api.get<GetMeResponse>("/users/me");
           if (data) {
             store.setUser({
               id: data.id,

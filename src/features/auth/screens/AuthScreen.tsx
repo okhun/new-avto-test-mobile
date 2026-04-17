@@ -242,7 +242,7 @@ export default function AuthScreen() {
           store.setAccessToken(response.data.accessToken);
           store.setRefreshToken(response.data.refreshToken);
           try {
-            const { data: meData } = await api.get<GetMeResponse>("/auth/me");
+            const { data: meData } = await api.get<GetMeResponse>("/users/me");
             if (meData) {
               store.setUser({
                 id: meData.id,

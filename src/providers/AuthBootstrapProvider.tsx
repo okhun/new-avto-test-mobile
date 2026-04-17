@@ -20,7 +20,7 @@ export function AuthBootstrapProvider({
 
       if (hasStored) {
         try {
-          const { data } = await api.get("/auth/me");
+          const { data } = await api.get("/users/me");
 
           store.setUser(data);
         } catch {
