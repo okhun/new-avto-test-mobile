@@ -2,6 +2,7 @@ export const API_CONFIG = {
   BASE_URL:
     process.env.EXPO_PUBLIC_API_URL || "https://dev-api.avto-test.uz/api/v1",
   TIMEOUT: 10000,
+  API_URL: process.env.EXPO_PUBLIC_API_URL || "https://dev-api.avto-test.uz",
 };
 
 export const STORAGE_KEYS = {

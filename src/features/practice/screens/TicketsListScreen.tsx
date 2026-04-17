@@ -1,3 +1,4 @@
+import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
@@ -9,11 +10,6 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetTicketsHistory } from "../hook/usePractice";
 import type { TicketHistory, TicketStatus } from "../types/practice.types";
@@ -26,7 +22,6 @@ const INFO = "#3498db";
 const WARNING = "#f59e0b";
 const TEXT_DARK = "#0f172a";
 const CARD_BG = "#ffffff";
-const SPRING_CONFIG = { damping: 15, stiffness: 400 };
 
 type FilterId = "all" | TicketStatus;
 
@@ -87,40 +82,6 @@ function computeStats(tickets: TicketHistory[]) {
 
 function formatTicketNumber(num: number): string {
   return `Ticket ${String(num).padStart(2, "0")}`;
-}
-
-// --- Reusable animated pressable ---
-
-function ScalePressable({
-  children,
-  onPress,
-  className,
-  style,
-}: {
-  children: React.ReactNode;
-  onPress?: () => void;
-  className?: string;
-  style?: object;
-}) {
-  const scale = useSharedValue(1);
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-  return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={() => {
-        scale.value = withSpring(0.98, SPRING_CONFIG);
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1, SPRING_CONFIG);
-      }}
-      className={className}
-      style={style}
-    >
-      <Animated.View style={animatedStyle}>{children}</Animated.View>
-    </Pressable>
-  );
 }
 
 // --- Stat card ---
