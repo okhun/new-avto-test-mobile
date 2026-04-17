@@ -452,7 +452,10 @@ export default function TicketsListScreen() {
                 onPress={() =>
                   router.push({
                     pathname: "/tickets/[id]",
-                    params: { id: ticket.ticketId },
+                    params: {
+                      id: ticket.ticketId,
+                      ticketNumber: String(ticket.ticketNumber),
+                    },
                   })
                 }
               />
