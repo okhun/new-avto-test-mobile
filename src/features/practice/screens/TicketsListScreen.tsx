@@ -451,8 +451,8 @@ export default function TicketsListScreen() {
                 width={cardWidth}
                 onPress={() =>
                   router.push({
-                    pathname: "/ticket-exam",
-                    params: { ticketId: ticket.ticketId },
+                    pathname: "/tickets/[id]",
+                    params: { id: ticket.ticketId },
                   })
                 }
               />

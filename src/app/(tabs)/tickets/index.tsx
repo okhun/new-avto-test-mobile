@@ -1,5 +1,5 @@
 import TicketsListScreen from "@/src/features/practice/screens/TicketsListScreen";
 
-export default function PracticeTabScreen() {
+export default function TicketsScreen() {
   return <TicketsListScreen />;
 }

@@ -46,9 +46,9 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="practice"
+        name="tickets/index"
         options={{
-          title: "Practice",
+          title: "Tickets",
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="edit-note" size={24} color={color} />
           ),

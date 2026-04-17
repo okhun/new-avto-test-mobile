@@ -67,8 +67,15 @@ export default function RootLayout() {
           {/* <AuthBootstrapProvider> */}
           <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(tabs)"
+              options={{ headerShown: false, animation: "slide_from_left" }}
+            />
             <Stack.Screen name="auth" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="tickets/[id]"
+              options={{ headerShown: false, animation: "slide_from_right" }}
+            />
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
             <Stack.Screen
               name="ticket-exam"
