@@ -1,7 +1,7 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -291,8 +291,14 @@ function EmptyState({ filterLabel }: { filterLabel: string }) {
 // --- Main screen ---
 
 export default function TicketsListScreen() {
-  const { data: ticketsHistory, isLoading } = useGetTicketsHistory();
+  const { data: ticketsHistory, isLoading, refetch } = useGetTicketsHistory();
   const router = useRouter();
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
   const { width } = useWindowDimensions();
   const cardGap = 16;
   const padding = 16;

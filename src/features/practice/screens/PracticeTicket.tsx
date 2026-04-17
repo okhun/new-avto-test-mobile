@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
-  Image,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -14,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { ImagePreview } from "@/src/components/ui/ImagePreview";
 import { API_CONFIG } from "@/src/utils/constants";
 import { AnswerOption, type FeedbackKind } from "../components/AnswerOption";
 import { ConfirmButton } from "../components/ConfirmButton";
@@ -209,7 +209,7 @@ export default function PracticeTicketScreen() {
           if (!wasCorrect && a.isCorrect) return "reveal";
           return null;
         }
-        if (isAnswered && !isCurrent) {
+        if (isAnswered) {
           if (a.id === submittedId && wasCorrect) return "correct";
           if (a.id === submittedId && !wasCorrect) return "incorrect";
           if (!wasCorrect && a.isCorrect) return "reveal";
@@ -225,19 +225,11 @@ export default function PracticeTicketScreen() {
           nestedScrollEnabled
         >
           {q.imageUrl && (
-            <View className="overflow-hidden rounded-xl border border-slate-200 shadow-md">
-              <Image
-                source={{
-                  uri: `${API_CONFIG.API_URL}/images/${q.imageUrl}.${Number(q.imageUrl) > 700 ? "webp" : "png"}`,
-                }}
-                style={{
-                  width: SCREEN_WIDTH - 32,
-                  height: IMAGE_HEIGHT,
-                  backgroundColor: "#e2e8f0",
-                }}
-                resizeMode="cover"
-              />
-            </View>
+            <ImagePreview
+              uri={`${API_CONFIG.API_URL}/images/${q.imageUrl}.${Number(q.imageUrl) > 700 ? "webp" : "png"}`}
+              width={SCREEN_WIDTH - 32}
+              height={IMAGE_HEIGHT}
+            />
           )}
 
           <View className={q.imageUrl ? "mt-4 gap-1" : "gap-1"}>
