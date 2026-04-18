@@ -1,5 +1,5 @@
-import PracticeTicketScreen from "@/src/features/practice/screens/PracticeTicket";
+import ExamTicketScreen from "@/src/components/start/ExamTicket";
 
 export default function TicketScreen() {
-  return <PracticeTicketScreen />;
+  return <ExamTicketScreen />;
 }

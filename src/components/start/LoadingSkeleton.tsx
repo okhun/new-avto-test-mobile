@@ -1,7 +1,11 @@
 import { Pulse } from "@/src/components/ui/Pulse";
+import {
+  COLORS,
+  QUESTION_BTN_SIZE,
+  SCREEN_WIDTH,
+} from "@/src/features/practice/constants/theme";
 import React from "react";
 import { View } from "react-native";
-import { COLORS, QUESTION_BTN_SIZE, SCREEN_WIDTH } from "../constants/theme";
 
 export function LoadingSkeleton() {
   const imgH = (SCREEN_WIDTH - 32) * (9 / 16);

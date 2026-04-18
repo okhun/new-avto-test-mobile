@@ -1,12 +1,15 @@
-import React, { useEffect, useRef } from "react";
-import { Pressable, ScrollView, Text } from "react-native";
 import {
   COLORS,
   QUESTION_BTN_GAP,
   QUESTION_BTN_SIZE,
   SCREEN_WIDTH,
-} from "../constants/theme";
-import type { SubmitAnswerResult, TestResponse } from "../types/practice.types";
+} from "@/src/features/practice/constants/theme";
+import type {
+  SubmitAnswerResult,
+  TestResponse,
+} from "@/src/features/practice/types/practice.types";
+import React, { useEffect, useRef } from "react";
+import { Pressable, ScrollView, Text } from "react-native";
 
 type QStatus = "unanswered" | "correct" | "incorrect" | "active";
 

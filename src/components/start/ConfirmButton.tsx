@@ -1,9 +1,9 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
+import { COLORS } from "@/src/features/practice/constants/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
-import { COLORS } from "../constants/theme";
 
 interface ConfirmButtonProps {
   onPress: () => void;

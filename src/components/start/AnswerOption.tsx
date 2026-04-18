@@ -1,9 +1,9 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
+import { COLORS } from "@/src/features/practice/constants/theme";
+import type { Answer } from "@/src/features/practice/types/practice.types";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { Text } from "react-native";
-import { COLORS } from "../constants/theme";
-import type { Answer } from "../types/practice.types";
 
 export type FeedbackKind = null | "correct" | "incorrect" | "reveal";
 

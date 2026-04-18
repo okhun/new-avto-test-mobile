@@ -13,29 +13,29 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  AnswerOption,
-  type FeedbackKind,
-} from "@/src/components/start/AnswerOption";
-import { ConfirmButton } from "@/src/components/start/ConfirmButton";
-import { LoadingSkeleton } from "@/src/components/start/LoadingSkeleton";
-import { QuestionNumberBar } from "@/src/components/start/QuestionNumberBar";
 import { ImagePreview } from "@/src/components/ui/ImagePreview";
-import { API_CONFIG } from "@/src/utils/constants";
 import {
   ANSWER_LABELS,
   COLORS,
   FEEDBACK_DELAY_MS,
   SCREEN_WIDTH,
-} from "../constants/theme";
-import { useStartTicket, useSubmitAnswer } from "../hook/usePractice";
+} from "@/src/features/practice/constants/theme";
+import {
+  useStartTicket,
+  useSubmitAnswer,
+} from "@/src/features/practice/hook/usePractice";
 import type {
   Answer,
   SubmitAnswerResult,
   TestAttempt,
   TestResponse,
-} from "../types/practice.types";
-import { TestMode } from "../types/practice.types";
+} from "@/src/features/practice/types/practice.types";
+import { TestMode } from "@/src/features/practice/types/practice.types";
+import { API_CONFIG } from "@/src/utils/constants";
+import { AnswerOption, type FeedbackKind } from "./AnswerOption";
+import { ConfirmButton } from "./ConfirmButton";
+import { LoadingSkeleton } from "./LoadingSkeleton";
+import { QuestionNumberBar } from "./QuestionNumberBar";
 
 const IMAGE_HEIGHT = (SCREEN_WIDTH - 32) * (9 / 16);
 
