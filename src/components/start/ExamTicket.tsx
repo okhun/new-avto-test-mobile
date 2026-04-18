@@ -691,7 +691,11 @@ export default function ExamTicketScreen() {
             }}
             onResults={() => {
               setShowSuccessModal(false);
-              router.replace("/(tabs)/exams");
+              if (attempt?.id) {
+                router.replace(`/exams/result/${attempt.id}`);
+              } else {
+                router.replace("/(tabs)/exams");
+              }
             }}
             onShare={async () => {
               try {
@@ -710,7 +714,11 @@ export default function ExamTicketScreen() {
             passingScore={examSnapshot.passingScore}
             onReviewMistakes={() => {
               setShowFailModal(false);
-              router.replace("/(tabs)/exams");
+              if (attempt?.id) {
+                router.replace(`/exams/result/${attempt.id}`);
+              } else {
+                router.replace("/(tabs)/exams");
+              }
             }}
             onTryAgain={() => {
               setShowFailModal(false);

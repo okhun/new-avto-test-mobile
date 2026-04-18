@@ -80,6 +80,10 @@ export default function RootLayout() {
               name="exams/start"
               options={{ headerShown: false, animation: "slide_from_right" }}
             />
+            <Stack.Screen
+              name="exams/result/[attemptId]"
+              options={{ headerShown: false, animation: "slide_from_right" }}
+            />
             <Stack.Screen name="onboarding" options={{ headerShown: false }} />
             <Stack.Screen
               name="ticket-exam"

@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { getExamHistory } from "../api/exams.api";
+import { getExamHistory, getExamResult } from "../api/exams.api";
 import type { GetExamHistoryParams } from "../types/exams.types";
 
 const PAGE_SIZE = 10;
@@ -27,6 +27,20 @@ export const useExamHistoryInfinite = (
       return loaded < lastPage.total ? allPages.length + 1 : undefined;
     },
     retry: false,
+    staleTime: 0,
+  });
+};
+
+export const useExamResult = (
+  attemptId: string | undefined,
+  isEnabled: boolean = true
+) => {
+  return useQuery({
+    queryKey: ["examResult", attemptId],
+    queryFn: () => getExamResult(attemptId ?? ""),
+    enabled: !!attemptId && isEnabled,
+    retry: false,
+    gcTime: 0,
     staleTime: 0,
   });
 };

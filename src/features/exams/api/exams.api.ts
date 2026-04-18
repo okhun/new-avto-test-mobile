@@ -1,5 +1,6 @@
 import { api } from "@/services/api";
 import {
+  ExamHistoryEntry,
   StartTicketExamPayload,
   TestAttempt,
 } from "../../practice/types/practice.types";
@@ -23,5 +24,12 @@ export const getExamHistory = async (
       limit: params?.limit,
     },
   });
+  return data;
+};
+
+export const getExamResult = async (
+  attemptId: string
+): Promise<ExamHistoryEntry> => {
+  const { data } = await api.get<ExamHistoryEntry>(`/tests/${attemptId}`);
   return data;
 };

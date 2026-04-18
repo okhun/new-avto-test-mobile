@@ -184,7 +184,10 @@ export default function ExamsScreen() {
   const renderItem = useCallback(
     ({ item }: { item: ExamHistoryEntry }) => (
       <View className="px-4">
-        <ExamHistoryCard entry={item} />
+        <ExamHistoryCard
+          entry={item}
+          onPress={() => router.push(`/exams/result/${item.id}`)}
+        />
       </View>
     ),
     []
