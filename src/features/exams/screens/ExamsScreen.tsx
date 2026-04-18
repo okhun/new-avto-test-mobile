@@ -294,7 +294,7 @@ export default function ExamsScreen() {
       {/* Start New Exam — fixed at bottom */}
       <View className="absolute bottom-0 left-0 right-0 px-6 pb-24 pt-2">
         <ScalePressable
-          onPress={() => router.push("/ticket-exam")}
+          onPress={() => router.push("/exams/start")}
           style={{
             backgroundColor: PRIMARY,
             shadowColor: PRIMARY,

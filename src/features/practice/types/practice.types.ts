@@ -17,8 +17,9 @@ export interface TicketHistory {
 }
 
 export interface StartTicketExamPayload {
-  ticketId: string;
   mode: TestMode;
+  /** Required for ticket / practice flows; omit for official exam mode. */
+  ticketId?: string;
 }
 export interface ExamHistoryEntry {
   id: string;

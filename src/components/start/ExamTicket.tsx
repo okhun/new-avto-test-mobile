@@ -1,19 +1,27 @@
 import "@/src/config/reanimated";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useLocalSearchParams, useRouter, useSegments } from "expo-router";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   FlatList,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
   ScrollView,
+  Share,
   Text,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ImagePreview } from "@/src/components/ui/ImagePreview";
+import { getExamResult } from "@/src/features/practice/api/practice.api";
 import {
   ANSWER_LABELS,
   COLORS,
@@ -26,6 +34,7 @@ import {
 } from "@/src/features/practice/hook/usePractice";
 import type {
   Answer,
+  ExamHistoryEntry,
   SubmitAnswerResult,
   TestAttempt,
   TestResponse,
@@ -34,24 +43,68 @@ import { TestMode } from "@/src/features/practice/types/practice.types";
 import { API_CONFIG } from "@/src/utils/constants";
 import { AnswerOption, type FeedbackKind } from "./AnswerOption";
 import { ConfirmButton } from "./ConfirmButton";
+import { ExamFailModal } from "./ExamFailModal";
+import { ExamSuccessModal } from "./ExamSuccessModal";
 import { LoadingSkeleton } from "./LoadingSkeleton";
 import { QuestionNumberBar } from "./QuestionNumberBar";
 
 const IMAGE_HEIGHT = (SCREEN_WIDTH - 32) * (9 / 16);
 
+const EXAM_DURATION_SECONDS = 25 * 60;
+const TEN_MINUTES_SECONDS = 10 * 60;
+const FIVE_MINUTES_SECONDS = 5 * 60;
+
+function examHistoryToAttempt(entry: ExamHistoryEntry): TestAttempt {
+  return {
+    id: entry.id,
+    startedAt: entry.startedAt,
+    completedAt: entry.completedAt,
+    status: entry.status as TestAttempt["status"],
+    totalQuestions: entry.totalQuestions,
+    correctAnswers: entry.correctAnswers,
+    wrongAnswers: entry.wrongAnswers,
+    skippedQuestions: entry.skippedQuestions,
+    score: entry.score,
+    timeSpentSeconds: entry.timeSpentSeconds,
+    timeLimitSeconds: entry.timeLimitSeconds,
+    passingScore: entry.passingScore,
+    responses: (entry.responses ?? []).map((r) => ({ ...r })),
+  };
+}
+
+function mergeSubmitIntoAttempt(
+  attempt: TestAttempt,
+  result: SubmitAnswerResult
+): TestAttempt {
+  const responses = attempt.responses.map((r) => ({ ...r }));
+  const idx = responses.findIndex((r) => r.id === result.id);
+  if (idx !== -1) {
+    const t = responses[idx]!;
+    t.selectedAnswerId = result.selectedAnswerId;
+    t.isCorrect = result.isCorrect;
+    t.isSkipped = result.isSkipped;
+    t.timeSpentSeconds = result.timeSpentSeconds;
+    t.answeredAt = result.answeredAt;
+    t.questionOrder = result.questionOrder;
+  }
+  return { ...attempt, responses };
+}
+
 // ─── Main Screen ──────────────────────────────────────────
-export default function PracticeTicketScreen() {
+export default function ExamTicketScreen() {
   const { mutateAsync: startTicketAsync } = useStartTicket();
   const { mutateAsync: submitAnswerAsync, isPending: isSubmitting } =
     useSubmitAnswer();
   const router = useRouter();
+  const segments = useSegments();
+  const isExamMode = segments[0] === "exams";
+
   const params = useLocalSearchParams<{ id?: string; ticketNumber?: string }>();
   const ticketId = params.id ?? "";
   const ticketLabel = params.ticketNumber
     ? `Ticket #${params.ticketNumber}`
     : "Practice";
 
-  // ── State ──
   const [attempt, setAttempt] = useState<TestAttempt | null>(null);
   const [isStarting, setIsStarting] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -60,40 +113,115 @@ export default function PracticeTicketScreen() {
     {}
   );
   const [feedbackQId, setFeedbackQId] = useState<string | null>(null);
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [nowMs, setNowMs] = useState(Date.now());
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showFailModal, setShowFailModal] = useState(false);
+  const [examSnapshot, setExamSnapshot] = useState({
+    correctAnswers: 0,
+    totalQuestions: 20,
+    passingScore: 18,
+  });
 
   const listRef = useRef<FlatList<TestResponse>>(null);
+  const currentIndexRef = useRef(0);
   const qStart = useRef(Date.now());
 
-  // ── Derived ──
-  const responses = attempt?.responses ?? [];
+  useEffect(() => {
+    currentIndexRef.current = currentIndex;
+  }, [currentIndex]);
+
+  const responses = useMemo(() => {
+    const r = attempt?.responses ?? [];
+    return [...r].sort((a, b) => a.questionOrder - b.questionOrder);
+  }, [attempt]);
+
   const total = responses.length;
-  const answeredCount = responses.filter(
-    (r) => r.selectedAnswerId || results[r.questionId]
-  ).length;
+  const answeredCount = useMemo(
+    () =>
+      responses.filter(
+        (r) => r.isCorrect !== null || r.isSkipped || r.answeredAt !== null
+      ).length,
+    [responses]
+  );
+
   const progress = total > 0 ? (answeredCount / total) * 100 : 0;
 
   const currentResponse = responses[currentIndex];
   const isCurrentAnswered = currentResponse
     ? !!(
-        results[currentResponse.questionId] || currentResponse.selectedAnswerId
+        results[currentResponse.questionId] ||
+        currentResponse.selectedAnswerId != null ||
+        currentResponse.isSkipped ||
+        currentResponse.answeredAt != null ||
+        currentResponse.isCorrect !== null
       )
     : false;
   const showConfirm = !!selectedAnswerId && !isCurrentAnswered && !feedbackQId;
 
-  // ── Start ticket on mount ──
+  const remainingSeconds = useMemo(() => {
+    if (!isExamMode || !attempt?.startedAt) return null;
+    const startMs = new Date(attempt.startedAt).getTime();
+    const limitSec = attempt.timeLimitSeconds ?? EXAM_DURATION_SECONDS;
+    const endMs = startMs + limitSec * 1000;
+    return Math.max(0, Math.floor((endMs - nowMs) / 1000));
+  }, [isExamMode, attempt, nowMs]);
+
+  const remainingLabel = useMemo(() => {
+    if (!isExamMode) return null;
+    const sec = remainingSeconds ?? EXAM_DURATION_SECONDS;
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  }, [isExamMode, remainingSeconds]);
+
+  const timerTone = useMemo(() => {
+    if (!isExamMode || remainingSeconds === null) return "default" as const;
+    if (remainingSeconds <= FIVE_MINUTES_SECONDS) return "danger" as const;
+    if (remainingSeconds <= TEN_MINUTES_SECONDS) return "warn" as const;
+    return "default" as const;
+  }, [isExamMode, remainingSeconds]);
+
+  const timerStyles = useMemo(() => {
+    if (timerTone === "danger")
+      return {
+        wrap: { backgroundColor: "#fef2f2", borderColor: "#fecaca" as const },
+        text: "#dc2626",
+        icon: "#dc2626",
+      };
+    if (timerTone === "warn")
+      return {
+        wrap: { backgroundColor: "#fffbeb", borderColor: "#fde68a" as const },
+        text: "#d97706",
+        icon: "#d97706",
+      };
+    return {
+      wrap: { backgroundColor: "#f1f5f9", borderColor: "#e2e8f0" as const },
+      text: COLORS.PRIMARY,
+      icon: COLORS.PRIMARY,
+    };
+  }, [timerTone]);
+
+  // ── Start attempt on mount ──
   useEffect(() => {
-    if (!ticketId) return;
+    if (!isExamMode && !ticketId) return;
     let cancelled = false;
     setIsStarting(true);
 
-    startTicketAsync({ ticketId, mode: TestMode.TICKET })
+    const payload = isExamMode
+      ? { mode: TestMode.EXAM as const }
+      : { mode: TestMode.TICKET as const, ticketId };
+
+    startTicketAsync(payload)
       .then((raw) => {
         if (cancelled) return;
-        const data: TestAttempt = (raw as any)?.data ?? raw;
-        data.responses.sort((a, b) => a.questionOrder - b.questionOrder);
-        setAttempt(data);
+        const data: TestAttempt = (raw as { data?: TestAttempt }).data ?? raw;
+        const sorted = [...(data.responses ?? [])].sort(
+          (a, b) => a.questionOrder - b.questionOrder
+        );
+        setAttempt({ ...data, responses: sorted.map((r) => ({ ...r })) });
 
-        const first = data.responses.findIndex(
+        const first = sorted.findIndex(
           (r) => !r.selectedAnswerId && !r.isSkipped
         );
         if (first > 0) {
@@ -116,17 +244,24 @@ export default function PracticeTicketScreen() {
     return () => {
       cancelled = true;
     };
-  }, [ticketId]);
+  }, [ticketId, isExamMode, startTicketAsync]);
+
+  // ── Exam countdown ──
+  useEffect(() => {
+    if (!isExamMode || !attempt) return;
+    const t = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [isExamMode, attempt?.id]);
 
   // ── Reset selection on question change ──
   useEffect(() => {
     if (!feedbackQId) {
       setSelectedAnswerId(null);
+      setShowExplanation(false);
       qStart.current = Date.now();
     }
   }, [currentIndex, feedbackQId]);
 
-  // ── Navigation ──
   const goTo = useCallback((i: number) => {
     setCurrentIndex(i);
     listRef.current?.scrollToIndex({ index: i, animated: true });
@@ -139,6 +274,42 @@ export default function PracticeTicketScreen() {
     },
     [responses.length]
   );
+
+  const exitToList = useCallback(() => {
+    if (isExamMode) {
+      router.replace("/(tabs)/exams");
+    } else {
+      router.replace("/(tabs)/tickets");
+    }
+  }, [isExamMode, router]);
+
+  const refetchAttempt = useCallback(async (attemptId: string) => {
+    const data = await getExamResult(attemptId);
+    const next = examHistoryToAttempt(data);
+    next.responses.sort((a, b) => a.questionOrder - b.questionOrder);
+    setAttempt(next);
+
+    const sorted = next.responses;
+    const idxView = currentIndexRef.current;
+    const currentOrder =
+      sorted[idxView]?.questionOrder ?? sorted[0]?.questionOrder ?? 0;
+    const idxAfter = sorted.findIndex(
+      (r) =>
+        r.selectedAnswerId === null &&
+        !r.isSkipped &&
+        r.questionOrder > currentOrder
+    );
+    const firstUnanswered = sorted.findIndex(
+      (r) => r.selectedAnswerId === null && !r.isSkipped
+    );
+    const nextIdx =
+      idxAfter !== -1 ? idxAfter : firstUnanswered !== -1 ? firstUnanswered : 0;
+    setCurrentIndex(nextIdx);
+    setTimeout(
+      () => listRef.current?.scrollToIndex({ index: nextIdx, animated: true }),
+      100
+    );
+  }, []);
 
   // ── Submit answer ──
   const handleConfirm = useCallback(async () => {
@@ -159,39 +330,100 @@ export default function PracticeTicketScreen() {
         timeSpentSeconds: timeSec,
       });
 
+      const merged = mergeSubmitIntoAttempt(attempt, result);
+      setAttempt(merged);
+
       setResults((prev) => ({ ...prev, [resp.questionId]: result }));
       setFeedbackQId(resp.questionId);
+
+      const finishExam =
+        isExamMode &&
+        result.isExamFinished &&
+        result.testStatus === "completed";
+
+      if (finishExam) {
+        const correct = merged.responses.filter(
+          (r) => r.isCorrect === true
+        ).length;
+        const passingNum = merged.passingScore
+          ? parseInt(merged.passingScore, 10)
+          : 18;
+        setExamSnapshot({
+          correctAnswers: correct,
+          totalQuestions: merged.totalQuestions ?? merged.responses.length,
+          passingScore: passingNum,
+        });
+      }
 
       setTimeout(() => {
         setFeedbackQId(null);
         setSelectedAnswerId(null);
 
-        if (result.isExamFinished) {
-          router.back();
+        if (finishExam) {
+          if (result.failed) {
+            setShowFailModal(true);
+          } else {
+            setShowSuccessModal(true);
+          }
           return;
         }
 
-        const next = responses.findIndex(
-          (r, i) =>
-            i > currentIndex && !r.selectedAnswerId && !results[r.questionId]
+        const afterMerge = merged.responses;
+        const currentOrder = resp.questionOrder;
+        const nextInOrder = afterMerge.findIndex(
+          (r) =>
+            r.selectedAnswerId === null &&
+            !r.isSkipped &&
+            r.questionOrder > currentOrder
         );
-        if (next >= 0) goTo(next);
-        else if (currentIndex < responses.length - 1) goTo(currentIndex + 1);
+
+        if (nextInOrder !== -1) {
+          const targetOrder = afterMerge[nextInOrder]!.questionOrder;
+          const flatIdx = responses.findIndex(
+            (r) => r.questionOrder === targetOrder
+          );
+          if (flatIdx >= 0) goTo(flatIdx);
+        } else {
+          const firstUn = afterMerge.findIndex(
+            (r) => r.selectedAnswerId === null && !r.isSkipped
+          );
+          if (firstUn !== -1) goTo(firstUn);
+          else if (currentIndex < responses.length - 1) goTo(currentIndex + 1);
+        }
       }, FEEDBACK_DELAY_MS);
-    } catch {}
+    } catch (e: unknown) {
+      const err = e as {
+        response?: { data?: { message?: string | string[] } };
+        message?: string;
+      };
+      const raw = err?.response?.data?.message;
+      const message = Array.isArray(raw) ? raw[0] : (raw ?? err?.message ?? "");
+
+      if (message === "Question already answered" && attempt) {
+        try {
+          await refetchAttempt(attempt.id);
+        } catch {
+          /* ignore */
+        }
+        return;
+      }
+      if (message === "Test is not in progress") {
+        exitToList();
+      }
+    }
   }, [
     attempt,
     selectedAnswerId,
     isSubmitting,
     responses,
     currentIndex,
-    results,
     submitAnswerAsync,
     goTo,
-    router,
+    isExamMode,
+    exitToList,
+    refetchAttempt,
   ]);
 
-  // ── Render a single question page ──
   const renderQuestion = useCallback(
     ({ item, index }: { item: TestResponse; index: number }) => {
       const q = item.question;
@@ -202,7 +434,7 @@ export default function PracticeTicketScreen() {
       const isCurrent = index === currentIndex;
       const submittedId = res?.selectedAnswerId ?? item.selectedAnswerId;
       const wasCorrect = res?.isCorrect ?? item.isCorrect;
-      const isAnswered = !!submittedId;
+      const isAnswered = !!submittedId || item.answeredAt != null;
       const showFB = feedbackQId === item.questionId;
 
       const getFeedback = (a: Answer): FeedbackKind => {
@@ -244,6 +476,35 @@ export default function PracticeTicketScreen() {
             </Text>
           </View>
 
+          {!isExamMode && !!q.explanation && (
+            <Pressable
+              onPress={() => setShowExplanation((v) => !v)}
+              className="mt-4 flex-row items-center gap-2 self-start rounded-xl border border-amber-200 bg-amber-50 px-3 py-2"
+            >
+              <MaterialIcons
+                name="lightbulb-outline"
+                size={20}
+                color="#d97706"
+              />
+              <Text className="text-sm font-bold text-amber-800">
+                {showExplanation ? "Yashirish" : "Tushuntirish"}
+              </Text>
+              <MaterialIcons
+                name={showExplanation ? "expand-less" : "expand-more"}
+                size={22}
+                color="#92400e"
+              />
+            </Pressable>
+          )}
+
+          {!isExamMode && showExplanation && !!q.explanation && (
+            <View className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
+              <Text className="text-sm leading-relaxed text-slate-700">
+                {q.explanation}
+              </Text>
+            </View>
+          )}
+
           <View className="mt-5 gap-3">
             {answers.map((a, i) => (
               <AnswerOption
@@ -255,9 +516,16 @@ export default function PracticeTicketScreen() {
                   (!isCurrent && submittedId === a.id)
                 }
                 feedback={getFeedback(a)}
-                disabled={isAnswered || showFB || (!isCurrent && !isAnswered)}
+                disabled={
+                  isAnswered ||
+                  showFB ||
+                  (!isCurrent && !isAnswered) ||
+                  !!showSuccessModal ||
+                  !!showFailModal
+                }
                 onPress={() => {
-                  if (!feedbackQId) setSelectedAnswerId(a.id);
+                  if (!feedbackQId && !showSuccessModal && !showFailModal)
+                    setSelectedAnswerId(a.id);
                 }}
               />
             ))}
@@ -265,10 +533,18 @@ export default function PracticeTicketScreen() {
         </ScrollView>
       );
     },
-    [currentIndex, selectedAnswerId, results, feedbackQId]
+    [
+      currentIndex,
+      selectedAnswerId,
+      results,
+      feedbackQId,
+      isExamMode,
+      showExplanation,
+      showSuccessModal,
+      showFailModal,
+    ]
   );
 
-  // ── Loading state ──
   if (isStarting) {
     return (
       <SafeAreaView
@@ -280,8 +556,7 @@ export default function PracticeTicketScreen() {
     );
   }
 
-  // ── Error / empty ──
-  if (!attempt || responses.length === 0) {
+  if ((!isExamMode && !ticketId) || !attempt || responses.length === 0) {
     return (
       <SafeAreaView
         style={{ flex: 1, backgroundColor: COLORS.BG }}
@@ -290,32 +565,33 @@ export default function PracticeTicketScreen() {
         <View className="flex-1 items-center justify-center gap-4">
           <MaterialIcons name="error-outline" size={48} color="#94a3b8" />
           <Text className="text-base font-medium text-slate-500">
-            Could not load ticket
+            {isExamMode ? "Imtihonni yuklab bo'lmadi" : "Ticket topilmadi"}
           </Text>
           <Pressable
-            onPress={() => router.back()}
+            onPress={exitToList}
             className="rounded-xl px-6 py-3"
             style={{ backgroundColor: COLORS.PRIMARY }}
           >
-            <Text className="font-bold text-white">Go Back</Text>
+            <Text className="font-bold text-white">Orqaga</Text>
           </Pressable>
         </View>
       </SafeAreaView>
     );
   }
 
+  const headerTitle = isExamMode ? "Imtihon" : ticketLabel;
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: COLORS.BG }}
       edges={["top"]}
     >
-      {/* Header */}
       <View
         className="flex-row items-center justify-between border-b border-slate-200 px-4 py-3"
         style={{ backgroundColor: `${COLORS.BG}CC` }}
       >
         <Pressable
-          onPress={() => router.back()}
+          onPress={exitToList}
           className="h-10 w-10 items-center justify-center rounded-full active:opacity-70"
           hitSlop={8}
         >
@@ -324,13 +600,28 @@ export default function PracticeTicketScreen() {
         <Text
           className="flex-1 text-center text-lg font-bold leading-tight tracking-tight"
           style={{ color: COLORS.TEXT_DARK }}
+          numberOfLines={1}
         >
-          {ticketLabel}
+          {headerTitle}
         </Text>
-        <View className="h-10 w-10" />
+        {isExamMode && remainingLabel ? (
+          <View
+            className="flex-row items-center gap-1 rounded-xl border px-2.5 py-1.5"
+            style={timerStyles.wrap}
+          >
+            <MaterialIcons name="timer" size={20} color={timerStyles.icon} />
+            <Text
+              className="text-base font-bold tabular-nums"
+              style={{ color: timerStyles.text }}
+            >
+              {remainingLabel}
+            </Text>
+          </View>
+        ) : (
+          <View className="h-10 w-10" />
+        )}
       </View>
 
-      {/* Progress */}
       <View className="gap-2 px-4 pb-2 pt-2">
         <View className="flex-row items-center justify-between">
           <Text
@@ -351,7 +642,6 @@ export default function PracticeTicketScreen() {
         </View>
       </View>
 
-      {/* Question number bar */}
       <QuestionNumberBar
         responses={responses}
         currentIndex={currentIndex}
@@ -359,7 +649,6 @@ export default function PracticeTicketScreen() {
         onPress={goTo}
       />
 
-      {/* Horizontal question pager */}
       <FlatList
         ref={listRef}
         data={responses}
@@ -369,18 +658,70 @@ export default function PracticeTicketScreen() {
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={onScrollEnd}
-        scrollEnabled={!feedbackQId}
+        scrollEnabled={!feedbackQId && !showSuccessModal && !showFailModal}
         getItemLayout={(_, i) => ({
           length: SCREEN_WIDTH,
           offset: SCREEN_WIDTH * i,
           index: i,
         })}
-        extraData={[currentIndex, selectedAnswerId, results, feedbackQId]}
+        extraData={[
+          currentIndex,
+          selectedAnswerId,
+          results,
+          feedbackQId,
+          showExplanation,
+          showSuccessModal,
+          showFailModal,
+        ]}
       />
 
-      {/* Confirm button — slides up when an answer is selected */}
       {showConfirm && (
         <ConfirmButton onPress={handleConfirm} isSubmitting={isSubmitting} />
+      )}
+
+      {isExamMode && (
+        <>
+          <ExamSuccessModal
+            visible={showSuccessModal}
+            correctAnswers={examSnapshot.correctAnswers}
+            totalQuestions={examSnapshot.totalQuestions}
+            onContinue={() => {
+              setShowSuccessModal(false);
+              router.replace("/(tabs)");
+            }}
+            onResults={() => {
+              setShowSuccessModal(false);
+              router.replace("/(tabs)/exams");
+            }}
+            onShare={async () => {
+              try {
+                await Share.share({
+                  message: `Men ${examSnapshot.correctAnswers}/${examSnapshot.totalQuestions} savoldan to'g'ri yechdim!`,
+                });
+              } catch {
+                /* cancelled */
+              }
+            }}
+          />
+          <ExamFailModal
+            visible={showFailModal}
+            correctAnswers={examSnapshot.correctAnswers}
+            totalQuestions={examSnapshot.totalQuestions}
+            passingScore={examSnapshot.passingScore}
+            onReviewMistakes={() => {
+              setShowFailModal(false);
+              router.replace("/(tabs)/exams");
+            }}
+            onTryAgain={() => {
+              setShowFailModal(false);
+              router.replace("/exams/start");
+            }}
+            onBackToStudy={() => {
+              setShowFailModal(false);
+              router.replace("/(tabs)/tickets");
+            }}
+          />
+        </>
       )}
     </SafeAreaView>
   );

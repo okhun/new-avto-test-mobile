@@ -436,7 +436,7 @@ export default function TicketsListScreen() {
         <ScalePressable
           onPress={() =>
             router.push({
-              pathname: "/ticket-exam",
+              pathname: "/exams/start",
               params: { ticketId: "random" },
             })
           }
