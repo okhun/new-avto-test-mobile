@@ -80,7 +80,7 @@ export default function ProfileTabScreen() {
       edges={["top"]}
     >
       {/* Header */}
-      <View className="flex-row items-center justify-between bg-white px-4 py-4">
+      {/* <View className="flex-row items-center justify-between bg-white px-4 py-4">
         <Pressable
           onPress={() => router.back()}
           className="h-12 w-12 shrink-0 items-center justify-start active:opacity-70"
@@ -92,7 +92,7 @@ export default function ProfileTabScreen() {
           Profile
         </Text>
         <View className="w-12" />
-      </View>
+      </View> */}
 
       <ScrollView
         className="flex-1"
@@ -153,8 +153,8 @@ export default function ProfileTabScreen() {
               onPress={() => {
                 if (item.id === "settings") {
                   router.push("/settings");
-                } else {
-                  // Edit Profile, Help - can push placeholder routes later
+                } else if (item.id === "help") {
+                  router.push("/conversations/new");
                 }
               }}
               style={{

@@ -90,8 +90,8 @@ export default function RootLayout() {
               options={{ headerShown: false, title: "Ticket Exam" }}
             />
             <Stack.Screen
-              name="modal"
-              options={{ presentation: "modal", title: "Modal" }}
+              name="settings"
+              options={{ headerShown: false, animation: "slide_from_right" }}
             />
           </Stack>
           {/* </AuthBootstrapProvider> */}
