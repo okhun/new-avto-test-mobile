@@ -1,5 +1,6 @@
+import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -128,6 +129,7 @@ function ListFooter({ isLoading }: { isLoading: boolean }) {
 
 // ─── Main screen ──────────────────────────────────────────
 export default function ExamsScreen() {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
 
   const queryParams = useMemo<
@@ -197,7 +199,11 @@ export default function ExamsScreen() {
             className="text-2xl font-bold tracking-tight"
             style={{ color: TEXT_DARK }}
           >
-            Exam History
+            Imtihon natijalari
+          </Text>
+          <Text className="mt-1 text-sm leading-snug text-slate-400">
+            Natijangizni tahlil qiling va yaxshilash kerak bo'lgan jihatlarni
+            aniqlang.
           </Text>
         </View>
         <ExamListSkeleton />
@@ -230,13 +236,12 @@ export default function ExamsScreen() {
                 className="text-2xl font-bold tracking-tight"
                 style={{ color: TEXT_DARK }}
               >
-                Exam History
+                Imtihon natijalari
               </Text>
-              {totalCount > 0 && (
-                <Text className="mt-0.5 text-sm text-slate-400">
-                  {totalCount} exam{totalCount !== 1 ? "s" : ""} total
-                </Text>
-              )}
+              <Text className="mt-1 text-sm leading-snug text-slate-400">
+                Natijangizni tahlil qiling va yaxshilash kerak bo'lgan
+                jihatlarni aniqlang.
+              </Text>
             </View>
 
             {/* Stats */}
@@ -285,6 +290,29 @@ export default function ExamsScreen() {
         ListEmptyComponent={<EmptyState filterLabel={activeFilterLabel} />}
         ListFooterComponent={<ListFooter isLoading={isFetchingNextPage} />}
       />
+
+      {/* Start New Exam — fixed at bottom */}
+      <View className="absolute bottom-0 left-0 right-0 px-6 pb-24 pt-2">
+        <ScalePressable
+          onPress={() => router.push("/ticket-exam")}
+          style={{
+            backgroundColor: PRIMARY,
+            shadowColor: PRIMARY,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+            elevation: 8,
+          }}
+          className="rounded-2xl py-4"
+        >
+          <View className="flex-row items-center justify-center gap-2">
+            <MaterialIcons name="play-arrow" size={20} color="#ffffff" />
+            <Text className="text-base font-bold text-white">
+              Start New Exam
+            </Text>
+          </View>
+        </ScalePressable>
+      </View>
     </SafeAreaView>
   );
 }
