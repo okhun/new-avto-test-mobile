@@ -461,7 +461,7 @@ export default function ExamTicketScreen() {
         >
           {q.imageUrl && (
             <ImagePreview
-              uri={`${API_CONFIG.API_URL}/images/${q.imageUrl}.${Number(q.imageUrl) > 700 ? "webp" : "png"}`}
+              uri={`${API_CONFIG.API_URL}/images/${q.imageUrl}.webp`}
               width={SCREEN_WIDTH - 32}
               height={IMAGE_HEIGHT}
             />

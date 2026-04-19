@@ -34,9 +34,7 @@ export function ExamResultQuestionCard({
     [answers]
   );
 
-  const uri = imageUrl
-    ? `${API_CONFIG.API_URL}/images/${imageUrl}.${Number(imageUrl) > 700 ? "webp" : "png"}`
-    : null;
+  const uri = imageUrl ? `${API_CONFIG.API_URL}/images/${imageUrl}.webp` : null;
 
   return (
     <View
