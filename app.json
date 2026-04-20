@@ -28,6 +28,13 @@
     "plugins": [
       "expo-router",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Profil rasmini tanlash uchun galereyaga kirish kerak.",
+          "cameraPermission": "Profil suratini olish uchun kameradan foydalanish kerak."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "image": "./assets/images/splash-icon.png",

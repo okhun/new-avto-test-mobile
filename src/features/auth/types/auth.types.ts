@@ -25,6 +25,11 @@ export interface GetMeResponse {
   isGuest: boolean;
 }
 
+export interface UpdateProfileDto {
+  displayName?: string;
+  avatarUrl?: string | null;
+}
+
 export interface User {
   id: string;
   createdAt: string; // or Date if you parse it

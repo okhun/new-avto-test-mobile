@@ -99,7 +99,7 @@ function StatCard({
 }) {
   return (
     <View
-      className="flex-1 flex-col gap-1 rounded-2xl border border-slate-100 p-4 shadow-sm"
+      className="flex-1 flex-col gap-1 rounded-2xl border border-slate-100 p-4"
       style={{ backgroundColor: CARD_BG }}
     >
       <View className="mb-1">

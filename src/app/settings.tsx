@@ -2,7 +2,14 @@ import { useAuthStore } from "@/src/store/auth.store";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Pressable, ScrollView, Switch, Text, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  Switch,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -98,7 +105,7 @@ export default function SettingsTabScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Account */}
-        <SectionHeader title="Account" />
+        {/* <SectionHeader title="Account" />
         <View
           className="overflow-hidden rounded-2xl shadow-sm"
           style={{ backgroundColor: CARD_BG }}
@@ -138,7 +145,7 @@ export default function SettingsTabScreen() {
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
           </Pressable>
-        </View>
+        </View> */}
 
         {/* Appearance */}
         <SectionHeader title="Appearance" />
@@ -344,7 +351,36 @@ export default function SettingsTabScreen() {
               />
             </View>
           </View>
-          <View className="min-h-[60px] flex-row items-center justify-between gap-4 px-4">
+          <Pressable
+            onPress={() => setHapticFeedback(!hapticFeedback)}
+            className="flex-row items-center justify-between px-4 py-3 active:bg-slate-50"
+          >
+            <View className="flex-row items-center gap-4">
+              {/* Icon with a slightly softer tint */}
+              <View className="h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
+                <MaterialIcons name="vibration" size={22} color={PRIMARY} />
+              </View>
+
+              <View>
+                <Text className="text-[16px] font-bold text-slate-900">
+                  Haptic Feedback
+                </Text>
+                <Text className="text-[12px] text-slate-400 font-medium">
+                  Vibrate on tap and errors
+                </Text>
+              </View>
+            </View>
+
+            <Switch
+              value={hapticFeedback}
+              onValueChange={setHapticFeedback}
+              trackColor={{ false: "#cbd5e1", true: PRIMARY }}
+              // On iOS, the thumb color is white by default; on Android, we define it
+              thumbColor={Platform.OS === "android" ? "#ffffff" : undefined}
+              ios_backgroundColor="#cbd5e1"
+            />
+          </Pressable>
+          {/* <View className="min-h-[60px] flex-row items-center justify-between gap-4 px-4">
             <View className="flex-row flex-1 items-center gap-4">
               <View className="h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100">
                 <MaterialIcons name="vibration" size={22} color={TEXT_DARK} />
@@ -364,7 +400,7 @@ export default function SettingsTabScreen() {
                 thumbColor="#ffffff"
               />
             </View>
-          </View>
+          </View> */}
         </View>
 
         {/* Support */}
@@ -373,7 +409,10 @@ export default function SettingsTabScreen() {
           className="overflow-hidden rounded-2xl shadow-sm"
           style={{ backgroundColor: CARD_BG }}
         >
-          <Pressable className="min-h-[60px] flex-row items-center justify-between gap-4 active:bg-slate-50">
+          <Pressable
+            className="min-h-[60px] flex-row items-center justify-between gap-4 active:bg-slate-50"
+            onPress={() => router.push("/conversations")}
+          >
             <View className="flex-row flex-1 items-center gap-4 px-4">
               <View
                 className="h-10 w-10 shrink-0 items-center justify-center rounded-lg"

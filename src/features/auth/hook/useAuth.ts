@@ -1,10 +1,13 @@
 import { api } from "@/services/api/axios";
 import {
-  getMe,
+  deleteMyAccount,
+  getMeData,
   guestLogin,
   login,
   logout,
   register,
+  updateProfile,
+  uploadAvatarMultipart,
 } from "@/src/features/auth/api/auth.api";
 import type {
   AuthResponse,
@@ -12,6 +15,7 @@ import type {
   GuestLoginDto,
   LoginDto,
   RegisterDto,
+  UpdateProfileDto,
 } from "@/src/features/auth/types/auth.types";
 import { useAuthStore } from "@/src/store/auth.store";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -79,7 +83,47 @@ export const useGetMe = () => {
 
   return useQuery({
     queryKey: ["auth", "me"],
-    queryFn: () => getMe(),
+    queryFn: () => getMeData(),
     enabled: isAuthenticated,
+    staleTime: 30_000,
+  });
+};
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dto: UpdateProfileDto) => updateProfile(dto),
+    onSuccess: async (user) => {
+      await useAuthStore.getState().setUser(user);
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
+  });
+};
+
+export const useUploadAvatar = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: uploadAvatarMultipart,
+    onSuccess: async ({ avatarUrl }) => {
+      const u = useAuthStore.getState().user;
+      if (u) {
+        await useAuthStore.getState().setUser({ ...u, avatarUrl });
+      }
+      queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
+    },
+  });
+};
+
+export const useDeleteMyAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteMyAccount,
+    onSuccess: async () => {
+      await useAuthStore.getState().logout();
+      queryClient.clear();
+    },
   });
 };

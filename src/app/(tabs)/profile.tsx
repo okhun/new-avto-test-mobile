@@ -1,3 +1,4 @@
+import { resolveAvatarUrl } from "@/src/features/auth/utils/avatarUrl";
 import { useAuthStore } from "@/src/store/auth.store";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
@@ -10,15 +11,12 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const PRIMARY = "#2563eb";
+const PRIMARY = "#137fec";
 const BACKGROUND = "#ffffff";
 const BG_SLATE_50 = "#f8fafc";
 const TEXT_DARK = "#0f172a";
 const TEXT_SECONDARY = "#64748b";
 const springConfig = { damping: 15, stiffness: 400 };
-
-const AVATAR_URI =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCalJMbX6eeXBY9PaDS9OFFk4KM97iUP1VbneL49kMIYNy05G_2HYAlBLr731GW0MUfs0Dzm5kCzy-rRaepcfWYWN0M1gCY-JoyUhsBKzu4nROd2mNwJfA7_Y50ebNy1GXT5lnG-HFFgnryTHEzBFvKwwjFWW_yTw6PslBPvQS7oH9RWnl4CWLyZ3Ap_ydbSVR7RK2AIDF4VbOwcFohTn_DlhAWxIPX14btfZ_LCrLlulF0LntfSHC3xaa9P2J7PzkglxQoDxbEZyg";
 
 function ScalePressable({
   children,
@@ -52,100 +50,81 @@ function ScalePressable({
 const MENU_ITEMS = [
   {
     id: "edit",
-    label: "Edit Profile",
+    label: "Profilni tahrirlash",
     icon: "manage-accounts" as const,
-    href: "/edit-profile",
   },
   {
     id: "settings",
-    label: "Settings",
+    label: "Sozlamalar",
     icon: "settings" as const,
-    href: "/settings",
   },
   {
     id: "help",
-    label: "Help & Support",
+    label: "Yordam va murojaat",
     icon: "help" as const,
-    href: "/help",
   },
 ] as const;
 
 export default function ProfileTabScreen() {
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
+  const user = useAuthStore((s) => s.user);
+
+  const avatarUri = resolveAvatarUrl(user?.avatarUrl ?? null);
+  const displayName = user?.displayName?.trim() || "Foydalanuvchi";
+  const subtitle = user?.isGuest
+    ? "Mehmon akkaunti"
+    : (user?.email ?? "Ro'yxatdan o'tgan");
 
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: BACKGROUND }}
       edges={["top"]}
     >
-      {/* Header */}
-      {/* <View className="flex-row items-center justify-between bg-white px-4 py-4">
-        <Pressable
-          onPress={() => router.back()}
-          className="h-12 w-12 shrink-0 items-center justify-start active:opacity-70"
-          hitSlop={8}
-        >
-          <MaterialIcons name="arrow-back-ios" size={20} color={TEXT_DARK} />
-        </Pressable>
-        <Text className="flex-1 text-center text-lg font-semibold leading-tight text-slate-900">
-          Profile
-        </Text>
-        <View className="w-12" />
-      </View> */}
-
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Profile header */}
         <View className="items-center px-6 pt-8 pb-10">
-          <View className="relative mb-6">
-            <View className="h-36 w-36 overflow-hidden rounded-full border-4 border-white shadow-xl">
-              <Image
-                source={{ uri: AVATAR_URI }}
-                className="h-full w-full"
-                style={{ backgroundColor: "#e2e8f0" }}
-                resizeMode="cover"
-              />
+          <Pressable
+            onPress={() => router.push("/edit-profile")}
+            className="relative mb-6"
+          >
+            <View className="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-xl">
+              {avatarUri ? (
+                <Image
+                  source={{ uri: avatarUri }}
+                  className="h-full w-full"
+                  style={{ backgroundColor: "#e2e8f0" }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View className="h-full w-full items-center justify-center bg-slate-100">
+                  <MaterialIcons name="person" size={56} color={PRIMARY} />
+                </View>
+              )}
             </View>
             <View
               className="absolute bottom-1 right-1 h-9 w-9 items-center justify-center rounded-full border-4 border-white shadow-md"
               style={{ backgroundColor: PRIMARY }}
             >
-              <MaterialIcons name="verified-user" size={18} color="#ffffff" />
+              <MaterialIcons name="edit" size={18} color="#ffffff" />
             </View>
-          </View>
-          <View className="items-center gap-2">
-            <Text className="text-center text-3xl font-bold tracking-tight text-slate-900">
-              Alex Driver
+          </Pressable>
+          <View className="items-center gap-1">
+            <Text className="text-center text-2xl font-bold tracking-tight text-slate-900">
+              {displayName}
             </Text>
             <Text
               className="text-center text-sm font-medium"
               style={{ color: TEXT_SECONDARY }}
             >
-              Member since Oct 2023
-            </Text>
-          </View>
-          <View
-            className="mt-6 flex-row items-center gap-2 rounded-full border px-5 py-2"
-            style={{
-              backgroundColor: "#eff6ff",
-              borderColor: "#dbeafe",
-            }}
-          >
-            <MaterialIcons name="workspace-premium" size={20} color={PRIMARY} />
-            <Text
-              className="text-sm font-bold tracking-wide"
-              style={{ color: PRIMARY }}
-            >
-              Level 5 - Advanced Learner
+              {subtitle}
             </Text>
           </View>
         </View>
 
-        {/* Action list */}
         <View className="flex-grow gap-3 px-6">
           {MENU_ITEMS.map((item) => (
             <ScalePressable
@@ -155,6 +134,8 @@ export default function ProfileTabScreen() {
                   router.push("/settings");
                 } else if (item.id === "help") {
                   router.push("/conversations/new");
+                } else if (item.id === "edit") {
+                  router.push("/edit-profile");
                 }
               }}
               style={{
@@ -167,8 +148,8 @@ export default function ProfileTabScreen() {
                 backgroundColor: BG_SLATE_50,
               }}
             >
-              <View className="flex-row items-center justify-between w-full">
-                <View className="flex-row flex-1 items-center gap-4">
+              <View className="w-full flex-row items-center justify-between">
+                <View className="flex-1 flex-row items-center gap-4">
                   <View className="h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
                     <MaterialIcons name={item.icon} size={22} color="#475569" />
                   </View>
@@ -185,7 +166,6 @@ export default function ProfileTabScreen() {
           ))}
         </View>
 
-        {/* Sign Out */}
         <View className="p-6 pb-12">
           <ScalePressable
             onPress={async () => {
@@ -200,7 +180,7 @@ export default function ProfileTabScreen() {
               borderRadius: 16,
             }}
           >
-            <Text className="text-base font-bold text-rose-500">Sign Out</Text>
+            <Text className="text-base font-bold text-rose-500">Chiqish</Text>
           </ScalePressable>
         </View>
       </ScrollView>
