@@ -66,7 +66,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const accessToken = await SecureStore.getItemAsync(
         STORAGE_KEYS.AUTH_TOKEN
       );
-      console.log("accessToken", accessToken);
       const userData = await SecureStore.getItemAsync(STORAGE_KEYS.USER_DATA);
       if (accessToken && userData) {
         const user = JSON.parse(userData) as GetMeResponse;

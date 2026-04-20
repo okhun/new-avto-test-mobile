@@ -1,7 +1,17 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import Animated, {
+  FadeInDown,
+  FadeInRight,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -9,23 +19,35 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const PRIMARY = "#137fec";
-const BACKGROUND_LIGHT = "#f6f7f8";
-const TEXT_DARK = "#0d141b";
-const TEXT_SECONDARY = "#4c739a";
-const CARD_BG = "#ffffff";
 const springConfig = { damping: 15, stiffness: 400 };
 
-function ScalePressable({
-  children,
-  onPress,
-  className,
-  style,
-}: {
-  children: React.ReactNode;
-  onPress?: () => void;
-  className?: string;
-  style?: object;
-}) {
+// --- Enhanced Native Shadows ---
+const shadows = StyleSheet.create({
+  card: {
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+      },
+      android: { elevation: 3 },
+    }),
+  },
+  hero: {
+    ...Platform.select({
+      ios: {
+        shadowColor: PRIMARY,
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.25,
+        shadowRadius: 20,
+      },
+      android: { elevation: 8 },
+    }),
+  },
+});
+
+function ScalePressable({ children, onPress, className, style }: any) {
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -33,312 +55,227 @@ function ScalePressable({
   return (
     <Pressable
       onPress={onPress}
-      onPressIn={() => {
-        scale.value = withSpring(0.98, springConfig);
-      }}
-      onPressOut={() => {
-        scale.value = withSpring(1, springConfig);
-      }}
+      onPressIn={() => (scale.value = withSpring(0.96, springConfig))}
+      onPressOut={() => (scale.value = withSpring(1, springConfig))}
       className={className}
-      style={style}
     >
-      <Animated.View style={animatedStyle}>{children}</Animated.View>
+      <Animated.View style={[animatedStyle, style]}>{children}</Animated.View>
     </Pressable>
   );
 }
 
 export default function HomeTabScreen() {
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: BACKGROUND_LIGHT }}
-      edges={["top"]}
-    >
+    <SafeAreaView className="flex-1 bg-[#F8FAFC]" edges={["top"]}>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
       >
-        {/* Top App Bar */}
-        <View className="flex-row items-center justify-between bg-[#f6f7f8] px-4 pb-2 pt-4">
-          <View className="flex-row flex-1 items-center">
-            <View
-              className="h-10 w-10 shrink-0 rounded-full border-2 bg-slate-200"
-              style={{ borderColor: `${PRIMARY}33` }}
-            >
-              <View className="h-full w-full items-center justify-center rounded-full bg-slate-300">
-                <MaterialIcons name="person" size={22} color={TEXT_SECONDARY} />
-              </View>
-            </View>
-            <View className="flex-1 px-2">
-              <Text
-                className="text-lg font-bold leading-tight tracking-tight"
-                style={{ color: TEXT_DARK }}
-              >
-                Dashboard
-              </Text>
-              <Text
-                className="text-xs font-medium uppercase tracking-wider"
-                style={{ color: TEXT_SECONDARY }}
-              >
-                Ready for a quiz?
-              </Text>
-            </View>
-          </View>
-          <Pressable className="h-12 w-12 items-center justify-center">
-            <MaterialIcons name="notifications" size={24} color={TEXT_DARK} />
-          </Pressable>
-        </View>
-
-        {/* Stats Overview */}
-        <View className="flex-row flex-wrap gap-3 px-4 py-4">
-          <View
-            className="min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-slate-100 p-5 shadow-sm"
-            style={{ backgroundColor: CARD_BG }}
-          >
-            <View className="flex-row items-center gap-2">
-              <MaterialIcons
-                name="assignment-turned-in"
-                size={20}
-                color={PRIMARY}
-              />
-              <Text
-                className="text-sm font-medium"
-                style={{ color: TEXT_SECONDARY }}
-              >
-                Tests Taken
-              </Text>
-            </View>
-            <Text
-              className="text-2xl font-bold leading-tight"
-              style={{ color: TEXT_DARK }}
-            >
-              12
+        {/* Header Section */}
+        <View className="flex-row items-center justify-between px-6 pt-4 pb-2">
+          <View>
+            <Text className="text-slate-500 text-sm font-medium">
+              Welcome back,
+            </Text>
+            <Text className="text-slate-900 text-2xl font-black tracking-tight">
+              Diyorbek 👋
             </Text>
           </View>
-          <View
-            className="min-w-[158px] flex-1 flex-col gap-2 rounded-xl border border-slate-100 p-5 shadow-sm"
-            style={{ backgroundColor: CARD_BG }}
-          >
-            <View className="flex-row items-center gap-2">
-              <MaterialIcons name="insights" size={20} color={PRIMARY} />
-              <Text
-                className="text-sm font-medium"
-                style={{ color: TEXT_SECONDARY }}
-              >
-                Avg. Score
-              </Text>
-            </View>
-            <Text
-              className="text-2xl font-bold leading-tight"
-              style={{ color: TEXT_DARK }}
-            >
-              85%
-            </Text>
-          </View>
-        </View>
-
-        {/* CTA */}
-        <View className="px-4 py-3">
-          <ScalePressable
-            onPress={() => {}}
-            style={{ backgroundColor: PRIMARY }}
-            className="flex-1  rounded-xl px-5 py-4 shadow-lg"
-          >
-            <View className="flex-row items-center justify-center gap-3">
-              <MaterialIcons name="play-circle" size={24} color="#ffffff" />
-              <Text className="text-base font-bold text-white">
-                Start New Test
-              </Text>
-            </View>
+          <ScalePressable className="h-12 w-12 items-center justify-center rounded-2xl bg-white border border-slate-100 shadow-sm">
+            <MaterialIcons
+              name="notifications-none"
+              size={26}
+              color="#1e293b"
+            />
           </ScalePressable>
         </View>
 
-        {/* Section Header */}
-        <View className="flex-row items-center justify-between px-4 pb-2 pt-6">
-          <Text
-            className="text-[20px] font-bold leading-tight tracking-tight"
-            style={{ color: TEXT_DARK }}
+        {/* Motivational Hero Card - Readiness Score */}
+        <Animated.View entering={FadeInDown.delay(100)} className="px-6 py-4">
+          <View
+            style={[shadows.hero]}
+            className="rounded-[32px] bg-blue-600 p-6 overflow-hidden"
           >
-            Available Tickets
-          </Text>
-          <Pressable>
-            <Text className="text-sm font-semibold" style={{ color: PRIMARY }}>
-              See All
+            {/* Background Decorative Circles */}
+            <View className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/10" />
+            <View className="absolute -bottom-10 -left-10 h-24 w-24 rounded-full bg-black/5" />
+
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1">
+                <Text className="text-blue-100 text-sm font-bold uppercase tracking-widest">
+                  Readiness Score
+                </Text>
+                <Text className="text-white text-4xl font-black mt-1">84%</Text>
+                <Text className="text-blue-100 text-xs mt-2 font-medium">
+                  You're doing great! Just 6% more to reach "Exam Ready" status.
+                </Text>
+              </View>
+              <View className="h-24 w-24 items-center justify-center rounded-full border-[6px] border-blue-400/30">
+                <View className="h-20 w-20 items-center justify-center rounded-full bg-white shadow-lg">
+                  <MaterialCommunityIcons
+                    name="shield-check"
+                    size={32}
+                    color={PRIMARY}
+                  />
+                </View>
+              </View>
+            </View>
+
+            <ScalePressable className="mt-6 rounded-2xl bg-white py-4 shadow-sm">
+              <Text className="text-center text-blue-600 font-black text-base">
+                Continue Learning
+              </Text>
+            </ScalePressable>
+          </View>
+        </Animated.View>
+
+        {/* Stats Grid */}
+        <View className="flex-row px-6 gap-4">
+          <View
+            style={shadows.card}
+            className="flex-1 rounded-3xl bg-white p-5 border border-slate-50"
+          >
+            <View className="h-10 w-10 rounded-xl bg-orange-50 items-center justify-center mb-3">
+              <MaterialCommunityIcons name="fire" size={24} color="#f97316" />
+            </View>
+            <Text className="text-slate-400 text-xs font-bold uppercase">
+              Streak
             </Text>
-          </Pressable>
+            <Text className="text-slate-900 text-xl font-black">7 Days</Text>
+          </View>
+          <View
+            style={shadows.card}
+            className="flex-1 rounded-3xl bg-white p-5 border border-slate-50"
+          >
+            <View className="h-10 w-10 rounded-xl bg-green-50 items-center justify-center mb-3">
+              <MaterialCommunityIcons
+                name="bullseye-arrow"
+                size={24}
+                color="#22c55e"
+              />
+            </View>
+            <Text className="text-slate-400 text-xs font-bold uppercase">
+              Accuracy
+            </Text>
+            <Text className="text-slate-900 text-xl font-black">92.4%</Text>
+          </View>
         </View>
 
-        {/* Ticket List */}
-        <View className="gap-2 px-4 pb-10">
-          {/* Ticket 1 - Completed (90%) */}
-          <View
-            className="min-h-[80px] flex-row items-center justify-between rounded-xl border border-slate-100 px-4 py-3 shadow-sm"
-            style={{ backgroundColor: CARD_BG }}
-          >
-            <View className="flex-row flex-1 items-center gap-4">
-              <View className="h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green-100">
-                <MaterialIcons name="check-circle" size={24} color="#22c55e" />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text
-                  className="text-base font-bold leading-normal"
-                  style={{ color: TEXT_DARK }}
-                  numberOfLines={1}
-                >
-                  Ticket #1
-                </Text>
-                <Text
-                  className="text-sm font-normal leading-normal"
-                  style={{ color: TEXT_SECONDARY }}
-                  numberOfLines={1}
-                >
-                  Completed • Score: 18/20
-                </Text>
-              </View>
-            </View>
-            <View className="shrink-0 rounded-lg bg-green-100 px-2 py-1">
-              <Text className="text-sm font-bold text-green-600">90%</Text>
-            </View>
+        {/* Categories / Topics */}
+        <View className="mt-8">
+          <View className="flex-row items-center justify-between px-6 mb-4">
+            <Text className="text-slate-900 text-xl font-black tracking-tight">
+              Study Topics
+            </Text>
+            <Pressable>
+              <Text className="text-blue-600 font-bold">View All</Text>
+            </Pressable>
           </View>
 
-          {/* Ticket 2 - Completed (80%) */}
-          <View
-            className="min-h-[80px] flex-row items-center justify-between rounded-xl border border-slate-100 px-4 py-3 shadow-sm"
-            style={{ backgroundColor: CARD_BG }}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingLeft: 24, paddingRight: 8 }}
           >
-            <View className="flex-row flex-1 items-center gap-4">
-              <View
-                className="h-12 w-12 shrink-0 items-center justify-center rounded-xl"
-                style={{ backgroundColor: `${PRIMARY}1A` }}
-              >
-                <MaterialIcons name="check-circle" size={24} color={PRIMARY} />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text
-                  className="text-base font-bold leading-normal"
-                  style={{ color: TEXT_DARK }}
-                  numberOfLines={1}
-                >
-                  Ticket #2
-                </Text>
-                <Text
-                  className="text-sm font-normal leading-normal"
-                  style={{ color: TEXT_SECONDARY }}
-                  numberOfLines={1}
-                >
-                  Completed • Score: 16/20
-                </Text>
-              </View>
+            {[
+              { label: "Signs", icon: "traffic-light", color: "#3b82f6" },
+              { label: "Rules", icon: "book-open-variant", color: "#8b5cf6" },
+              { label: "First Aid", icon: "medical-bag", color: "#ef4444" },
+              { label: "Penalties", icon: "gavel", color: "#f59e0b" },
+            ].map((item, i) => (
+              <Animated.View key={i} entering={FadeInRight.delay(i * 100)}>
+                <ScalePressable className="mr-4 items-center">
+                  <View
+                    style={shadows.card}
+                    className="h-20 w-20 rounded-[28px] bg-white items-center justify-center mb-2 border border-slate-50"
+                  >
+                    <MaterialCommunityIcons
+                      name={item.icon as any}
+                      size={30}
+                      color={item.color}
+                    />
+                  </View>
+                  <Text className="text-slate-600 text-xs font-bold">
+                    {item.label}
+                  </Text>
+                </ScalePressable>
+              </Animated.View>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Tickets Section */}
+        <View className="px-6 mt-8">
+          <Text className="text-slate-900 text-xl font-black tracking-tight mb-4">
+            Exam Tickets
+          </Text>
+
+          {/* Active Ticket */}
+          <ScalePressable
+            style={shadows.card}
+            className="bg-white rounded-[28px] p-4 flex-row items-center border border-blue-100 mb-4"
+          >
+            <View className="h-16 w-16 rounded-2xl bg-blue-600 items-center justify-center">
+              <MaterialCommunityIcons name="play" size={32} color="white" />
             </View>
-            <View
-              className="shrink-0 rounded-lg px-2 py-1"
-              style={{ backgroundColor: `${PRIMARY}1A` }}
-            >
-              <Text className="text-sm font-bold" style={{ color: PRIMARY }}>
-                80%
+            <View className="flex-1 ml-4">
+              <View className="flex-row items-center">
+                <Text className="text-slate-900 font-black text-lg">
+                  Ticket #3
+                </Text>
+                <View className="ml-2 bg-blue-100 px-2 py-0.5 rounded-md">
+                  <Text className="text-blue-600 text-[10px] font-black uppercase">
+                    Active
+                  </Text>
+                </View>
+              </View>
+              <Text className="text-slate-500 text-sm font-medium">
+                Resume your current test
               </Text>
             </View>
-          </View>
+            <MaterialIcons name="chevron-right" size={24} color="#CBD5E1" />
+          </ScalePressable>
 
-          {/* Ticket 3 - New/Active */}
+          {/* Completed Ticket */}
           <View
-            className="min-h-[80px] flex-row items-center justify-between rounded-xl border-2 px-4 py-3 shadow-md"
-            style={{
-              backgroundColor: CARD_BG,
-              borderColor: `${PRIMARY}33`,
-            }}
+            style={shadows.card}
+            className="bg-white rounded-[28px] p-4 flex-row items-center border border-slate-50 mb-4"
           >
-            <View className="flex-row flex-1 items-center gap-4">
-              <View
-                className="h-12 w-12 shrink-0 items-center justify-center rounded-xl"
-                style={{ backgroundColor: PRIMARY }}
-              >
-                <MaterialIcons name="bolt" size={24} color="#ffffff" />
-              </View>
-              <View className="flex-1 justify-center">
-                <View className="flex-row items-center gap-2">
-                  <Text
-                    className="text-base font-bold leading-normal"
-                    style={{ color: TEXT_DARK }}
-                    numberOfLines={1}
-                  >
-                    Ticket #3
-                  </Text>
-                  <View
-                    className="rounded px-1.5 py-0.5"
-                    style={{ backgroundColor: PRIMARY }}
-                  >
-                    <Text className="text-[10px] font-bold uppercase text-white">
-                      New
-                    </Text>
-                  </View>
-                </View>
-                <Text
-                  className="text-sm font-normal leading-normal"
-                  style={{ color: TEXT_SECONDARY }}
-                  numberOfLines={1}
-                >
-                  Current Ticket • 20 Questions
-                </Text>
-              </View>
+            <View className="h-16 w-16 rounded-2xl bg-green-50 items-center justify-center">
+              <MaterialCommunityIcons
+                name="check-decagram"
+                size={32}
+                color="#22c55e"
+              />
             </View>
-            <MaterialIcons
-              name="arrow-forward-ios"
-              size={14}
-              color={TEXT_SECONDARY}
-            />
+            <View className="flex-1 ml-4">
+              <Text className="text-slate-900 font-black text-lg">
+                Ticket #1
+              </Text>
+              <Text className="text-slate-400 text-sm font-medium">
+                Passed • Score: 20/20
+              </Text>
+            </View>
+            <View className="bg-green-100 h-10 w-10 rounded-full items-center justify-center">
+              <Text className="text-green-700 font-black text-xs">100%</Text>
+            </View>
           </View>
 
-          {/* Ticket 4 - Locked */}
-          <View className="min-h-[80px] flex-row items-center justify-between rounded-xl border border-dashed border-slate-200 bg-slate-100/50 px-4 py-3">
-            <View className="flex-row flex-1 items-center gap-4 opacity-60">
-              <View className="h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-200">
-                <MaterialIcons name="lock" size={24} color={TEXT_SECONDARY} />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text
-                  className="text-base font-bold leading-normal"
-                  style={{ color: TEXT_DARK }}
-                  numberOfLines={1}
-                >
-                  Ticket #4
-                </Text>
-                <Text
-                  className="text-sm font-normal leading-normal"
-                  style={{ color: TEXT_SECONDARY }}
-                  numberOfLines={1}
-                >
-                  Unlock at Level 5
-                </Text>
-              </View>
+          {/* Locked Ticket */}
+          <View className="bg-slate-50/50 rounded-[28px] p-4 flex-row items-center border border-dashed border-slate-200">
+            <View className="h-16 w-16 rounded-2xl bg-slate-100 items-center justify-center opacity-50">
+              <MaterialCommunityIcons name="lock" size={28} color="#94a3b8" />
             </View>
-            <MaterialIcons name="lock" size={20} color="#cbd5e1" />
-          </View>
-
-          {/* Ticket 5 - Locked */}
-          <View className="min-h-[80px] flex-row items-center justify-between rounded-xl border border-dashed border-slate-200 bg-slate-100/50 px-4 py-3">
-            <View className="flex-row flex-1 items-center gap-4 opacity-60">
-              <View className="h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-200">
-                <MaterialIcons name="lock" size={24} color={TEXT_SECONDARY} />
-              </View>
-              <View className="flex-1 justify-center">
-                <Text
-                  className="text-base font-bold leading-normal"
-                  style={{ color: TEXT_DARK }}
-                  numberOfLines={1}
-                >
-                  Ticket #5
-                </Text>
-                <Text
-                  className="text-sm font-normal leading-normal"
-                  style={{ color: TEXT_SECONDARY }}
-                  numberOfLines={1}
-                >
-                  Unlock at Level 6
-                </Text>
-              </View>
+            <View className="flex-1 ml-4 opacity-50">
+              <Text className="text-slate-900 font-black text-lg">
+                Ticket #4
+              </Text>
+              <Text className="text-slate-400 text-sm font-medium">
+                Unlock after 5 more tests
+              </Text>
             </View>
-            <MaterialIcons name="lock" size={20} color="#cbd5e1" />
+            <MaterialIcons name="lock-outline" size={20} color="#CBD5E1" />
           </View>
         </View>
       </ScrollView>

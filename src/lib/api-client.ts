@@ -16,7 +16,6 @@ class ApiClient {
 
   private async getHeaders(): Promise<HeadersInit> {
     const token = await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_TOKEN);
-    console.log("token", token);
     return {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -25,21 +24,15 @@ class ApiClient {
 
   async get<T>(endpoint: string): Promise<T> {
     const headers = await this.getHeaders();
-    console.log("headers", headers);
-    console.log("endpoint", `${this.baseUrl}${endpoint}`);
 
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: "GET",
         headers,
       });
-      console.log("Response status:", response.status);
       const json = await response.json();
-
-      console.log("Response json:", json);
       return json;
     } catch (err) {
-      console.log("Fetch error:", err);
       throw err;
     }
   }
