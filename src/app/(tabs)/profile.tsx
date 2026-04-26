@@ -1,4 +1,6 @@
 import { resolveAvatarUrl } from "@/src/features/auth/utils/avatarUrl";
+import { useMyRank } from "@/src/features/leaderboard/hook/useLeaderBoard";
+import { formatRankDisplay } from "@/src/features/leaderboard/utils/leaderboardUi";
 import { useAuthStore } from "@/src/store/auth.store";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
@@ -54,6 +56,11 @@ const MENU_ITEMS = [
     icon: "manage-accounts" as const,
   },
   {
+    id: "leaderboard",
+    label: "Reyting",
+    icon: "emoji-events" as const,
+  },
+  {
     id: "settings",
     label: "Sozlamalar",
     icon: "settings" as const,
@@ -69,6 +76,7 @@ export default function ProfileTabScreen() {
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
+  const { data: myRank, isPending: myRankLoading } = useMyRank();
 
   const avatarUri = resolveAvatarUrl(user?.avatarUrl ?? null);
   const displayName = user?.displayName?.trim() || "Foydalanuvchi";
@@ -133,9 +141,11 @@ export default function ProfileTabScreen() {
                 if (item.id === "settings") {
                   router.push("/settings");
                 } else if (item.id === "help") {
-                  router.push("/conversations/new");
+                  router.push("/conversations");
                 } else if (item.id === "edit") {
                   router.push("/edit-profile");
+                } else if (item.id === "leaderboard") {
+                  router.push("/leaderboard");
                 }
               }}
               style={{
@@ -160,7 +170,29 @@ export default function ProfileTabScreen() {
                     {item.label}
                   </Text>
                 </View>
-                <MaterialIcons name="chevron-right" size={24} color="#cbd5e1" />
+                {item.id === "leaderboard" ? (
+                  <View className="flex-row items-center gap-2 pr-0.5">
+                    <Text
+                      className="text-sm font-extrabold"
+                      style={{ color: PRIMARY }}
+                    >
+                      {myRankLoading
+                        ? "…"
+                        : formatRankDisplay(myRank?.allTime ?? null)}
+                    </Text>
+                    <MaterialIcons
+                      name="chevron-right"
+                      size={24}
+                      color="#cbd5e1"
+                    />
+                  </View>
+                ) : (
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={24}
+                    color="#cbd5e1"
+                  />
+                )}
               </View>
             </ScalePressable>
           ))}
