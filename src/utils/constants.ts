@@ -11,3 +11,11 @@ export const STORAGE_KEYS = {
   SETTINGS: "autotest_settings",
   REFRESH_TOKEN: "autotest_refresh_token",
 };
+
+export const GOOGLE_CONFIG = {
+  EXPO_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_EXPO_CLIENT_ID ?? "dfgdfgdfdf",
+  IOS_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ?? "sdfsd",
+  ANDROID_CLIENT_ID:
+    process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "sdfsd",
+  WEB_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "sdfsd",
+};

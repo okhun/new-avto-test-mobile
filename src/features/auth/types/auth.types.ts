@@ -64,3 +64,19 @@ export interface SocialAuthCallbackDto {
   code: string;
   state?: string;
 }
+
+export interface OAuthLoginDto {
+  provider: "google";
+  accessToken: string;
+  deviceId?: string;
+}
+
+export interface TelegramAuthDto {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: number;
+  hash: string;
+}

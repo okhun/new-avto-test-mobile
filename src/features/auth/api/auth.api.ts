@@ -4,9 +4,9 @@ import type {
   GetMeResponse,
   GuestLoginDto,
   LoginDto,
+  OAuthLoginDto,
   RegisterDto,
-  SocialAuthCallbackDto,
-  SocialAuthUrlResponse,
+  TelegramAuthDto,
   UpdateProfileDto,
 } from "@/src/features/auth/types/auth.types";
 import { API_CONFIG, STORAGE_KEYS } from "@/src/utils/constants";
@@ -84,14 +84,8 @@ export async function uploadAvatarMultipart(file: {
 export const deleteMyAccount = () =>
   api.delete("/users/me").then(() => undefined);
 
-export const getGoogleAuthUrl = () =>
-  api.get<SocialAuthUrlResponse>("/auth/google");
+export const oauthLogin = (data: OAuthLoginDto) =>
+  api.post<AuthResponse>("/auth/oauth", data);
 
-export const googleCallback = (data: SocialAuthCallbackDto) =>
-  api.post<AuthResponse>("/auth/google/callback", data);
-
-export const getTelegramAuthUrl = () =>
-  api.get<SocialAuthUrlResponse>("/auth/telegram");
-
-export const telegramCallback = (data: SocialAuthCallbackDto) =>
-  api.post<AuthResponse>("/auth/telegram/callback", data);
+export const telegramAuth = (data: TelegramAuthDto) =>
+  api.post<AuthResponse>("/auth/telegram", data);

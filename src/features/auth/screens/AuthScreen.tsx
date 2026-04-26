@@ -1,22 +1,12 @@
-import { api } from "@/services/api/axios";
-import {
-  getGoogleAuthUrl,
-  getTelegramAuthUrl,
-  googleCallback,
-  telegramCallback,
-} from "@/src/features/auth/api/auth.api";
 import {
   useGuestLogin,
   useLogin,
   useRegister,
 } from "@/src/features/auth/hook/useAuth";
-import type { GetMeResponse } from "@/src/features/auth/types/auth.types";
-import { useAuthStore } from "@/src/store/auth.store";
+import { useSocialAuth } from "@/src/features/auth/hook/useSocialAuth";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Application from "expo-application";
-import * as Linking from "expo-linking";
 import { useRouter } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import React, { useCallback, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -135,6 +125,7 @@ export default function AuthScreen() {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const guestLoginMutation = useGuestLogin();
+  const { loginWithGoogle, loginWithTelegram } = useSocialAuth();
 
   const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
@@ -181,42 +172,40 @@ export default function AuthScreen() {
     );
   };
 
-  const handleSocialAuth = async (provider: "google" | "telegram") => {
+  const handleGoogleLogin = async () => {
     if (isAnyLoading) return;
-    setSocialLoading(provider);
+    setSocialLoading("google");
     setServerError("");
-    try {
-      const getUrl =
-        provider === "google" ? getGoogleAuthUrl : getTelegramAuthUrl;
-      const callback =
-        provider === "google" ? googleCallback : telegramCallback;
-      const { data: urlData } = await getUrl();
-      const redirectUrl = Linking.createURL("auth/callback");
-      const result = await WebBrowser.openAuthSessionAsync(
-        urlData.url,
-        redirectUrl
-      );
 
-      if (result.type === "success" && result.url) {
-        const parsed = Linking.parse(result.url);
-        const code = parsed.queryParams?.code as string;
-        if (code) {
-          const response = await callback({
-            code,
-            state: parsed.queryParams?.state as string,
-          });
-          const store = useAuthStore.getState();
-          store.setAccessToken(response.data.accessToken);
-          store.setRefreshToken(response.data.refreshToken);
-          try {
-            const { data: meData } = await api.get<GetMeResponse>("/users/me");
-            if (meData)
-              store.setUser({ ...meData, avatarUrl: meData.avatarUrl ?? null });
-          } catch {
-            await store.logout();
-          }
-          router.replace("/(tabs)");
-        }
+    try {
+      const result = await loginWithGoogle();
+      if (result.ok) {
+        router.replace("/(tabs)");
+        return;
+      }
+      if (result.reason === "error") {
+        setServerError(result.message ?? "Google login amalga oshmadi");
+      }
+    } catch (e) {
+      setServerError(extractApiError(e));
+    } finally {
+      setSocialLoading(null);
+    }
+  };
+
+  const handleTelegramLogin = async () => {
+    if (isAnyLoading) return;
+    setSocialLoading("telegram");
+    setServerError("");
+
+    try {
+      const result = await loginWithTelegram();
+      if (result.ok) {
+        router.replace("/(tabs)");
+        return;
+      }
+      if (result.reason === "error") {
+        setServerError(result.message ?? "Telegram login amalga oshmadi");
       }
     } catch (e) {
       setServerError(extractApiError(e));
@@ -401,7 +390,7 @@ export default function AuthScreen() {
           {/* Social Buttons */}
           <View className="flex-row gap-4">
             <ScaleButton
-              onPress={() => handleSocialAuth("google")}
+              onPress={handleGoogleLogin}
               disabled={isAnyLoading}
               className="flex-1 flex-row items-center rounded-2xl border border-slate-200 bg-white py-4"
             >
@@ -416,7 +405,7 @@ export default function AuthScreen() {
             </ScaleButton>
 
             <ScaleButton
-              onPress={() => handleSocialAuth("telegram")}
+              onPress={handleTelegramLogin}
               disabled={isAnyLoading}
               className="flex-1 flex-row items-center rounded-2xl bg-[#229ED9] py-4"
             >
