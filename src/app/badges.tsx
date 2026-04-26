@@ -1,5 +1,5 @@
-import { View } from "react-native";
+import BadgesScreen from "../features/badges/screens/BadgesScreen";
 
-export default function BadgesScreen() {
-  return <View />;
+export default function BadgeScreen() {
+  return <BadgesScreen />;
 }

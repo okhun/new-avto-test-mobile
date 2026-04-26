@@ -1,4 +1,5 @@
 import { resolveAvatarUrl } from "@/src/features/auth/utils/avatarUrl";
+import { ProfileBadgesPreview } from "@/src/features/badges/components/ProfileBadgesPreview";
 import { useMyRank } from "@/src/features/leaderboard/hook/useLeaderBoard";
 import { formatRankDisplay } from "@/src/features/leaderboard/utils/leaderboardUi";
 import { useAuthStore } from "@/src/store/auth.store";
@@ -16,7 +17,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const PRIMARY = "#137fec";
 const BACKGROUND = "#ffffff";
 const BG_SLATE_50 = "#f8fafc";
-const TEXT_DARK = "#0f172a";
 const TEXT_SECONDARY = "#64748b";
 const springConfig = { damping: 15, stiffness: 400 };
 
@@ -131,6 +131,10 @@ export default function ProfileTabScreen() {
               {subtitle}
             </Text>
           </View>
+        </View>
+
+        <View className="px-6 pb-2">
+          <ProfileBadgesPreview />
         </View>
 
         <View className="flex-grow gap-3 px-6">
