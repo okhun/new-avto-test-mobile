@@ -24,6 +24,19 @@ export function formatDateShort(iso: string): string {
   });
 }
 
+/** Returns 0–100 (or >100 if API sends that) for charts/badges; `null` if missing/invalid. */
+export function parsePercentToNumber(
+  value: string | number | undefined | null
+): number | null {
+  if (value == null || value === "") return null;
+  const n = parseFloat(String(value).replace(",", "."));
+  if (Number.isNaN(n)) return null;
+  if (n >= 0 && n <= 1) {
+    return Math.round(n * 1000) / 10;
+  }
+  return Math.round(n * 10) / 10;
+}
+
 export function xpBarWidth(xpProgress: number): string {
   if (!Number.isFinite(xpProgress) || xpProgress < 0) return "0%";
   if (xpProgress <= 1) {
