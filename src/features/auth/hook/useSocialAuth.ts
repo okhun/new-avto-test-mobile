@@ -100,24 +100,15 @@ function buildTelegramPayload(url: string) {
 }
 
 export function useSocialAuth() {
-  const redirectUri = useMemo(
-    () => AuthSession.makeRedirectUri({ path: "auth/callback" }),
-    []
-  );
+  const redirectUri = useMemo(() => AuthSession.makeRedirectUri(), []);
 
   const googleExpoClientId = GOOGLE_CONFIG.EXPO_CLIENT_ID;
-  const googleIosClientId = GOOGLE_CONFIG.IOS_CLIENT_ID ?? googleExpoClientId;
-  const googleAndroidClientId =
-    GOOGLE_CONFIG.ANDROID_CLIENT_ID ?? googleExpoClientId;
   const googleWebClientId = GOOGLE_CONFIG.WEB_CLIENT_ID ?? googleExpoClientId;
-
+  console.log("redirectUri", redirectUri);
   const [googleRequest, , promptGoogleAsync] = Google.useAuthRequest({
     responseType: "token",
     scopes: ["openid", "profile", "email"],
-    clientId: googleExpoClientId,
-    iosClientId: googleIosClientId,
-    androidClientId: googleAndroidClientId,
-    webClientId: googleWebClientId,
+    clientId: googleWebClientId,
     redirectUri,
   });
 
