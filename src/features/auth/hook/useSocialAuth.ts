@@ -104,7 +104,6 @@ export function useSocialAuth() {
 
   const googleExpoClientId = GOOGLE_CONFIG.EXPO_CLIENT_ID;
   const googleWebClientId = GOOGLE_CONFIG.WEB_CLIENT_ID ?? googleExpoClientId;
-  console.log("redirectUri", redirectUri);
   const [googleRequest, , promptGoogleAsync] = Google.useAuthRequest({
     responseType: "token",
     scopes: ["openid", "profile", "email"],
