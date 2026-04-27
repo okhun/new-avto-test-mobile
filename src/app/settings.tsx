@@ -1,7 +1,9 @@
+import LangSwitcher from "@/components/LangSwitcher";
 import { useAuthStore } from "@/src/store/auth.store";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Platform,
   Pressable,
@@ -68,6 +70,7 @@ function SectionHeader({ title }: { title: string }) {
 
 export default function SettingsTabScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [theme, setTheme] = useState<ThemeOption>("light");
   const [pushNotifications, setPushNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
@@ -298,6 +301,9 @@ export default function SettingsTabScreen() {
             </View>
           </ScalePressable>
         </View>
+
+        <SectionHeader title="Language" />
+        <LangSwitcher />
 
         {/* Preferences */}
         <SectionHeader title="Preferences" />

@@ -1,5 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 type Props = {
@@ -10,12 +11,12 @@ const TEXT = "#0f172a";
 
 export function HomeHeader({ displayName }: Props) {
   const name = displayName?.trim() || "Foydalanuvchi";
-
+  const { t } = useTranslation();
   return (
     <View className="flex-row items-center justify-between px-5 pb-2 pt-1">
       <View className="min-w-0 flex-1 pr-2">
         <Text className="text-sm font-medium text-slate-500">
-          Xush kelibsiz,
+          {t("welcome")},
         </Text>
         <Text
           className="mt-0.5 text-2xl font-extrabold tracking-tight"
