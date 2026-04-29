@@ -18,6 +18,7 @@ const PRIMARY = "#137fec";
 export default function HomeScreen() {
   const router = useRouter();
   const displayName = useAuthStore((s) => s.user?.displayName);
+  const avatarUrl = useAuthStore((s) => s.user?.avatarUrl);
 
   const {
     data: summary,
@@ -81,7 +82,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 32 }}
       >
-        <HomeHeader displayName={displayName} />
+        <HomeHeader displayName={displayName} avatarUrl={avatarUrl} />
         <HomeProgressHero progress={progress} onContinue={onContinueLearning} />
         <HomeQuickStats progress={progress} streak={streak} />
         <View className="h-1" />
