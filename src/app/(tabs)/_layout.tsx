@@ -3,6 +3,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { Tabs } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 
 const PRIMARY = "#137fec";
@@ -28,6 +29,7 @@ const TAB_BAR_HIDDEN = {
 };
 
 export default function TabLayout() {
+  const { t } = useTranslation();
   return (
     <Tabs
       screenOptions={{
@@ -43,8 +45,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          tabBarIcon: ({ focused, color, size }) => (
+          title: t("home"),
+          tabBarIcon: ({ focused, color }) => (
             <MaterialIcons
               name={focused ? "dashboard" : "dashboard"}
               size={24}
@@ -57,7 +59,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="tickets/index"
         options={{
-          title: "Tickets",
+          title: t("questions"),
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="edit-note" size={24} color={color} />
           ),
@@ -66,7 +68,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="exams"
         options={{
-          title: "Exam",
+          title: t("exams"),
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="book" size={24} color={color} />
           ),
@@ -75,7 +77,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: t("profile"),
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="person" size={24} color={color} />
           ),
@@ -87,7 +89,7 @@ export default function TabLayout() {
           const focused = getFocusedRouteNameFromRoute(route) ?? "index";
           const hideTabBar = focused !== "index";
           return {
-            title: "Murojaat",
+            title: t("conversations"),
             tabBarIcon: ({ color, size }: { color: string; size: number }) => (
               <MaterialIcons name="chat" size={24} color={color} />
             ),

@@ -1,6 +1,7 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import type { ExamHistoryEntry } from "../../practice/types/practice.types";
 
@@ -12,28 +13,6 @@ const TEXT_DARK = "#0f172a";
 const CARD_BG = "#ffffff";
 
 type StatusKey = "passed" | "failed" | "in_progress" | "completed";
-
-const STATUS_CONFIG: Record<
-  StatusKey,
-  {
-    color: string;
-    icon: keyof typeof MaterialIcons.glyphMap;
-    label: string;
-  }
-> = {
-  passed: { color: SUCCESS, icon: "check-circle", label: "Passed" },
-  failed: { color: ERROR, icon: "cancel", label: "Failed" },
-  in_progress: { color: WARNING, icon: "timelapse", label: "In Progress" },
-  completed: { color: PRIMARY, icon: "task-alt", label: "Completed" },
-};
-
-const MODE_LABELS: Record<string, string> = {
-  practice: "Practice",
-  exam: "Exam",
-  ticket: "Ticket",
-  weak_topics: "Weak Topics",
-  marathon: "Marathon",
-};
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -56,6 +35,27 @@ interface ExamHistoryCardProps {
 }
 
 export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
+  const { t } = useTranslation();
+  const STATUS_CONFIG: Record<
+    StatusKey,
+    {
+      color: string;
+      icon: keyof typeof MaterialIcons.glyphMap;
+      label: string;
+    }
+  > = {
+    passed: { color: SUCCESS, icon: "check-circle", label: t("passed") },
+    failed: { color: ERROR, icon: "cancel", label: t("failed") },
+    in_progress: { color: WARNING, icon: "timelapse", label: t("in_progress") },
+    completed: { color: PRIMARY, icon: "task-alt", label: t("completed") },
+  };
+  const MODE_LABELS: Record<string, string> = {
+    practice: t("practice"),
+    exam: t("exam"),
+    ticket: t("ticket"),
+    weak_topics: t("weak_topics"),
+    marathon: t("marathon"),
+  };
   const statusKey = (entry.isPassed ? "passed" : entry.status) as StatusKey;
   const config = STATUS_CONFIG[statusKey] ?? STATUS_CONFIG.completed;
   const modeLabel = MODE_LABELS[entry.mode] ?? entry.mode;
@@ -94,6 +94,7 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
           <MaterialIcons name={config.icon} size={16} color={config.color} />
           <Text
             style={{ color: config.color, fontSize: 13, fontWeight: "700" }}
+            className="capitalize"
           >
             {config.label}
           </Text>
@@ -114,7 +115,7 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
           <Text style={{ color: TEXT_DARK, fontWeight: "700" }}>
             {entry.correctAnswers}
           </Text>
-          /{entry.totalQuestions} correct
+          /{entry.totalQuestions} {t("correct")}
         </Text>
       </View>
 
@@ -141,7 +142,7 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
           <View className="flex-row items-center gap-1">
             <MaterialIcons name="close" size={14} color="#94a3b8" />
             <Text className="text-xs font-medium text-slate-400">
-              {entry.wrongAnswers} wrong
+              {entry.wrongAnswers} {t("wrong")}
             </Text>
           </View>
         )}
@@ -149,7 +150,7 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
           <View className="flex-row items-center gap-1">
             <MaterialIcons name="skip-next" size={14} color="#94a3b8" />
             <Text className="text-xs font-medium text-slate-400">
-              {entry.skippedQuestions} skipped
+              {entry.skippedQuestions} {t("skipped")}
             </Text>
           </View>
         )}

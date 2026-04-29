@@ -11,6 +11,7 @@ import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -67,6 +68,7 @@ function apiErrorMessage(e: unknown, fallback: string): string {
 }
 
 export default function ProfileEditScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { data: me, isPending: loadingMe, isError } = useGetMe();
   const { mutateAsync: saveProfile, isPending: saving } = useUpdateProfile();
@@ -103,8 +105,8 @@ export default function ProfileEditScreen() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert(
-        "Ruxsat kerak",
-        "Profil rasmi uchun galereyaga kirishga ruxsat bering."
+        t("permission_required"),
+        t("permission_required_description")
       );
       return;
     }
@@ -122,20 +124,17 @@ export default function ProfileEditScreen() {
     const mime = (asset.mimeType ?? mimeFromUri(asset.uri)).toLowerCase();
 
     if (!mime.startsWith("image/")) {
-      Alert.alert("Noto'g'ri fayl", "Faqat rasm fayllari yuklanishi mumkin.");
+      Alert.alert(t("invalid_file"), t("only_images_allowed"));
       return;
     }
 
     if (!ALLOWED_MIME.has(mime)) {
-      Alert.alert(
-        "Format qo'llab-quvvatlanmaydi",
-        "JPEG, PNG, WebP yoki HEIC tanlang."
-      );
+      Alert.alert(t("format_not_supported"), t("supported_formats"));
       return;
     }
 
     if (typeof asset.fileSize === "number" && asset.fileSize > MAX_FILE_BYTES) {
-      Alert.alert("Juda katta fayl", "Rasm hajmi 2 MB dan oshmasligi kerak.");
+      Alert.alert(t("file_too_large"), t("image_size_limit"));
       return;
     }
 
@@ -151,7 +150,7 @@ export default function ProfileEditScreen() {
       setLocalPreview(null);
     } catch (e: unknown) {
       setLocalPreview(null);
-      Alert.alert("Xato", apiErrorMessage(e, "Yuklashda xatolik"));
+      Alert.alert(t("error"), apiErrorMessage(e, t("upload_error")));
     }
   }, [uploading, me?.isGuest, uploadAvatar]);
 
@@ -162,10 +161,10 @@ export default function ProfileEditScreen() {
         displayName: displayName.trim(),
         avatarUrl: avatarUrl ?? null,
       });
-      Alert.alert("Saqlandi", "Profil ma'lumotlari yangilandi.");
+      Alert.alert(t("saved"), t("profile_information_updated"));
       router.back();
     } catch (e: unknown) {
-      Alert.alert("Xato", apiErrorMessage(e, "Saqlashda xatolik"));
+      Alert.alert(t("error"), apiErrorMessage(e, t("save_error")));
     }
   }, [me, hasChanges, saving, saveProfile, displayName, avatarUrl, router]);
 
@@ -175,7 +174,7 @@ export default function ProfileEditScreen() {
       await deleteAccount();
       router.replace("/auth");
     } catch (e: unknown) {
-      Alert.alert("Xato", apiErrorMessage(e, "Akkauntni o'chirishda xatolik"));
+      Alert.alert(t("error"), apiErrorMessage(e, t("delete_account_error")));
     }
   }, [deleteAccount, router]);
 
@@ -194,7 +193,7 @@ export default function ProfileEditScreen() {
             className="flex-1 text-center text-base font-bold"
             style={{ color: TEXT }}
           >
-            Profil
+            {t("profile")}
           </Text>
           <View className="w-10" />
         </View>
@@ -209,13 +208,15 @@ export default function ProfileEditScreen() {
         className="flex-1 items-center justify-center bg-white px-6"
         edges={["top"]}
       >
-        <Text className="text-center text-slate-500">Profil yuklanmadi</Text>
+        <Text className="text-center text-slate-500">
+          {t("profile_not_loaded")}
+        </Text>
         <Pressable
           onPress={() => router.back()}
           className="mt-4 rounded-xl px-6 py-3"
           style={{ backgroundColor: PRIMARY }}
         >
-          <Text className="font-semibold text-white">Orqaga</Text>
+          <Text className="font-semibold text-white">{t("back")}</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -239,7 +240,7 @@ export default function ProfileEditScreen() {
             className="flex-1 text-center text-base font-bold"
             style={{ color: TEXT }}
           >
-            Profil
+            {t("profile")}
           </Text>
           <View className="w-10" />
         </View>
@@ -272,7 +273,7 @@ export default function ProfileEditScreen() {
                   <View className="absolute inset-0 items-center justify-center bg-black/50">
                     <ActivityIndicator color="#fff" />
                     <Text className="mt-1 text-[10px] font-bold text-white">
-                      Yuklanmoqda
+                      {t("loading")}
                     </Text>
                   </View>
                 ) : null}
@@ -288,14 +289,14 @@ export default function ProfileEditScreen() {
             </Pressable>
             {me.isGuest ? (
               <Text className="mt-2 text-center text-xs text-amber-700">
-                Mehmon rejimida avatar o'zgartirib bo'lmaydi
+                {t("guest_mode_avatar_edit_not_allowed")}
               </Text>
             ) : (
               <Text
                 className="mt-2 text-center text-xs"
                 style={{ color: MUTED }}
               >
-                Rasmga bosing — faqat rasm, 2 MB gacha
+                {t("tap_to_add_photo")}
               </Text>
             )}
             <Text
@@ -310,7 +311,7 @@ export default function ProfileEditScreen() {
             <View className="mb-2 flex-row items-center gap-2">
               <MaterialIcons name="person-outline" size={22} color={PRIMARY} />
               <Text className="text-base font-bold" style={{ color: TEXT }}>
-                Profil ma'lumotlari
+                {t("profile_information")}
               </Text>
             </View>
 
@@ -318,7 +319,7 @@ export default function ProfileEditScreen() {
               className="mb-1.5 text-sm font-medium"
               style={{ color: MUTED }}
             >
-              To'liq ism
+              {t("full_name")}
             </Text>
             <TextInput
               className="mb-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-[15px]"
@@ -326,7 +327,7 @@ export default function ProfileEditScreen() {
               value={displayName}
               onChangeText={setDisplayName}
               editable={!saving && !me.isGuest}
-              placeholder="Ismingiz"
+              placeholder={t("your_name")}
               placeholderTextColor="#94a3b8"
             />
 
@@ -334,7 +335,7 @@ export default function ProfileEditScreen() {
               className="mb-1.5 text-sm font-medium"
               style={{ color: MUTED }}
             >
-              Email
+              {t("email")}
             </Text>
             <TextInput
               className="mb-8 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3.5 text-[15px]"
@@ -347,7 +348,7 @@ export default function ProfileEditScreen() {
             <View className="mb-2 flex-row items-center gap-2">
               <MaterialIcons name="settings" size={22} color={PRIMARY} />
               <Text className="text-base font-bold" style={{ color: TEXT }}>
-                Hisob sozlamalari
+                {t("account_settings")}
               </Text>
             </View>
             <Pressable
@@ -355,7 +356,7 @@ export default function ProfileEditScreen() {
               className="mb-8 flex-row items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5"
             >
               <Text className="text-[15px] font-medium" style={{ color: TEXT }}>
-                Ilova sozlamalari
+                {t("app_settings")}
               </Text>
               <MaterialIcons name="chevron-right" size={22} color={MUTED} />
             </Pressable>
@@ -377,7 +378,7 @@ export default function ProfileEditScreen() {
                 <ActivityIndicator color="#fff" />
               ) : (
                 <Text className="text-sm font-bold text-white">
-                  O'zgarishlarni saqlash
+                  {t("save_changes")}
                 </Text>
               )}
             </Pressable>
@@ -387,7 +388,7 @@ export default function ProfileEditScreen() {
               className="items-center py-2"
             >
               <Text className="text-xs font-semibold text-slate-400 underline">
-                Akkauntni butunlay o'chirish
+                {t("delete_account")}
               </Text>
             </Pressable>
           </View>
@@ -398,8 +399,7 @@ export default function ProfileEditScreen() {
         <View className="flex-1 items-center justify-center bg-black/50 px-6">
           <View className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6">
             <Text className="text-base leading-relaxed" style={{ color: TEXT }}>
-              Akkauntingizni o'chirishni xohlaysizmi? Bu amal qaytarib
-              bo'lmaydi.
+              {t("delete_account_confirmation")}
             </Text>
             <View className="mt-6 flex-row justify-end gap-3">
               <Pressable
@@ -408,7 +408,7 @@ export default function ProfileEditScreen() {
                 disabled={deleting}
               >
                 <Text className="font-semibold text-slate-700">
-                  Bekor qilish
+                  {t("cancel")}
                 </Text>
               </Pressable>
               <Pressable
@@ -420,7 +420,7 @@ export default function ProfileEditScreen() {
                 {deleting ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text className="font-bold text-white">O'chirish</Text>
+                  <Text className="font-bold text-white">{t("delete")}</Text>
                 )}
               </Pressable>
             </View>

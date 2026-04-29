@@ -1,16 +1,15 @@
-import MaterialCommunityIcons, {
-  type MaterialCommunityIconsProps,
-} from "@expo/vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 import { useUserBadges } from "../hook/useBadge";
 import { fallbackIconNameForType, resolveBadgeIconUrl } from "../utils/badgeUi";
-
 const PRIMARY = "#137fec";
 
 export function ProfileBadgesPreview() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { data: badges, isPending } = useUserBadges();
 
@@ -39,11 +38,11 @@ export function ProfileBadgesPreview() {
           <View className="flex-row items-center gap-1.5">
             <MaterialIcons name="military-tech" size={20} color={PRIMARY} />
             <Text className="text-base font-extrabold text-slate-800">
-              Nishonlar
+              {t("badges")}
             </Text>
           </View>
-          <Text className="mt-0.5 text-xs font-medium text-slate-500">
-            {earned} / {total} ochilgan
+          <Text className="mt-0.5 text-xs font-medium text-slate-500 lowercase">
+            {earned} / {total} {t("open")}
           </Text>
         </View>
 
@@ -65,7 +64,7 @@ export function ProfileBadgesPreview() {
                 const uri = resolveBadgeIconUrl(b.iconUrl);
                 const fall = fallbackIconNameForType(
                   b.type
-                ) as MaterialCommunityIconsProps["name"];
+                ) as keyof typeof MaterialCommunityIcons.glyphMap;
                 return (
                   <View
                     key={b.id}

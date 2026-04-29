@@ -6,6 +6,7 @@ import { useAuthStore } from "@/src/store/auth.store";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -49,40 +50,40 @@ function ScalePressable({
   );
 }
 
-const MENU_ITEMS = [
-  {
-    id: "edit",
-    label: "Profilni tahrirlash",
-    icon: "manage-accounts" as const,
-  },
-  {
-    id: "leaderboard",
-    label: "Reyting",
-    icon: "emoji-events" as const,
-  },
-  {
-    id: "settings",
-    label: "Sozlamalar",
-    icon: "settings" as const,
-  },
-  {
-    id: "help",
-    label: "Yordam va murojaat",
-    icon: "help" as const,
-  },
-] as const;
-
 export default function ProfileTabScreen() {
+  const { t } = useTranslation();
+  const MENU_ITEMS = [
+    {
+      id: "edit",
+      label: t("edit_profile"),
+      icon: "manage-accounts" as const,
+    },
+    {
+      id: "leaderboard",
+      label: t("leaderboards"),
+      icon: "emoji-events" as const,
+    },
+    {
+      id: "settings",
+      label: t("settings"),
+      icon: "settings" as const,
+    },
+    {
+      id: "help",
+      label: t("help"),
+      icon: "help" as const,
+    },
+  ] as const;
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const { data: myRank, isPending: myRankLoading } = useMyRank();
 
   const avatarUri = resolveAvatarUrl(user?.avatarUrl ?? null);
-  const displayName = user?.displayName?.trim() || "Foydalanuvchi";
+  const displayName = user?.displayName?.trim() || t("user");
   const subtitle = user?.isGuest
-    ? "Mehmon akkaunti"
-    : (user?.email ?? "Ro'yxatdan o'tgan");
+    ? t("guest_account")
+    : (user?.email ?? t("registered_user"));
 
   return (
     <SafeAreaView
@@ -216,7 +217,9 @@ export default function ProfileTabScreen() {
               borderRadius: 16,
             }}
           >
-            <Text className="text-base font-bold text-rose-500">Chiqish</Text>
+            <Text className="text-base font-bold text-rose-500">
+              {t("logout")}
+            </Text>
           </ScalePressable>
         </View>
       </ScrollView>

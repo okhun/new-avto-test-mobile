@@ -2,6 +2,7 @@ import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Pressable,
@@ -24,49 +25,6 @@ const TEXT_DARK = "#0f172a";
 const CARD_BG = "#ffffff";
 
 type FilterId = "all" | TicketStatus;
-
-const FILTERS: ReadonlyArray<{ id: FilterId; label: string }> = [
-  { id: "all", label: "All" },
-  { id: "unattempted", label: "New" },
-  { id: "in_progress", label: "In Progress" },
-  { id: "passed", label: "Passed" },
-  { id: "failed", label: "Failed" },
-];
-
-const STATUS_META: Record<
-  TicketStatus,
-  {
-    color: string;
-    badgeIcon: keyof typeof MaterialIcons.glyphMap;
-    cardIcon: keyof typeof MaterialIcons.glyphMap;
-    label: string;
-  }
-> = {
-  passed: {
-    color: SUCCESS,
-    badgeIcon: "check-circle",
-    cardIcon: "description",
-    label: "Passed",
-  },
-  failed: {
-    color: ERROR,
-    badgeIcon: "cancel",
-    cardIcon: "assignment-late",
-    label: "Failed",
-  },
-  in_progress: {
-    color: WARNING,
-    badgeIcon: "timelapse",
-    cardIcon: "edit-note",
-    label: "In Progress",
-  },
-  unattempted: {
-    color: INFO,
-    badgeIcon: "radio-button-unchecked",
-    cardIcon: "play-arrow",
-    label: "Not Started",
-  },
-};
 
 function computeStats(tickets: TicketHistory[]) {
   let passed = 0;
@@ -202,6 +160,41 @@ function TicketCard({
   width: number;
   onPress: () => void;
 }) {
+  const { t } = useTranslation();
+  const STATUS_META: Record<
+    TicketStatus,
+    {
+      color: string;
+      badgeIcon: keyof typeof MaterialIcons.glyphMap;
+      cardIcon: keyof typeof MaterialIcons.glyphMap;
+      label: string;
+    }
+  > = {
+    passed: {
+      color: SUCCESS,
+      badgeIcon: "check-circle",
+      cardIcon: "description",
+      label: t("passed"),
+    },
+    failed: {
+      color: ERROR,
+      badgeIcon: "cancel",
+      cardIcon: "assignment-late",
+      label: t("failed"),
+    },
+    in_progress: {
+      color: WARNING,
+      badgeIcon: "timelapse",
+      cardIcon: "edit-note",
+      label: t("in_progress"),
+    },
+    unattempted: {
+      color: INFO,
+      badgeIcon: "radio-button-unchecked",
+      cardIcon: "play-arrow",
+      label: t("unattempted"),
+    },
+  };
   const meta = STATUS_META[ticket.status];
   const progress =
     ticket.totalQuestions > 0
@@ -212,11 +205,11 @@ function TicketCard({
     switch (ticket.status) {
       case "passed":
       case "failed":
-        return `${ticket.answeredQuestions}/${ticket.totalQuestions} correct`;
+        return `${ticket.answeredQuestions}/${ticket.totalQuestions} ${t("correct")}`;
       case "in_progress":
-        return `${ticket.answeredQuestions}/${ticket.totalQuestions} answered`;
+        return `${ticket.answeredQuestions}/${ticket.totalQuestions} ${t("answered")}`;
       default:
-        return `${ticket.totalQuestions} questions`;
+        return `${ticket.totalQuestions} ${t("questions")}`;
     }
   };
 
@@ -249,7 +242,7 @@ function TicketCard({
           style={{ color: TEXT_DARK }}
           numberOfLines={1}
         >
-          {formatTicketNumber(ticket.ticketNumber)}
+          {t("ticket_number", { number: String(ticket.ticketNumber) })}
         </Text>
 
         <Text
@@ -274,16 +267,17 @@ function TicketCard({
 
 // --- Empty state ---
 
-function EmptyState({ filterLabel }: { filterLabel: string }) {
+function EmptyState() {
+  const { t } = useTranslation();
   return (
     <View className="items-center justify-center px-8 py-16">
       <MaterialIcons name="inbox" size={48} color="#cbd5e1" />
       <Text className="mt-3 text-center text-base font-semibold text-slate-400">
-        No {filterLabel.toLowerCase()} tickets
+        {t("no_tests_found")}
       </Text>
-      <Text className="mt-1 text-center text-xs text-slate-400">
-        Try selecting a different filter
-      </Text>
+      {/* <Text className="mt-1 text-center text-xs text-slate-400">
+        {t("no_tests_found")}
+      </Text> */}
     </View>
   );
 }
@@ -293,12 +287,19 @@ function EmptyState({ filterLabel }: { filterLabel: string }) {
 export default function TicketsListScreen() {
   const { data: ticketsHistory, isLoading, refetch } = useGetTicketsHistory();
   const router = useRouter();
-
+  const { t } = useTranslation();
   useFocusEffect(
     useCallback(() => {
       refetch();
     }, [refetch])
   );
+  const FILTERS: ReadonlyArray<{ id: FilterId; label: string }> = [
+    { id: "all", label: t("all_tests") },
+    { id: "unattempted", label: t("unattempted") },
+    { id: "in_progress", label: t("in_progress") },
+    { id: "passed", label: t("passed") },
+    { id: "failed", label: t("failed") },
+  ];
   const { width } = useWindowDimensions();
   const cardGap = 16;
   const padding = 16;
@@ -366,19 +367,19 @@ export default function TicketsListScreen() {
             icon="check-circle"
             iconColor={SUCCESS}
             value={stats.passed}
-            label="Passed"
+            label={t("passed")}
           />
           <StatCard
             icon="cancel"
             iconColor={ERROR}
             value={stats.failed}
-            label="Failed"
+            label={t("failed")}
           />
           <StatCard
             icon="schedule"
             iconColor={INFO}
             value={stats.remaining}
-            label="Remaining"
+            label={t("remaining")}
           />
         </View>
 
@@ -405,7 +406,7 @@ export default function TicketsListScreen() {
 
         {/* Ticket grid */}
         {filteredTickets.length === 0 ? (
-          <EmptyState filterLabel={activeFilterLabel} />
+          <EmptyState />
         ) : (
           <View
             className="flex-row flex-wrap px-4 pb-4 pt-2"
@@ -453,7 +454,7 @@ export default function TicketsListScreen() {
           <View className="flex-row items-center justify-center gap-2">
             <MaterialIcons name="bolt" size={20} color="#ffffff" />
             <Text className="text-base font-bold text-white">
-              Start Random Exam
+              {t("start_exam")}
             </Text>
           </View>
         </ScalePressable>

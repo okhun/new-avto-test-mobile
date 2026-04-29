@@ -2,6 +2,7 @@ import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -27,13 +28,6 @@ const TEXT_DARK = "#0f172a";
 const CARD_BG = "#ffffff";
 
 type FilterId = "all" | "passed" | "failed" | "in_progress";
-
-const FILTERS: ReadonlyArray<{ id: FilterId; label: string }> = [
-  { id: "all", label: "All" },
-  { id: "passed", label: "Passed" },
-  { id: "failed", label: "Failed" },
-  { id: "in_progress", label: "In Progress" },
-];
 
 // ─── Stat card ────────────────────────────────────────────
 function StatCard({
@@ -104,14 +98,15 @@ function FilterPill({
 
 // ─── Empty state ──────────────────────────────────────────
 function EmptyState({ filterLabel }: { filterLabel: string }) {
+  const { t } = useTranslation();
   return (
     <View className="items-center justify-center px-8 py-20">
       <MaterialIcons name="history" size={48} color="#cbd5e1" />
       <Text className="mt-3 text-center text-base font-semibold text-slate-400">
-        No {filterLabel.toLowerCase()} exams yet
+        {t("no_exams_yet")}
       </Text>
       <Text className="mt-1 text-center text-xs text-slate-400">
-        Your exam results will appear here
+        {t("your_exam_results_will_appear_here")}
       </Text>
     </View>
   );
@@ -129,9 +124,15 @@ function ListFooter({ isLoading }: { isLoading: boolean }) {
 
 // ─── Main screen ──────────────────────────────────────────
 export default function ExamsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
-
+  const FILTERS: ReadonlyArray<{ id: FilterId; label: string }> = [
+    { id: "all", label: t("view_all") },
+    { id: "passed", label: t("passed") },
+    { id: "failed", label: t("failed") },
+    { id: "in_progress", label: t("in_progress") },
+  ];
   const queryParams = useMemo<
     Omit<GetExamHistoryParams, "page" | "limit"> | undefined
   >(() => {
@@ -175,7 +176,7 @@ export default function ExamsScreen() {
   }, [entries]);
 
   const activeFilterLabel =
-    FILTERS.find((f) => f.id === activeFilter)?.label ?? "All";
+    FILTERS.find((f) => f.id === activeFilter)?.label ?? t("view_all");
 
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
@@ -202,11 +203,10 @@ export default function ExamsScreen() {
             className="text-2xl font-bold tracking-tight"
             style={{ color: TEXT_DARK }}
           >
-            Imtihon natijalari
+            {t("exam_history_title")}
           </Text>
           <Text className="mt-1 text-sm leading-snug text-slate-400">
-            Natijangizni tahlil qiling va yaxshilash kerak bo'lgan jihatlarni
-            aniqlang.
+            {t("exam_history_description")}
           </Text>
         </View>
         <ExamListSkeleton />
@@ -239,11 +239,10 @@ export default function ExamsScreen() {
                 className="text-2xl font-bold tracking-tight"
                 style={{ color: TEXT_DARK }}
               >
-                Imtihon natijalari
+                {t("exam_history_title")}
               </Text>
               <Text className="mt-1 text-sm leading-snug text-slate-400">
-                Natijangizni tahlil qiling va yaxshilash kerak bo'lgan
-                jihatlarni aniqlang.
+                {t("exam_history_description")}
               </Text>
             </View>
 
@@ -253,19 +252,19 @@ export default function ExamsScreen() {
                 icon="check-circle"
                 iconColor={SUCCESS}
                 value={stats.passed}
-                label="Passed"
+                label={t("passed")}
               />
               <StatCard
                 icon="cancel"
                 iconColor={ERROR}
                 value={stats.failed}
-                label="Failed"
+                label={t("failed")}
               />
               <StatCard
                 icon="timelapse"
                 iconColor={WARNING}
                 value={stats.inProgress}
-                label="In Progress"
+                label={t("in_progress")}
               />
             </View>
 
@@ -311,7 +310,7 @@ export default function ExamsScreen() {
           <View className="flex-row items-center justify-center gap-2">
             <MaterialIcons name="play-arrow" size={20} color="#ffffff" />
             <Text className="text-base font-bold text-white">
-              Start New Exam
+              {t("start_exam")}
             </Text>
           </View>
         </ScalePressable>
