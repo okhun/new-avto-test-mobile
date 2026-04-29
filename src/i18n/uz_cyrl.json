@@ -229,7 +229,7 @@
   "passed": "Муваффақиятли",
   "failed": "Муваффақиятсиз",
   "in_progress": "Жараёнда",
-  "ticket_number": "Вариант # {number}",
+  "ticket_number": "Вариант # {{number}}",
   "questions": "Саволлар",
   "start_test": "Тестни бошлаш",
   "resume_test": "Тестни давом эттириш",

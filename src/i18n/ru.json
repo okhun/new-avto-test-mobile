@@ -228,7 +228,7 @@
   "passed": "Пройдено",
   "failed": "Не пройдено",
   "in_progress": "В процессе",
-  "ticket_number": "Вариант № {number}",
+  "ticket_number": "Вариант № {{number}}",
   "questions": "Вопросы",
   "start_test": "Начать тест",
   "resume_test": "Продолжить тест",
