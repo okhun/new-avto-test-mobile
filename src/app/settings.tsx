@@ -67,7 +67,6 @@ export default function SettingsTabScreen() {
   const [theme, setTheme] = useState<ThemeOption>("light");
   const [pushNotifications, setPushNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
-  const [hapticFeedback, setHapticFeedback] = useState(false);
   const logout = useAuthStore((s) => s.logout);
   return (
     <SafeAreaView

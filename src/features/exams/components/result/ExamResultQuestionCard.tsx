@@ -3,8 +3,8 @@ import type { Answer } from "@/src/features/practice/types/practice.types";
 import { API_CONFIG } from "@/src/utils/constants";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { Image, Text, View } from "react-native";
-
 const TEXT_DARK = "#0f172a";
 const SUCCESS = "#22c55e";
 const ERROR = "#ef4444";
@@ -29,6 +29,7 @@ export function ExamResultQuestionCard({
   isCorrect,
   explanation,
 }: Props) {
+  const { t } = useTranslation();
   const sorted = useMemo(
     () => [...answers].sort((a, b) => a.displayOrder - b.displayOrder),
     [answers]
@@ -65,7 +66,7 @@ export function ExamResultQuestionCard({
                       : MUTED,
               }}
             >
-              Savol {questionOrder}
+              {t("question")} {questionOrder}
             </Text>
           </View>
           {isCorrect === true && (
@@ -155,7 +156,7 @@ export function ExamResultQuestionCard({
                 color="#d97706"
               />
               <Text className="text-xs font-bold uppercase text-amber-800">
-                Tushuntirish
+                {t("explanation")}
               </Text>
             </View>
             <Text className="text-sm leading-relaxed text-amber-950/90">

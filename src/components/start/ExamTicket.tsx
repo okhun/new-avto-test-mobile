@@ -1,26 +1,5 @@
-import "@/src/config/reanimated";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useLocalSearchParams, useRouter, useSegments } from "expo-router";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  FlatList,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-  Pressable,
-  ScrollView,
-  Share,
-  Text,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
 import { ImagePreview } from "@/src/components/ui/ImagePreview";
+import "@/src/config/reanimated";
 import { getExamResult } from "@/src/features/practice/api/practice.api";
 import {
   ANSWER_LABELS,
@@ -41,6 +20,27 @@ import type {
 } from "@/src/features/practice/types/practice.types";
 import { TestMode } from "@/src/features/practice/types/practice.types";
 import { API_CONFIG } from "@/src/utils/constants";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useLocalSearchParams, useRouter, useSegments } from "expo-router";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useTranslation } from "react-i18next";
+import {
+  FlatList,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  Share,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { AnswerOption, type FeedbackKind } from "./AnswerOption";
 import { ConfirmButton } from "./ConfirmButton";
 import { ExamFailModal } from "./ExamFailModal";
@@ -92,6 +92,7 @@ function mergeSubmitIntoAttempt(
 
 // ─── Main Screen ──────────────────────────────────────────
 export default function ExamTicketScreen() {
+  const { t } = useTranslation();
   const { mutateAsync: startTicketAsync } = useStartTicket();
   const { mutateAsync: submitAnswerAsync, isPending: isSubmitting } =
     useSubmitAnswer();
@@ -102,8 +103,8 @@ export default function ExamTicketScreen() {
   const params = useLocalSearchParams<{ id?: string; ticketNumber?: string }>();
   const ticketId = params.id ?? "";
   const ticketLabel = params.ticketNumber
-    ? `Ticket #${params.ticketNumber}`
-    : "Practice";
+    ? `${t("ticket")} #${params.ticketNumber}`
+    : t("exam");
 
   const [attempt, setAttempt] = useState<TestAttempt | null>(null);
   const [isStarting, setIsStarting] = useState(true);
@@ -487,7 +488,9 @@ export default function ExamTicketScreen() {
                 color="#d97706"
               />
               <Text className="text-sm font-bold text-amber-800">
-                {showExplanation ? "Yashirish" : "Tushuntirish"}
+                {showExplanation
+                  ? t("hide_explanation")
+                  : t("show_explanation")}
               </Text>
               <MaterialIcons
                 name={showExplanation ? "expand-less" : "expand-more"}
@@ -565,21 +568,21 @@ export default function ExamTicketScreen() {
         <View className="flex-1 items-center justify-center gap-4">
           <MaterialIcons name="error-outline" size={48} color="#94a3b8" />
           <Text className="text-base font-medium text-slate-500">
-            {isExamMode ? "Imtihonni yuklab bo'lmadi" : "Ticket topilmadi"}
+            {isExamMode ? t("exam_not_loaded") : t("ticket_not_found")}
           </Text>
           <Pressable
             onPress={exitToList}
             className="rounded-xl px-6 py-3"
             style={{ backgroundColor: COLORS.PRIMARY }}
           >
-            <Text className="font-bold text-white">Orqaga</Text>
+            <Text className="font-bold text-white">{t("back")}</Text>
           </Pressable>
         </View>
       </SafeAreaView>
     );
   }
 
-  const headerTitle = isExamMode ? "Imtihon" : ticketLabel;
+  const headerTitle = isExamMode ? t("exam") : ticketLabel;
 
   return (
     <SafeAreaView
@@ -628,7 +631,7 @@ export default function ExamTicketScreen() {
             className="text-xs font-semibold uppercase tracking-wider"
             style={{ color: COLORS.TEXT_DARK }}
           >
-            Progress
+            {t("progress")}
           </Text>
           <Text className="text-sm font-bold" style={{ color: COLORS.PRIMARY }}>
             {answeredCount}/{total}

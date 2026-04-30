@@ -1,6 +1,7 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 
 const PRIMARY = "#137fec";
@@ -17,6 +18,7 @@ export function ExamResultActions({
   onRetake,
   retakeLabel,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <View className="mt-2 gap-3 pb-8">
       <ScalePressable
@@ -33,7 +35,7 @@ export function ExamResultActions({
       >
         <MaterialIcons name="replay" size={22} color="#ffffff" />
         <Text className="text-base font-bold text-white">
-          Qayta topshirish ({retakeLabel})
+          {t("retake")} ({retakeLabel})
         </Text>
       </ScalePressable>
 
@@ -51,7 +53,7 @@ export function ExamResultActions({
       >
         <MaterialIcons name="list-alt" size={22} color={TEXT_DARK} />
         <Text className="text-base font-semibold" style={{ color: TEXT_DARK }}>
-          Imtihonlar tarixi
+          {t("exam_history")}
         </Text>
       </ScalePressable>
     </View>

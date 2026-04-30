@@ -1,5 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 const PRIMARY = "#137fec";
@@ -29,6 +30,7 @@ export function ExamResultHeader({
   scoreLabel,
   onBack,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <View
       className="border-b border-slate-200 bg-white px-4 pb-4 pt-2"
@@ -51,7 +53,7 @@ export function ExamResultHeader({
             {titleLabel}
           </Text>
           <Text className="mt-0.5 text-xs font-semibold uppercase tracking-wider text-slate-400">
-            Natija
+            {t("result")}
           </Text>
         </View>
         {isPassed !== undefined && (
@@ -65,7 +67,7 @@ export function ExamResultHeader({
               className="text-xs font-bold"
               style={{ color: isPassed ? SUCCESS : ERROR }}
             >
-              {isPassed ? "O&apos;tgan" : "O&apos;tmagan"}
+              {isPassed ? t("passed") : t("failed")}
             </Text>
           </View>
         )}
@@ -80,7 +82,7 @@ export function ExamResultHeader({
       <View className="mt-4 flex-row flex-wrap items-center justify-between gap-2">
         <View className="min-w-[45%] flex-1 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
           <Text className="text-[10px] font-bold uppercase text-slate-400">
-            Noto toʻgʻri
+            {t("incorrect")}
           </Text>
           <Text className="text-lg font-bold" style={{ color: ERROR }}>
             {incorrectCount}
@@ -88,7 +90,7 @@ export function ExamResultHeader({
         </View>
         <View className="min-w-[45%] flex-1 rounded-xl border border-slate-100 bg-slate-50 px-3 py-2">
           <Text className="text-[10px] font-bold uppercase text-slate-400">
-            Jami savollar
+            {t("total_questions_label")}
           </Text>
           <Text className="text-lg font-bold" style={{ color: PRIMARY }}>
             {totalQuestions}
@@ -99,7 +101,7 @@ export function ExamResultHeader({
       <View className="mt-3">
         <View className="mb-1 flex-row justify-between">
           <Text className="text-xs font-semibold" style={{ color: PRIMARY }}>
-            Ko'rilgan: {reviewedCount}/{totalQuestions}
+            {t("reviewed")}: {reviewedCount}/{totalQuestions}
           </Text>
           <Text className="text-xs font-medium text-slate-500">
             {progressPercent}%

@@ -1,6 +1,7 @@
 import { COLORS } from "@/src/features/practice/constants/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, Text, View } from "react-native";
 
 type Props = {
@@ -20,6 +21,7 @@ export function ExamSuccessModal({
   onResults,
   onShare,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -47,10 +49,10 @@ export function ExamSuccessModal({
               className="text-center text-xl font-bold"
               style={{ color: COLORS.TEXT_DARK }}
             >
-              Tabriklaymiz!
+              {t("congratulations")}
             </Text>
             <Text className="mt-2 text-center text-base text-slate-600">
-              {correctAnswers} / {totalQuestions} savol to&apos;g&apos;ri
+              {correctAnswers} / {totalQuestions} {t("correct")}
             </Text>
           </View>
 
@@ -61,7 +63,7 @@ export function ExamSuccessModal({
               style={{ backgroundColor: COLORS.PRIMARY }}
             >
               <Text className="text-center text-base font-bold text-white">
-                Davom etish
+                {t("continue")}
               </Text>
             </Pressable>
             <Pressable
@@ -72,7 +74,7 @@ export function ExamSuccessModal({
                 className="text-center text-base font-semibold"
                 style={{ color: COLORS.TEXT_DARK }}
               >
-                Natijalar
+                {t("results")}
               </Text>
             </Pressable>
             <Pressable onPress={onShare} className="rounded-xl py-3">
@@ -80,7 +82,7 @@ export function ExamSuccessModal({
                 className="text-center text-base font-semibold"
                 style={{ color: COLORS.PRIMARY }}
               >
-                Ulashish
+                {t("share")}
               </Text>
             </Pressable>
           </View>

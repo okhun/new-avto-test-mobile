@@ -1,6 +1,7 @@
 import { COLORS } from "@/src/features/practice/constants/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Modal, Pressable, Text, View } from "react-native";
 
 type Props = {
@@ -22,6 +23,7 @@ export function ExamFailModal({
   onTryAgain,
   onBackToStudy,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <Modal
       visible={visible}
@@ -49,11 +51,11 @@ export function ExamFailModal({
               className="text-center text-xl font-bold"
               style={{ color: COLORS.TEXT_DARK }}
             >
-              Imtihon yakunlandi
+              {t("exam_finished")}
             </Text>
             <Text className="mt-2 text-center text-base text-slate-600">
-              {correctAnswers} / {totalQuestions} to&apos;g&apos;ri
-              (o&apos;tish: {passingScore}+)
+              {correctAnswers} / {totalQuestions} {t("correct")}({t("passing")}:{" "}
+              {passingScore}+)
             </Text>
           </View>
 
@@ -64,7 +66,7 @@ export function ExamFailModal({
               style={{ backgroundColor: COLORS.PRIMARY }}
             >
               <Text className="text-center text-base font-bold text-white">
-                Xatolarni ko&apos;rish
+                {t("view_mistakes")}
               </Text>
             </Pressable>
             <Pressable
@@ -75,7 +77,7 @@ export function ExamFailModal({
                 className="text-center text-base font-semibold"
                 style={{ color: COLORS.TEXT_DARK }}
               >
-                Qayta urinish
+                {t("try_again")}
               </Text>
             </Pressable>
             <Pressable onPress={onBackToStudy} className="rounded-xl py-3">
@@ -83,7 +85,7 @@ export function ExamFailModal({
                 className="text-center text-base font-semibold"
                 style={{ color: COLORS.PRIMARY }}
               >
-                O&apos;qishga qaytish
+                {t("back_to_study")}
               </Text>
             </Pressable>
           </View>

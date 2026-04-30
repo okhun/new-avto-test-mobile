@@ -161,8 +161,6 @@ export default function ExamsScreen() {
     [data]
   );
 
-  const totalCount = data?.pages[0]?.total ?? 0;
-
   const stats = useMemo(() => {
     let passed = 0;
     let failed = 0;

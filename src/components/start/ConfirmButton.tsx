@@ -2,6 +2,7 @@ import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import { COLORS } from "@/src/features/practice/constants/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Text, View } from "react-native";
 import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
 
@@ -11,6 +12,7 @@ interface ConfirmButtonProps {
 }
 
 export function ConfirmButton({ onPress, isSubmitting }: ConfirmButtonProps) {
+  const { t } = useTranslation();
   return (
     <Animated.View
       entering={SlideInDown.duration(300).springify()}
@@ -40,7 +42,7 @@ export function ConfirmButton({ onPress, isSubmitting }: ConfirmButtonProps) {
         ) : (
           <View className="flex-row items-center justify-center gap-2">
             <Text className="text-base font-bold text-white">
-              Confirm & Next
+              {t("confirm_and_next")}
             </Text>
             <MaterialIcons name="arrow-forward" size={20} color="#ffffff" />
           </View>

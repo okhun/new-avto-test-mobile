@@ -2,6 +2,7 @@ import type { TestResponse } from "@/src/features/practice/types/practice.types"
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { FlatList, ListRenderItem, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ExamResultActions } from "../components/result/ExamResultActions";
@@ -12,7 +13,6 @@ import {
   MistakeNavigator,
   type NavigatorItem,
 } from "../components/result/MistakeNavigator";
-
 import { useExamResult } from "../hook/useExams";
 
 const BG = "#f4f5f7";
@@ -25,7 +25,7 @@ export default function ExamAttemptResult() {
   const router = useRouter();
   const { attemptId } = useLocalSearchParams<{ attemptId: string }>();
   const id = attemptId ?? "";
-
+  const { t } = useTranslation();
   const { data: attempt, isPending, isError } = useExamResult(id);
 
   const listRef = useRef<FlatList<TestResponse>>(null);
@@ -51,16 +51,16 @@ export default function ExamAttemptResult() {
   );
 
   const titleLabel = useMemo(() => {
-    if (!attempt) return "Imtihon";
+    if (!attempt) return t("exam");
     if (attempt.ticketId) return `Ticket · ${attempt.ticketId}`;
-    return "Imtihon";
+    return t("exam");
   }, [attempt]);
 
-  const retakeLabel = attempt?.ticketId ? "ticket" : "imtihon";
+  const retakeLabel = attempt?.ticketId ? t("ticket") : t("exam");
 
   const scoreLabel = useMemo(() => {
     if (!attempt) return undefined;
-    return `${attempt.correctAnswers}/${attempt.totalQuestions} · Ball: ${attempt.score}%`;
+    return `${attempt.correctAnswers}/${attempt.totalQuestions} · ${t("score")}: ${attempt.score}%`;
   }, [attempt]);
 
   const onBack = useCallback(() => {
@@ -154,11 +154,11 @@ export default function ExamAttemptResult() {
           className="mt-4 text-center text-base"
           style={{ color: TEXT_MUTED }}
         >
-          Natija topilmadi
+          {t("result_not_found")}
         </Text>
         <Pressable onPress={onBack} className="mt-6">
           <Text className="text-base font-semibold text-[#137fec]">
-            Imtihonlar tarixiga qaytish
+            {t("back_to_exam_history")}
           </Text>
         </Pressable>
       </SafeAreaView>
@@ -184,7 +184,7 @@ export default function ExamAttemptResult() {
             className="py-8 text-center text-base"
             style={{ color: TEXT_MUTED }}
           >
-            Savollar mavjud emas
+            {t("no_questions_available")}
           </Text>
           <ExamResultActions
             onBackToExams={onBack}

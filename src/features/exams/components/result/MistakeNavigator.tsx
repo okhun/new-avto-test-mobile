@@ -1,8 +1,8 @@
 import { COLORS } from "@/src/features/practice/constants/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, Text, View } from "react-native";
-
 export type NavigatorItem = {
   order: number;
   isMistake: boolean;
@@ -20,11 +20,12 @@ export function MistakeNavigator({
   mistakeCount,
   onSelectOrder,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <View className="rounded-2xl border border-slate-200 bg-white p-4">
       <View className="mb-3 flex-row items-center justify-between">
         <Text className="text-xs font-bold uppercase tracking-wider text-slate-400">
-          Savollar
+          {t("questions")}
         </Text>
         {mistakeCount > 0 ? (
           <View className="flex-row items-center gap-1">
@@ -34,12 +35,12 @@ export function MistakeNavigator({
               color={COLORS.ERROR}
             />
             <Text className="text-xs font-semibold text-red-600">
-              {mistakeCount} xato
+              {mistakeCount} {t("wrong")}
             </Text>
           </View>
         ) : (
           <Text className="text-xs font-semibold text-emerald-600">
-            Xatosiz
+            {t("no_mistakes")}
           </Text>
         )}
       </View>
@@ -85,9 +86,9 @@ export function MistakeNavigator({
       </ScrollView>
 
       <View className="mt-4 flex-row flex-wrap gap-x-4 gap-y-2 border-t border-slate-100 pt-3">
-        <LegendDot color="#22c55e" label="To'g'ri" />
-        <LegendDot color="#ef4444" label="Xato" />
-        <LegendDot color="#94a3b8" label="Javobsiz" />
+        <LegendDot color="#22c55e" label={t("correct")} />
+        <LegendDot color="#ef4444" label={t("wrong")} />
+        <LegendDot color="#94a3b8" label={t("not_answered")} />
       </View>
     </View>
   );

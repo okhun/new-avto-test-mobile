@@ -109,10 +109,10 @@ export default function ConversationListScreen() {
             className="text-2xl font-bold tracking-tight"
             style={{ color: CONV.TEXT }}
           >
-            Murojaatlar
+            {t("conversations")}
           </Text>
           <Text className="mt-1 text-sm text-slate-500">
-            Savollaringiz va arizalaringiz
+            {t("conversations_description")}
           </Text>
         </View>
         <Pressable
@@ -121,7 +121,7 @@ export default function ConversationListScreen() {
           style={{ backgroundColor: CONV.PRIMARY }}
         >
           <MaterialIcons name="add" size={22} color="#fff" />
-          <Text className="text-sm font-bold text-white">Yangi</Text>
+          <Text className="text-sm font-bold text-white">{t("new")}</Text>
         </Pressable>
       </View>
 
@@ -129,14 +129,16 @@ export default function ConversationListScreen() {
         <View className="flex-1 items-center justify-center px-8">
           <MaterialIcons name="cloud-off" size={48} color="#cbd5e1" />
           <Text className="mt-3 text-center text-slate-500">
-            Ro&apos;yxatni yuklashda xatolik
+            {t("error_loading_list")}
           </Text>
           <Pressable
             onPress={() => refetch()}
             className="mt-4 rounded-xl px-6 py-3"
             style={{ backgroundColor: CONV.PRIMARY }}
           >
-            <Text className="font-semibold text-white">Qayta urinish</Text>
+            <Text className="font-semibold text-white">
+              {t("try_again_loading")}
+            </Text>
           </Pressable>
         </View>
       ) : (
