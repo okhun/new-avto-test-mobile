@@ -1,5 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CONV } from "../constants/theme";
@@ -17,6 +18,7 @@ export function ChatInputBar({
   sending,
   placeholder = "Xabar yozing…",
 }: Props) {
+  const { t } = useTranslation();
   const [text, setText] = useState("");
   const insets = useSafeAreaInsets();
 
@@ -39,7 +41,7 @@ export function ChatInputBar({
       <TextInput
         className="max-h-28 min-h-[44px] flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-[15px] leading-snug"
         style={{ color: CONV.TEXT }}
-        placeholder={placeholder}
+        placeholder={t("write_message")}
         placeholderTextColor="#94a3b8"
         multiline
         maxLength={5000}

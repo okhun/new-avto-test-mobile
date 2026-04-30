@@ -2,6 +2,7 @@ import { useCreateSupportConversation } from "@/src/features/conversations/hook/
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -21,6 +22,7 @@ const MSG_MIN = 10;
 const MSG_MAX = 5000;
 
 export default function NewSupportTicketScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { mutateAsync: createTicket, isPending } =
     useCreateSupportConversation();
@@ -39,13 +41,11 @@ export default function NewSupportTicketScreen() {
   const submit = useCallback(async () => {
     setError(null);
     if (!subjectOk) {
-      setError(
-        `Mavzu ${SUBJECT_MIN}–${SUBJECT_MAX} belgi oralig'ida bo'lishi kerak.`
-      );
+      setError(t("subject_min_max", { min: SUBJECT_MIN, max: SUBJECT_MAX }));
       return;
     }
     if (!msgOk) {
-      setError(`Xabar ${MSG_MIN}–${MSG_MAX} belgi oralig'ida bo'lishi kerak.`);
+      setError(t("message_min_max", { min: MSG_MIN, max: MSG_MAX }));
       return;
     }
     try {
@@ -56,7 +56,7 @@ export default function NewSupportTicketScreen() {
       });
       router.replace(`/conversations/${conv.id}`);
     } catch {
-      setError("Yuborishda xatolik. Qayta urinib ko'ring.");
+      setError(t("error_sending_ticket"));
     }
   }, [createTicket, subject, message, subjectOk, msgOk, router]);
 
@@ -78,7 +78,7 @@ export default function NewSupportTicketScreen() {
             className="flex-1 text-center text-lg font-bold"
             style={{ color: CONV.TEXT }}
           >
-            Yangi murojaat
+            {t("new_conversation")}
           </Text>
           <View className="w-10" />
         </View>
@@ -89,28 +89,29 @@ export default function NewSupportTicketScreen() {
           contentContainerStyle={{ paddingBottom: 32 }}
         >
           <Text className="mb-2 text-sm font-semibold text-slate-700">
-            Mavzu
+            {t("subject")}
           </Text>
           <TextInput
             className="mb-1 rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-[15px]"
             style={{ color: CONV.TEXT }}
-            placeholder="Masalan: Imtihon natijasi ko'rinmayapti"
+            placeholder={t("subject_placeholder")}
             placeholderTextColor="#94a3b8"
             value={subject}
             onChangeText={setSubject}
             maxLength={SUBJECT_MAX}
           />
           <Text className="mb-4 text-right text-xs text-slate-400">
-            {subject.trim().length}/{SUBJECT_MAX} · kamida {SUBJECT_MIN}
+            {subject.trim().length}/{SUBJECT_MAX} ·{" "}
+            {t("at_least", { min: SUBJECT_MIN })}
           </Text>
 
           <Text className="mb-2 text-sm font-semibold text-slate-700">
-            Xabar
+            {t("message")}
           </Text>
           <TextInput
             className="min-h-[160px] rounded-xl border border-slate-200 bg-white px-4 py-3.5 text-[15px] leading-relaxed"
             style={{ color: CONV.TEXT, textAlignVertical: "top" }}
-            placeholder="Muammoingizni batafsil yozing — qachon, qaysi ekranda yuz berdi..."
+            placeholder={t("message_placeholder")}
             placeholderTextColor="#94a3b8"
             value={message}
             onChangeText={setMessage}
@@ -118,7 +119,8 @@ export default function NewSupportTicketScreen() {
             maxLength={MSG_MAX}
           />
           <Text className="mb-4 text-right text-xs text-slate-400">
-            {message.trim().length}/{MSG_MAX} · kamida {MSG_MIN}
+            {message.trim().length}/{MSG_MAX} ·{" "}
+            {t("at_least", { min: MSG_MIN })}
           </Text>
 
           {error ? (
@@ -139,14 +141,13 @@ export default function NewSupportTicketScreen() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text className="text-base font-bold text-white">
-                Murojaatni yuborish
+                {t("send_ticket")}
               </Text>
             )}
           </Pressable>
 
           <Text className="mt-4 text-center text-xs leading-relaxed text-slate-400">
-            Yuborilgan murojaatlar &quot;Murojaatlar&quot; bo&apos;limida
-            saqlanadi. Javob tayyor bo&apos;lganda xabar beramiz.
+            {t("saved_conversations_description")}
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>

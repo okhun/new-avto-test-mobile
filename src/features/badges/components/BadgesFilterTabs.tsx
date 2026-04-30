@@ -1,14 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 import { BADGES_PRIMARY } from "../utils/badgeUi";
 
 export type BadgeFilter = "all" | "unlocked" | "locked";
-
-const TABS: { id: BadgeFilter; label: string }[] = [
-  { id: "all", label: "Hamma" },
-  { id: "unlocked", label: "Ochilgan" },
-  { id: "locked", label: "Qulflangan" },
-];
 
 type Props = {
   value: BadgeFilter;
@@ -16,6 +11,12 @@ type Props = {
 };
 
 export function BadgesFilterTabs({ value, onChange }: Props) {
+  const { t } = useTranslation();
+  const TABS: { id: BadgeFilter; label: string }[] = [
+    { id: "all", label: t("badges_page.filter_all") },
+    { id: "unlocked", label: t("badges_page.filter_earned") },
+    { id: "locked", label: t("badges_page.filter_locked") },
+  ];
   return (
     <View className="mb-2 flex-row gap-2 px-4">
       {TABS.map((tab) => {

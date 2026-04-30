@@ -1,14 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 import { LeaderboardType } from "../types/leaderboard.types";
 
 const PRIMARY = "#137fec";
-
-const TABS: { type: LeaderboardType; label: string }[] = [
-  { type: LeaderboardType.WEEKLY, label: "Hafta" },
-  { type: LeaderboardType.MONTHLY, label: "Oy" },
-  { type: LeaderboardType.ALL_TIME, label: "Butun vaqt" },
-];
 
 type Props = {
   value: LeaderboardType;
@@ -16,6 +11,18 @@ type Props = {
 };
 
 export function LeaderboardFilterTabs({ value, onChange }: Props) {
+  const { t } = useTranslation();
+  const TABS: { type: LeaderboardType; label: string }[] = [
+    {
+      type: LeaderboardType.WEEKLY,
+      label: t("leaderboard_page.period_weekly"),
+    },
+    {
+      type: LeaderboardType.MONTHLY,
+      label: t("leaderboard_page.period_monthly"),
+    },
+    { type: LeaderboardType.ALL_TIME, label: t("leaderboard_page.period_all") },
+  ];
   return (
     <View className="px-4 pb-3">
       <View className="flex-row rounded-2xl bg-slate-200/90 p-1">

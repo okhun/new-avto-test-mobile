@@ -6,6 +6,7 @@ import type { Conversation } from "@/src/features/conversations/types/conversati
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -27,6 +28,7 @@ function ListFooter({ loading }: { loading: boolean }) {
 }
 
 export default function ConversationListScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const {
     data,
@@ -88,10 +90,10 @@ export default function ConversationListScreen() {
             className="text-2xl font-bold tracking-tight"
             style={{ color: CONV.TEXT }}
           >
-            Murojaatlar
+            {t("conversations")}
           </Text>
           <Text className="mt-1 text-sm text-slate-500">
-            Qo&apos;llab-quvvatlash bilan suhbatlar
+            {t("conversations_description")}
           </Text>
         </View>
         <ConversationListSkeleton />

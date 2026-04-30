@@ -1,5 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import { BADGES_PRIMARY, formatBadgeXp } from "../utils/badgeUi";
 
@@ -18,6 +19,7 @@ export function BadgesProgressCard({
   totalCount,
   progress,
 }: Props) {
+  const { t } = useTranslation();
   const pct = Math.min(100, Math.max(0, Math.round(progress * 100)));
 
   return (
@@ -38,7 +40,7 @@ export function BadgesProgressCard({
             style={{ color: BADGES_PRIMARY }}
             numberOfLines={1}
           >
-            Jami XP: {formatBadgeXp(totalXp)}
+            {t("total_xp")}: {formatBadgeXp(totalXp)}
           </Text>
         </View>
         <View
@@ -57,7 +59,7 @@ export function BadgesProgressCard({
             color="#ea580c"
           />
           <Text className="text-xs font-bold text-orange-800">
-            {currentStreak} kun ketma-ket
+            {t("days_streak", { count: currentStreak })}
           </Text>
         </View>
         <View
@@ -66,7 +68,7 @@ export function BadgesProgressCard({
         >
           <MaterialIcons name="star" size={16} color={BADGES_PRIMARY} />
           <Text className="text-xs font-bold" style={{ color: BADGES_PRIMARY }}>
-            {earnedCount} / {totalCount} nishon
+            {earnedCount} / {totalCount} {t("badges")}
           </Text>
         </View>
       </View>

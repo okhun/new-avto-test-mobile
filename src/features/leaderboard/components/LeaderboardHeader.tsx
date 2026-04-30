@@ -1,6 +1,7 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export function LeaderboardHeader({ title = "Reyting" }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
 
   return (
@@ -16,12 +18,12 @@ export function LeaderboardHeader({ title = "Reyting" }: Props) {
         onPress={() => router.back()}
         hitSlop={12}
         className="absolute left-2 h-10 w-10 items-center justify-center"
-        accessibilityLabel="Orqaga"
+        accessibilityLabel={t("back")}
       >
         <MaterialIcons name="chevron-left" size={28} color="#0f172a" />
       </Pressable>
       <Text className="text-center text-lg font-extrabold text-slate-900">
-        {title}
+        {t("leaderboards")}
       </Text>
     </View>
   );

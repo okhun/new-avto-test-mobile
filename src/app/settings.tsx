@@ -4,14 +4,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  Switch,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -69,14 +62,13 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 export default function SettingsTabScreen() {
-  const router = useRouter();
   const { t } = useTranslation();
+  const router = useRouter();
   const [theme, setTheme] = useState<ThemeOption>("light");
   const [pushNotifications, setPushNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
   const [hapticFeedback, setHapticFeedback] = useState(false);
   const logout = useAuthStore((s) => s.logout);
-  const isLoading = useAuthStore((s) => s.isLoading);
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: BACKGROUND_LIGHT }}
@@ -98,7 +90,7 @@ export default function SettingsTabScreen() {
           className="flex-1 pr-12 text-center text-lg font-bold leading-tight tracking-tight"
           style={{ color: TEXT_DARK }}
         >
-          Settings
+          {t("settings")}
         </Text>
       </View>
 
@@ -107,51 +99,8 @@ export default function SettingsTabScreen() {
         contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Account */}
-        {/* <SectionHeader title="Account" />
-        <View
-          className="overflow-hidden rounded-2xl shadow-sm"
-          style={{ backgroundColor: CARD_BG }}
-        >
-          <Pressable className="min-h-[60px] flex-row items-center justify-between gap-4 px-4 active:bg-slate-50">
-            <View className="flex-row flex-1 items-center gap-4">
-              <View
-                className="h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                style={{ backgroundColor: `${PRIMARY}1A` }}
-              >
-                <MaterialIcons name="person" size={22} color={PRIMARY} />
-              </View>
-              <Text
-                className="flex-1 text-base font-medium text-[#0d141c]"
-                numberOfLines={1}
-              >
-                Edit Profile
-              </Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
-          </Pressable>
-          <View className="h-px bg-slate-100" />
-          <Pressable className="min-h-[60px] flex-row items-center justify-between gap-4 px-4 active:bg-slate-50">
-            <View className="flex-row flex-1 items-center gap-4">
-              <View
-                className="h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                style={{ backgroundColor: `${PRIMARY}1A` }}
-              >
-                <MaterialIcons name="lock" size={22} color={PRIMARY} />
-              </View>
-              <Text
-                className="flex-1 text-base font-medium text-[#0d141c]"
-                numberOfLines={1}
-              >
-                Change Password
-              </Text>
-            </View>
-            <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
-          </Pressable>
-        </View> */}
-
         {/* Appearance */}
-        <SectionHeader title="Appearance" />
+        <SectionHeader title={t("appearance")} />
         <View className="flex-row gap-3">
           {/* Light */}
           <ScalePressable
@@ -178,7 +127,9 @@ export default function SettingsTabScreen() {
             >
               <MaterialIcons name="wb-sunny" size={22} color={PRIMARY} />
             </View>
-            <Text className="text-sm font-semibold text-[#0d141c]">Light</Text>
+            <Text className="text-sm font-semibold text-[#0d141c]">
+              {t("light")}
+            </Text>
             <View className="flex-row items-center justify-center">
               <View
                 style={{
@@ -226,7 +177,9 @@ export default function SettingsTabScreen() {
             <View className="h-10 w-10 items-center justify-center rounded-full bg-slate-100">
               <MaterialIcons name="nights-stay" size={22} color="#64748b" />
             </View>
-            <Text className="text-sm font-semibold text-[#0d141c]">Dark</Text>
+            <Text className="text-sm font-semibold text-[#0d141c]">
+              {t("dark")}
+            </Text>
             <View className="flex-row items-center justify-center">
               <View
                 style={{
@@ -274,7 +227,9 @@ export default function SettingsTabScreen() {
             <View className=" h-10 w-10 items-center justify-center rounded-full bg-slate-100">
               <MaterialIcons name="brightness-6" size={22} color="#64748b" />
             </View>
-            <Text className="text-sm font-semibold text-[#0d141c]">System</Text>
+            <Text className="text-sm font-semibold text-[#0d141c]">
+              {t("system")}
+            </Text>
             <View className="flex-row items-center justify-center">
               <View
                 style={{
@@ -302,11 +257,11 @@ export default function SettingsTabScreen() {
           </ScalePressable>
         </View>
 
-        <SectionHeader title="Language" />
+        <SectionHeader title={t("language")} />
         <LangSwitcher />
 
         {/* Preferences */}
-        <SectionHeader title="Preferences" />
+        <SectionHeader title={t("preferences")} />
         <View
           className="overflow-hidden rounded-2xl shadow-sm"
           style={{ backgroundColor: CARD_BG }}
@@ -324,7 +279,7 @@ export default function SettingsTabScreen() {
                 className="flex-1 text-base font-medium text-[#0d141c]"
                 numberOfLines={1}
               >
-                Push Notifications
+                {t("push_notifications")}
               </Text>
             </View>
             <View>
@@ -345,7 +300,7 @@ export default function SettingsTabScreen() {
                 className="flex-1 text-base font-medium text-[#0d141c]"
                 numberOfLines={1}
               >
-                Sound Effects
+                {t("sound_effects")}
               </Text>
             </View>
             <View>
@@ -357,22 +312,21 @@ export default function SettingsTabScreen() {
               />
             </View>
           </View>
-          <Pressable
+          {/* <Pressable
             onPress={() => setHapticFeedback(!hapticFeedback)}
             className="flex-row items-center justify-between px-4 py-3 active:bg-slate-50"
           >
             <View className="flex-row items-center gap-4">
-              {/* Icon with a slightly softer tint */}
               <View className="h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
                 <MaterialIcons name="vibration" size={22} color={PRIMARY} />
               </View>
 
               <View>
                 <Text className="text-[16px] font-bold text-slate-900">
-                  Haptic Feedback
+                  {t("haptic_feedback")}
                 </Text>
                 <Text className="text-[12px] text-slate-400 font-medium">
-                  Vibrate on tap and errors
+                  {t("vibrate_on_tap_and_errors")}
                 </Text>
               </View>
             </View>
@@ -381,36 +335,14 @@ export default function SettingsTabScreen() {
               value={hapticFeedback}
               onValueChange={setHapticFeedback}
               trackColor={{ false: "#cbd5e1", true: PRIMARY }}
-              // On iOS, the thumb color is white by default; on Android, we define it
               thumbColor={Platform.OS === "android" ? "#ffffff" : undefined}
               ios_backgroundColor="#cbd5e1"
             />
-          </Pressable>
-          {/* <View className="min-h-[60px] flex-row items-center justify-between gap-4 px-4">
-            <View className="flex-row flex-1 items-center gap-4">
-              <View className="h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                <MaterialIcons name="vibration" size={22} color={TEXT_DARK} />
-              </View>
-              <Text
-                className="flex-1 text-base font-medium text-[#0d141c]"
-                numberOfLines={1}
-              >
-                Haptic Feedback
-              </Text>
-            </View>
-            <View>
-              <Switch
-                value={hapticFeedback}
-                onValueChange={setHapticFeedback}
-                trackColor={{ false: "#e2e8f0", true: PRIMARY }}
-                thumbColor="#ffffff"
-              />
-            </View>
-          </View> */}
+          </Pressable> */}
         </View>
 
         {/* Support */}
-        <SectionHeader title="Support" />
+        <SectionHeader title={t("support")} />
         <View
           className="overflow-hidden rounded-2xl shadow-sm"
           style={{ backgroundColor: CARD_BG }}
@@ -430,7 +362,7 @@ export default function SettingsTabScreen() {
                 className="flex-1 text-base font-medium text-[#0d141c]"
                 numberOfLines={1}
               >
-                Help & Support
+                {t("help_and_support")}
               </Text>
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
@@ -448,7 +380,7 @@ export default function SettingsTabScreen() {
                 className="flex-1 text-base font-medium text-[#0d141c]"
                 numberOfLines={1}
               >
-                Privacy Policy
+                {t("privacy_policy")}
               </Text>
             </View>
             <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
@@ -475,14 +407,16 @@ export default function SettingsTabScreen() {
           >
             <View className="flex-row items-center justify-center gap-2">
               <MaterialIcons name="logout" size={22} color="#dc2626" />
-              <Text className="text-base font-bold text-red-600">Log Out</Text>
+              <Text className="text-base font-bold text-red-600">
+                {t("logout")}
+              </Text>
             </View>
           </ScalePressable>
           <Text
             className="mt-6 text-center text-sm"
             style={{ color: "#94a3b8" }}
           >
-            Version 2.4.0 (Build 108)
+            {t("version")} 2.4.0 (Build 108)
           </Text>
         </View>
       </ScrollView>

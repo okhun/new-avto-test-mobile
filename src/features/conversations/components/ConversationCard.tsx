@@ -1,6 +1,7 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import { CONV } from "../constants/theme";
 import type {
@@ -9,21 +10,6 @@ import type {
   ConversationType,
 } from "../types/conversation.types";
 import { formatConversationTime } from "../utils/format";
-
-const TYPE_LABEL: Record<ConversationType, string> = {
-  support: "Qo'llab-quvvatlash",
-  contact: "Aloqa",
-  report: "Xabar",
-};
-
-const STATUS_STYLE: Record<
-  ConversationStatus,
-  { label: string; bg: string; text: string }
-> = {
-  open: { label: "Ochiq", bg: "#dbeafe", text: "#1d4ed8" },
-  pending: { label: "Kutilmoqda", bg: "#fef3c7", text: "#b45309" },
-  closed: { label: "Yopilgan", bg: "#f1f5f9", text: "#64748b" },
-};
 
 function lastPreview(c: Conversation): string {
   const msgs = c.messages ?? [];
@@ -38,6 +24,21 @@ type Props = {
 };
 
 export function ConversationCard({ conversation, onPress }: Props) {
+  const { t } = useTranslation();
+  const TYPE_LABEL: Record<ConversationType, string> = {
+    support: t("support"),
+    contact: t("contact"),
+    report: t("report_issue"),
+  };
+
+  const STATUS_STYLE: Record<
+    ConversationStatus,
+    { label: string; bg: string; text: string }
+  > = {
+    open: { label: t("open"), bg: "#dbeafe", text: "#1d4ed8" },
+    pending: { label: t("pending"), bg: "#fef3c7", text: "#b45309" },
+    closed: { label: t("closed"), bg: "#f1f5f9", text: "#64748b" },
+  };
   const typeLabel = TYPE_LABEL[conversation.type] ?? conversation.type;
   const st = STATUS_STYLE[conversation.status] ?? STATUS_STYLE.open;
   const preview = lastPreview(conversation);

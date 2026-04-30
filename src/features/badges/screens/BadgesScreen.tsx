@@ -1,5 +1,6 @@
 import { useGemificationSummary } from "@/src/features/dashboard/hook/useDashboard";
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BadgeGridItem } from "../components/BadgeGridItem";
@@ -15,6 +16,7 @@ import { BADGES_PRIMARY } from "../utils/badgeUi";
 
 export default function BadgesScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [filter, setFilter] = useState<BadgeFilter>("all");
 
   const { data: badges, isPending, isError, refetch } = useUserBadges();
@@ -57,7 +59,7 @@ export default function BadgesScreen() {
       ) : isError || !badges ? (
         <View className="flex-1 items-center justify-center px-6 pb-16">
           <Text className="text-center text-base font-semibold text-slate-600">
-            Nishonlarni yuklab bo&apos;lmadi.
+            {t("badges_not_loaded")}
           </Text>
           <Pressable
             onPress={() => refetch()}
@@ -68,7 +70,7 @@ export default function BadgesScreen() {
               className="text-sm font-extrabold"
               style={{ color: BADGES_PRIMARY }}
             >
-              Qayta urinish
+              {t("try_again_badge")}
             </Text>
           </Pressable>
         </View>
@@ -90,10 +92,10 @@ export default function BadgesScreen() {
             <View className="items-center px-6 py-8">
               <Text className="text-center text-sm text-slate-500">
                 {filter === "all"
-                  ? "Hozircha nishonlar yo'q."
+                  ? t("no_badges_available")
                   : filter === "unlocked"
-                    ? "Hozircha ochilgan nishon yo'q."
-                    : "Barcha nishonlar ochildi."}
+                    ? t("no_unlocked_badges_available")
+                    : t("all_badges_unlocked")}
               </Text>
             </View>
           ) : (

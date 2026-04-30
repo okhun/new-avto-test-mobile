@@ -1,6 +1,7 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import { CONV } from "../constants/theme";
 
@@ -9,6 +10,7 @@ type Props = {
 };
 
 export function ConversationsEmptyState({ onCreateTicket }: Props) {
+  const { t } = useTranslation();
   return (
     <View className="flex-1 items-center justify-center px-8 pb-24">
       <View
@@ -21,11 +23,10 @@ export function ConversationsEmptyState({ onCreateTicket }: Props) {
         className="text-center text-lg font-bold"
         style={{ color: CONV.TEXT }}
       >
-        Hozircha murojaat yo&apos;q
+        {t("no_conversations_yet")}
       </Text>
       <Text className="mt-2 text-center text-sm leading-relaxed text-slate-500">
-        Texnik yoki dastur bo&apos;yicha savolingiz bo&apos;lsa, yangi murojaat
-        oching — jamoamiz tez orada javob beradi.
+        {t("no_conversations_yet_description")}
       </Text>
       <ScalePressable
         onPress={onCreateTicket}
@@ -38,7 +39,7 @@ export function ConversationsEmptyState({ onCreateTicket }: Props) {
         }}
       >
         <Text className="text-base font-bold text-white">
-          Murojaat yaratish
+          {t("create_conversation")}
         </Text>
       </ScalePressable>
     </View>

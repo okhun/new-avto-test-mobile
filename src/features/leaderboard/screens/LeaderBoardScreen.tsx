@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/src/store/auth.store";
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LeaderboardFilterTabs } from "../components/LeaderboardFilterTabs";
@@ -20,9 +21,10 @@ const PAGE_LIMIT = 100;
 
 export default function LeaderBoardScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const [type, setType] = useState(LeaderboardType.WEEKLY);
   const user = useAuthStore((s) => s.user);
-  const displayName = user?.displayName?.trim() || "Foydalanuvchi";
+  const displayName = user?.displayName?.trim() || t("user");
   const avatarUrl = user?.avatarUrl;
 
   const {
@@ -83,7 +85,7 @@ export default function LeaderBoardScreen() {
         ) : showError ? (
           <View className="flex-1 items-center justify-center px-6 pb-24">
             <Text className="text-center text-base font-semibold text-slate-600">
-              Reytingni yuklab bo&apos;lmadi.
+              {t("leaderboard_not_loaded")}
             </Text>
             <Pressable
               onPress={() => refetch()}
@@ -94,7 +96,7 @@ export default function LeaderBoardScreen() {
                 className="text-sm font-extrabold"
                 style={{ color: PRIMARY }}
               >
-                Qayta urinish
+                {t("try_again_leaderboard")}
               </Text>
             </Pressable>
           </View>
@@ -109,7 +111,7 @@ export default function LeaderBoardScreen() {
             {allEntries.length === 0 ? (
               <View className="mt-4 items-center px-6">
                 <Text className="text-center text-sm text-slate-500">
-                  Bu davrda hali reyting yo&apos;q.
+                  {t("no_leaderboard_entries")}
                 </Text>
               </View>
             ) : (

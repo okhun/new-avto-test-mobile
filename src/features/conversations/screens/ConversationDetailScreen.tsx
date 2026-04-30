@@ -8,6 +8,7 @@ import type { ConversationMessage } from "@/src/features/conversations/types/con
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -24,6 +25,7 @@ import {
 import { CONV } from "../constants/theme";
 
 export default function ConversationDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const conversationId = id ?? "";
@@ -87,7 +89,7 @@ export default function ConversationDetailScreen() {
   if (!conversationId) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-slate-50">
-        <Text className="text-slate-500">Noto&apos;g&apos;ri havola</Text>
+        <Text className="text-slate-500">{t("invalid_link")}</Text>
       </SafeAreaView>
     );
   }
@@ -100,7 +102,7 @@ export default function ConversationDetailScreen() {
         edges={["top"]}
       >
         <ActivityIndicator size="large" color={CONV.PRIMARY} />
-        <Text className="mt-3 text-slate-500">Yuklanmoqda…</Text>
+        <Text className="mt-3 text-slate-500">{t("loading")}</Text>
       </SafeAreaView>
     );
   }
@@ -114,14 +116,14 @@ export default function ConversationDetailScreen() {
       >
         <MaterialIcons name="error-outline" size={48} color="#cbd5e1" />
         <Text className="mt-3 text-center text-slate-500">
-          Suhbat topilmadi
+          {t("conversation_not_found")}
         </Text>
         <Pressable
           onPress={() => router.back()}
           className="mt-6 rounded-xl px-6 py-3"
           style={{ backgroundColor: CONV.PRIMARY }}
         >
-          <Text className="font-semibold text-white">Orqaga</Text>
+          <Text className="font-semibold text-white">{t("back")}</Text>
         </Pressable>
       </SafeAreaView>
     );
@@ -147,7 +149,7 @@ export default function ConversationDetailScreen() {
               {conversation.subject}
             </Text>
             <Text className="text-xs text-slate-400">
-              {closed ? "Yopilgan" : "Faol murojaat"}
+              {closed ? t("closed") : t("active_request")}
             </Text>
           </View>
         </View>
@@ -156,7 +158,7 @@ export default function ConversationDetailScreen() {
       {closed ? (
         <View className="border-b border-amber-200 bg-amber-50 px-4 py-2">
           <Text className="text-center text-xs font-medium text-amber-900">
-            Bu murojaat yopilgan. Yangi savol uchun yangi murojaat oching.
+            {t("conversation_closed_message")}
           </Text>
         </View>
       ) : null}
@@ -185,7 +187,7 @@ export default function ConversationDetailScreen() {
           ListEmptyComponent={
             <View className="flex-1 items-center justify-center py-16">
               <Text className="text-center text-slate-400">
-                Hozircha xabar yo&apos;q. Birinchi xabarni yozing.
+                {t("no_messages_yet")}
               </Text>
             </View>
           }

@@ -38,11 +38,11 @@ export function ProfileBadgesPreview() {
           <View className="flex-row items-center gap-1.5">
             <MaterialIcons name="military-tech" size={20} color={PRIMARY} />
             <Text className="text-base font-extrabold text-slate-800">
-              {t("badges")}
+              {t("badges_page.title")}
             </Text>
           </View>
           <Text className="mt-0.5 text-xs font-medium text-slate-500 lowercase">
-            {earned} / {total} {t("open")}
+            {earned} / {total} {t("badges_page.filter_earned")}
           </Text>
         </View>
 

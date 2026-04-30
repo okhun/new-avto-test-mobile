@@ -1,6 +1,7 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Image, Text, View } from "react-native";
 import type { Badge } from "../types/badges.types";
 import {
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function BadgeGridItem({ badge, currentStreak }: Props) {
+  const { t } = useTranslation();
   const earned = badge.isEarned;
   const uri = resolveBadgeIconUrl(badge.iconUrl);
   const fallName = fallbackIconNameForType(badge.type);
@@ -70,7 +72,7 @@ export function BadgeGridItem({ badge, currentStreak }: Props) {
             />
           ) : (
             <MaterialCommunityIcons
-              name={fallName}
+              name={fallName as any}
               size={40}
               color={earned ? BADGES_PRIMARY : "#94a3b8"}
             />
@@ -83,21 +85,21 @@ export function BadgeGridItem({ badge, currentStreak }: Props) {
         numberOfLines={2}
         style={!earned ? { color: "#64748b" } : undefined}
       >
-        {badge.name}
+        {t(`badge.${badge.type}`)}
       </Text>
       <Text
         className="mt-1 text-[11px] font-medium leading-4"
         numberOfLines={3}
         style={{ color: earned ? "#64748b" : "#94a3b8" }}
       >
-        {badge.description}
+        {t(`badge.${badge.type}_description`)}
       </Text>
 
       {streakProg && !earned ? (
         <View className="mt-2">
           <View className="mb-0.5 flex-row justify-between">
             <Text className="text-[10px] font-semibold text-slate-500">
-              {streakProg.current} / {streakProg.target} kun
+              {streakProg.current} / {streakProg.target} {t("days")}
             </Text>
           </View>
           <View className="h-1.5 overflow-hidden rounded-full bg-slate-100">

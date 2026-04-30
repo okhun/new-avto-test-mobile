@@ -1,5 +1,6 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import { CONV } from "../constants/theme";
 import type { ConversationMessage } from "../types/conversation.types";
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function MessageBubble({ message }: Props) {
+  const { t } = useTranslation();
   const isUser = message.senderType === "user";
 
   return (
@@ -31,7 +33,7 @@ export function MessageBubble({ message }: Props) {
               className="text-[11px] font-bold"
               style={{ color: CONV.PRIMARY }}
             >
-              Qo&apos;llab-quvvatlash
+              {t("support")}
             </Text>
           </View>
         )}

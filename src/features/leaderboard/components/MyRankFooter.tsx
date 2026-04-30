@@ -1,5 +1,6 @@
 import { resolveAvatarUrl } from "@/src/features/auth/utils/avatarUrl";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, Text, View } from "react-native";
 import { formatLeaderboardXp, formatRankDisplay } from "../utils/leaderboardUi";
 
@@ -18,6 +19,7 @@ export function MyRankFooter({
   totalXp,
   loading,
 }: Props) {
+  const { t } = useTranslation();
   const uri = resolveAvatarUrl(avatarUrl);
   const rankLabel = formatRankDisplay(rank);
   const xpLabel = formatLeaderboardXp(totalXp);
@@ -69,7 +71,7 @@ export function MyRankFooter({
           {displayName}
         </Text>
         <Text className="mt-0.5 text-[9px] font-extrabold uppercase tracking-wider text-slate-800">
-          Sizning o&apos;rningiz
+          {t("leaderboard_page.your_rank")}
         </Text>
       </View>
       <View className="items-end pl-1">
@@ -77,7 +79,7 @@ export function MyRankFooter({
           {xpLabel}
         </Text>
         <Text className="mt-0.5 text-[9px] font-extrabold uppercase tracking-wider text-slate-800">
-          Jami XP
+          {t("total_xp")}
         </Text>
       </View>
     </View>
