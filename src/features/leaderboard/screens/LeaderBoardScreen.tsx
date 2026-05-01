@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/src/store/auth.store";
+import { useTheme } from "@/src/theme";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, Text, View } from "react-native";
@@ -16,12 +17,12 @@ import {
 } from "../types/leaderboard.types";
 import { getMyRankForType } from "../utils/leaderboardUi";
 
-const PRIMARY = "#137fec";
 const PAGE_LIMIT = 100;
 
 export default function LeaderBoardScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const { palette } = useTheme();
   const [type, setType] = useState(LeaderboardType.WEEKLY);
   const user = useAuthStore((s) => s.user);
   const displayName = user?.displayName?.trim() || t("user");
@@ -68,7 +69,10 @@ export default function LeaderBoardScreen() {
   const showError = leaderboardError && !leaderboard;
 
   return (
-    <View className="flex-1 bg-slate-50" style={{ paddingTop: insets.top }}>
+    <View
+      className="flex-1"
+      style={{ paddingTop: insets.top, backgroundColor: palette.background }}
+    >
       <View className="flex-1">
         <LeaderboardHeader />
         <LeaderboardFilterTabs value={type} onChange={setType} />
@@ -84,17 +88,20 @@ export default function LeaderBoardScreen() {
           </ScrollView>
         ) : showError ? (
           <View className="flex-1 items-center justify-center px-6 pb-24">
-            <Text className="text-center text-base font-semibold text-slate-600">
+            <Text
+              className="text-center text-base font-semibold"
+              style={{ color: palette.muted }}
+            >
               {t("leaderboard_not_loaded")}
             </Text>
             <Pressable
               onPress={() => refetch()}
               className="mt-4 rounded-2xl px-5 py-2.5"
-              style={{ backgroundColor: `${PRIMARY}18` }}
+              style={{ backgroundColor: `${palette.primary}18` }}
             >
               <Text
                 className="text-sm font-extrabold"
-                style={{ color: PRIMARY }}
+                style={{ color: palette.primary }}
               >
                 {t("try_again_leaderboard")}
               </Text>
@@ -110,7 +117,10 @@ export default function LeaderBoardScreen() {
           >
             {allEntries.length === 0 ? (
               <View className="mt-4 items-center px-6">
-                <Text className="text-center text-sm text-slate-500">
+                <Text
+                  className="text-center text-sm"
+                  style={{ color: palette.muted }}
+                >
                   {t("no_leaderboard_entries")}
                 </Text>
               </View>

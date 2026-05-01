@@ -4,13 +4,12 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
 
-type Props = {
-  title?: string;
-};
+import { useTheme } from "@/src/theme";
 
-export function LeaderboardHeader({ title = "Reyting" }: Props) {
+export function LeaderboardHeader() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { palette } = useTheme();
 
   return (
     <View className="flex-row items-center justify-center px-2 pb-3 pt-1">
@@ -20,9 +19,16 @@ export function LeaderboardHeader({ title = "Reyting" }: Props) {
         className="absolute left-2 h-10 w-10 items-center justify-center"
         accessibilityLabel={t("back")}
       >
-        <MaterialIcons name="chevron-left" size={28} color="#0f172a" />
+        <MaterialIcons
+          name="chevron-left"
+          size={28}
+          color={palette.foreground}
+        />
       </Pressable>
-      <Text className="text-center text-lg font-extrabold text-slate-900">
+      <Text
+        className="text-center text-lg font-extrabold"
+        style={{ color: palette.foreground }}
+      >
         {t("leaderboards")}
       </Text>
     </View>

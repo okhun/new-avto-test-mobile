@@ -1,8 +1,6 @@
 import { API_CONFIG } from "@/src/utils/constants";
 import { BadgeType, type Badge } from "../types/badges.types";
 
-export const BADGES_PRIMARY = "#137fec";
-
 export function resolveBadgeIconUrl(
   iconUrl: string | null | undefined
 ): string | undefined {

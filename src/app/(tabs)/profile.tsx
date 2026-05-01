@@ -3,6 +3,7 @@ import { ProfileBadgesPreview } from "@/src/features/badges/components/ProfileBa
 import { useMyRank } from "@/src/features/leaderboard/hook/useLeaderBoard";
 import { formatRankDisplay } from "@/src/features/leaderboard/utils/leaderboardUi";
 import { useAuthStore } from "@/src/store/auth.store";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -15,10 +16,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const PRIMARY = "#137fec";
-const BACKGROUND = "#ffffff";
-const BG_SLATE_50 = "#f8fafc";
-const TEXT_SECONDARY = "#64748b";
 const springConfig = { damping: 15, stiffness: 400 };
 
 function ScalePressable({
@@ -52,6 +49,7 @@ function ScalePressable({
 
 export default function ProfileTabScreen() {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   const MENU_ITEMS = [
     {
       id: "edit",
@@ -87,7 +85,7 @@ export default function ProfileTabScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: BACKGROUND }}
+      style={{ flex: 1, backgroundColor: palette.background }}
       edges={["top"]}
     >
       <ScrollView
@@ -100,34 +98,54 @@ export default function ProfileTabScreen() {
             onPress={() => router.push("/edit-profile")}
             className="relative mb-6"
           >
-            <View className="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-xl">
+            <View
+              className="h-32 w-32 overflow-hidden rounded-full border-4 shadow-xl"
+              style={{ borderColor: palette.card }}
+            >
               {avatarUri ? (
                 <Image
                   source={{ uri: avatarUri }}
                   className="h-full w-full"
-                  style={{ backgroundColor: "#e2e8f0" }}
+                  style={{ backgroundColor: palette.iconSurface }}
                   resizeMode="cover"
                 />
               ) : (
-                <View className="h-full w-full items-center justify-center bg-slate-100">
-                  <MaterialIcons name="person" size={56} color={PRIMARY} />
+                <View
+                  className="h-full w-full items-center justify-center"
+                  style={{ backgroundColor: palette.iconSurface }}
+                >
+                  <MaterialIcons
+                    name="person"
+                    size={56}
+                    color={palette.primary}
+                  />
                 </View>
               )}
             </View>
             <View
-              className="absolute bottom-1 right-1 h-9 w-9 items-center justify-center rounded-full border-4 border-white shadow-md"
-              style={{ backgroundColor: PRIMARY }}
+              className="absolute bottom-1 right-1 h-9 w-9 items-center justify-center rounded-full border-4 shadow-md"
+              style={{
+                borderColor: palette.background,
+                backgroundColor: palette.primary,
+              }}
             >
-              <MaterialIcons name="edit" size={18} color="#ffffff" />
+              <MaterialIcons
+                name="edit"
+                size={18}
+                color={palette.switchThumb}
+              />
             </View>
           </Pressable>
           <View className="items-center gap-1">
-            <Text className="text-center text-2xl font-bold tracking-tight text-slate-900">
+            <Text
+              className="text-center text-2xl font-bold tracking-tight"
+              style={{ color: palette.foreground }}
+            >
               {displayName}
             </Text>
             <Text
               className="text-center text-sm font-medium"
-              style={{ color: TEXT_SECONDARY }}
+              style={{ color: palette.muted }}
             >
               {subtitle}
             </Text>
@@ -160,16 +178,31 @@ export default function ProfileTabScreen() {
                 justifyContent: "space-between",
                 padding: 20,
                 borderRadius: 16,
-                backgroundColor: BG_SLATE_50,
+                backgroundColor: palette.iconSurface,
               }}
             >
               <View className="w-full flex-row items-center justify-between">
                 <View className="flex-1 flex-row items-center gap-4">
-                  <View className="h-10 w-10 items-center justify-center rounded-full bg-white shadow-sm">
-                    <MaterialIcons name={item.icon} size={22} color="#475569" />
+                  <View
+                    className="h-10 w-10 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: palette.card,
+                      shadowColor: palette.shadow,
+                      shadowOpacity: palette.cardShadowOpacity * 0.5,
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowRadius: 2,
+                      elevation: 1,
+                    }}
+                  >
+                    <MaterialIcons
+                      name={item.icon}
+                      size={22}
+                      color={palette.muted}
+                    />
                   </View>
                   <Text
-                    className="text-base font-semibold text-slate-700"
+                    className="text-base font-semibold"
+                    style={{ color: palette.foreground }}
                     numberOfLines={1}
                   >
                     {item.label}
@@ -179,7 +212,7 @@ export default function ProfileTabScreen() {
                   <View className="flex-row items-center gap-2 pr-0.5">
                     <Text
                       className="text-sm font-extrabold"
-                      style={{ color: PRIMARY }}
+                      style={{ color: palette.primary }}
                     >
                       {myRankLoading
                         ? "…"
@@ -188,14 +221,14 @@ export default function ProfileTabScreen() {
                     <MaterialIcons
                       name="chevron-right"
                       size={24}
-                      color="#cbd5e1"
+                      color={palette.chevron}
                     />
                   </View>
                 ) : (
                   <MaterialIcons
                     name="chevron-right"
                     size={24}
-                    color="#cbd5e1"
+                    color={palette.chevron}
                   />
                 )}
               </View>
@@ -215,9 +248,13 @@ export default function ProfileTabScreen() {
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 16,
+              backgroundColor: palette.dangerBg,
             }}
           >
-            <Text className="text-base font-bold text-rose-500">
+            <Text
+              className="text-base font-bold"
+              style={{ color: palette.dangerForeground }}
+            >
               {t("logout")}
             </Text>
           </ScalePressable>

@@ -1,20 +1,43 @@
 import { resolveAvatarUrl } from "@/src/features/auth/utils/avatarUrl";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { Image, Text, View } from "react-native";
+
 import type { LeaderboardEntry } from "../types/leaderboard.types";
 import { formatLeaderboardXp } from "../utils/leaderboardUi";
 
-const GOLD = "#d97706";
-const SLATE_900 = "#0f172a";
+const GOLD_LIGHT = "#d97706";
+const GOLD_DARK = "#fbbf24";
 
-const BADGE: Record<
+const BADGE_LIGHT: Record<
   1 | 2 | 3,
   { text: string; bg: string; textColor: string }
 > = {
   1: { text: "G\u0027olib", bg: "#fef08a", textColor: "#a16207" },
   2: { text: "2-orin", bg: "#e2e8f0", textColor: "#475569" },
   3: { text: "3-orin", bg: "#fed7aa", textColor: "#9a3412" },
+};
+
+const BADGE_DARK: Record<
+  1 | 2 | 3,
+  { text: string; bg: string; textColor: string }
+> = {
+  1: {
+    text: "G\u0027olib",
+    bg: "rgba(234, 179, 8, 0.28)",
+    textColor: "#fde047",
+  },
+  2: {
+    text: "2-orin",
+    bg: "rgba(148, 163, 184, 0.22)",
+    textColor: "#e2e8f0",
+  },
+  3: {
+    text: "3-orin",
+    bg: "rgba(249, 115, 22, 0.25)",
+    textColor: "#fdba74",
+  },
 };
 
 const RING: Record<1 | 2 | 3, string> = {
@@ -38,12 +61,16 @@ export function PodiumCard({
   avatarSize,
   showTrophy = false,
 }: Props) {
+  const { palette, isDark } = useTheme();
+  const BADGE = isDark ? BADGE_DARK : BADGE_LIGHT;
   const badge = BADGE[place];
   const ring = RING[place];
   const uri = entry ? resolveAvatarUrl(entry.avatarUrl) : undefined;
   const name = entry?.displayName?.trim() || "—";
   const xp = entry != null ? formatLeaderboardXp(entry.totalXp) : "—";
-  const xpColor = place === 1 ? GOLD : "#475569";
+
+  const xpColor =
+    place === 1 ? (isDark ? GOLD_DARK : GOLD_LIGHT) : palette.muted;
 
   return (
     <View className="items-center" style={{ width: "31%", maxWidth: 128 }}>
@@ -63,7 +90,7 @@ export function PodiumCard({
             height: avatarSize,
             borderWidth: 3,
             borderColor: ring,
-            backgroundColor: "#e2e8f0",
+            backgroundColor: palette.iconSurface,
           }}
         >
           {uri ? (
@@ -76,7 +103,7 @@ export function PodiumCard({
             <MaterialIcons
               name="person"
               size={avatarSize * 0.5}
-              color="#94a3b8"
+              color={palette.muted}
             />
           )}
         </View>
@@ -95,12 +122,13 @@ export function PodiumCard({
       </View>
 
       <View
-        className="w-full items-center rounded-2xl bg-white px-2 pb-3 pt-10"
+        className="w-full items-center rounded-2xl px-2 pb-3 pt-10"
         style={{
+          backgroundColor: palette.card,
           minHeight: cardMinHeight,
-          shadowColor: "#0f172a",
+          shadowColor: palette.shadow,
           shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.06,
+          shadowOpacity: palette.cardShadowOpacity,
           shadowRadius: 6,
           elevation: 2,
         }}
@@ -108,7 +136,7 @@ export function PodiumCard({
         <Text
           className="text-center text-xs font-extrabold"
           numberOfLines={1}
-          style={{ color: SLATE_900 }}
+          style={{ color: palette.foreground }}
         >
           {name}
         </Text>

@@ -1,9 +1,10 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, Text, View } from "react-native";
-import { LeaderboardType } from "../types/leaderboard.types";
 
-const PRIMARY = "#137fec";
+import { useTheme } from "@/src/theme";
+
+import { LeaderboardType } from "../types/leaderboard.types";
 
 type Props = {
   value: LeaderboardType;
@@ -12,6 +13,8 @@ type Props = {
 
 export function LeaderboardFilterTabs({ value, onChange }: Props) {
   const { t } = useTranslation();
+  const { palette } = useTheme();
+
   const TABS: { type: LeaderboardType; label: string }[] = [
     {
       type: LeaderboardType.WEEKLY,
@@ -23,9 +26,13 @@ export function LeaderboardFilterTabs({ value, onChange }: Props) {
     },
     { type: LeaderboardType.ALL_TIME, label: t("leaderboard_page.period_all") },
   ];
+
   return (
     <View className="px-4 pb-3">
-      <View className="flex-row rounded-2xl bg-slate-200/90 p-1">
+      <View
+        className="flex-row rounded-2xl p-1"
+        style={{ backgroundColor: palette.iconSurface }}
+      >
         {TABS.map((tab) => {
           const active = value === tab.type;
           return (
@@ -36,10 +43,10 @@ export function LeaderboardFilterTabs({ value, onChange }: Props) {
               style={
                 active
                   ? {
-                      backgroundColor: "#ffffff",
-                      shadowColor: "#0f172a",
+                      backgroundColor: palette.card,
+                      shadowColor: palette.shadow,
                       shadowOffset: { width: 0, height: 1 },
-                      shadowOpacity: 0.08,
+                      shadowOpacity: palette.cardShadowOpacity,
                       shadowRadius: 3,
                       elevation: 2,
                     }
@@ -49,7 +56,9 @@ export function LeaderboardFilterTabs({ value, onChange }: Props) {
               <Text
                 className="text-center text-xs font-extrabold"
                 numberOfLines={1}
-                style={{ color: active ? PRIMARY : "#64748b" }}
+                style={{
+                  color: active ? palette.primary : palette.muted,
+                }}
               >
                 {tab.label}
               </Text>

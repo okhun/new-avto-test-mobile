@@ -6,6 +6,7 @@ import {
   useUploadAvatar,
 } from "@/src/features/auth/hook/useAuth";
 import { resolveAvatarUrl } from "@/src/features/auth/utils/avatarUrl";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
@@ -27,9 +28,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const PRIMARY = "#137fec";
-const TEXT = "#0f172a";
-const MUTED = "#64748b";
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 
 const ALLOWED_MIME = new Set([
@@ -70,11 +68,14 @@ function apiErrorMessage(e: unknown, fallback: string): string {
 export default function ProfileEditScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { palette, isDark } = useTheme();
   const { data: me, isPending: loadingMe, isError } = useGetMe();
   const { mutateAsync: saveProfile, isPending: saving } = useUpdateProfile();
   const { mutateAsync: uploadAvatar, isPending: uploading } = useUploadAvatar();
   const { mutateAsync: deleteAccount, isPending: deleting } =
     useDeleteMyAccount();
+
+  const guestWarningColor = isDark ? "#fcd34d" : "#b45309";
 
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -98,6 +99,8 @@ export default function ProfileEditScreen() {
   }, [me, displayName, avatarUrl]);
 
   const displayUri = localPreview ?? resolveAvatarUrl(avatarUrl);
+
+  const saveActive = hasChanges && !saving && !me?.isGuest;
 
   const pickAvatar = useCallback(async () => {
     if (uploading || me?.isGuest) return;
@@ -178,25 +181,44 @@ export default function ProfileEditScreen() {
     }
   }, [deleteAccount, router]);
 
+  const headerRowClass = "flex-row items-center px-2 py-2";
+
+  const renderHeaderNav = () => (
+    <View
+      className={headerRowClass}
+      style={{
+        borderBottomWidth: 1,
+        borderBottomColor: palette.divider,
+      }}
+    >
+      <Pressable
+        onPress={() => router.back()}
+        className="h-10 w-10 items-center justify-center rounded-full"
+        hitSlop={8}
+        style={({ pressed }) =>
+          pressed ? { backgroundColor: palette.surfacePressed } : undefined
+        }
+      >
+        <MaterialIcons name="arrow-back" size={24} color={palette.foreground} />
+      </Pressable>
+      <Text
+        className="flex-1 text-center text-base font-bold"
+        style={{ color: palette.foreground }}
+      >
+        {t("profile")}
+      </Text>
+      <View className="w-10" />
+    </View>
+  );
+
   if (loadingMe && !me) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
-        <View className="flex-row items-center border-b border-slate-100 px-2 py-2">
-          <Pressable
-            onPress={() => router.back()}
-            className="h-10 w-10 items-center justify-center rounded-full"
-            hitSlop={8}
-          >
-            <MaterialIcons name="arrow-back" size={24} color={TEXT} />
-          </Pressable>
-          <Text
-            className="flex-1 text-center text-base font-bold"
-            style={{ color: TEXT }}
-          >
-            {t("profile")}
-          </Text>
-          <View className="w-10" />
-        </View>
+      <SafeAreaView
+        className="flex-1"
+        style={{ backgroundColor: palette.background }}
+        edges={["top"]}
+      >
+        {renderHeaderNav()}
         <ProfileEditSkeleton />
       </SafeAreaView>
     );
@@ -205,40 +227,60 @@ export default function ProfileEditScreen() {
   if (isError || !me) {
     return (
       <SafeAreaView
-        className="flex-1 items-center justify-center bg-white px-6"
+        className="flex-1 items-center justify-center px-6"
+        style={{ backgroundColor: palette.background }}
         edges={["top"]}
       >
-        <Text className="text-center text-slate-500">
+        <Text className="text-center" style={{ color: palette.muted }}>
           {t("profile_not_loaded")}
         </Text>
         <Pressable
           onPress={() => router.back()}
           className="mt-4 rounded-xl px-6 py-3"
-          style={{ backgroundColor: PRIMARY }}
+          style={{ backgroundColor: palette.primary }}
         >
-          <Text className="font-semibold text-white">{t("back")}</Text>
+          <Text style={{ color: palette.switchThumb, fontWeight: "600" }}>
+            {t("back")}
+          </Text>
         </Pressable>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top"]}>
+    <SafeAreaView
+      className="flex-1"
+      style={{ backgroundColor: palette.background }}
+      edges={["top"]}
+    >
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View className="flex-row items-center border-b border-slate-100 px-2 py-2">
+        <View
+          className={headerRowClass}
+          style={{
+            borderBottomWidth: 1,
+            borderBottomColor: palette.divider,
+          }}
+        >
           <Pressable
             onPress={() => router.back()}
-            className="h-10 w-10 items-center justify-center rounded-full active:bg-slate-50"
+            className="h-10 w-10 items-center justify-center rounded-full"
             hitSlop={8}
+            style={({ pressed }) =>
+              pressed ? { backgroundColor: palette.surfacePressed } : undefined
+            }
           >
-            <MaterialIcons name="arrow-back" size={24} color={TEXT} />
+            <MaterialIcons
+              name="arrow-back"
+              size={24}
+              color={palette.foreground}
+            />
           </Pressable>
           <Text
             className="flex-1 text-center text-base font-bold"
-            style={{ color: TEXT }}
+            style={{ color: palette.foreground }}
           >
             {t("profile")}
           </Text>
@@ -257,7 +299,13 @@ export default function ProfileEditScreen() {
               disabled={uploading || me.isGuest}
               className="relative"
             >
-              <View className="h-28 w-28 overflow-hidden rounded-full border-4 border-slate-100 bg-slate-100 shadow-lg">
+              <View
+                className="h-28 w-28 overflow-hidden rounded-full border-4 shadow-lg"
+                style={{
+                  borderColor: palette.divider,
+                  backgroundColor: palette.iconSurface,
+                }}
+              >
                 {displayUri ? (
                   <Image
                     source={{ uri: displayUri }}
@@ -266,13 +314,20 @@ export default function ProfileEditScreen() {
                   />
                 ) : (
                   <View className="h-full w-full items-center justify-center">
-                    <MaterialIcons name="person" size={64} color={PRIMARY} />
+                    <MaterialIcons
+                      name="person"
+                      size={64}
+                      color={palette.primary}
+                    />
                   </View>
                 )}
                 {uploading ? (
                   <View className="absolute inset-0 items-center justify-center bg-black/50">
-                    <ActivityIndicator color="#fff" />
-                    <Text className="mt-1 text-[10px] font-bold text-white">
+                    <ActivityIndicator color={palette.switchThumb} />
+                    <Text
+                      className="mt-1 text-[10px] font-bold"
+                      style={{ color: palette.switchThumb }}
+                    >
                       {t("loading")}
                     </Text>
                   </View>
@@ -280,28 +335,38 @@ export default function ProfileEditScreen() {
               </View>
               {!uploading && !me.isGuest ? (
                 <View
-                  className="absolute bottom-0 right-0 h-9 w-9 items-center justify-center rounded-full border-2 border-white"
-                  style={{ backgroundColor: PRIMARY }}
+                  className="absolute bottom-0 right-0 h-9 w-9 items-center justify-center rounded-full border-2"
+                  style={{
+                    borderColor: palette.background,
+                    backgroundColor: palette.primary,
+                  }}
                 >
-                  <MaterialIcons name="add-a-photo" size={18} color="#fff" />
+                  <MaterialIcons
+                    name="add-a-photo"
+                    size={18}
+                    color={palette.switchThumb}
+                  />
                 </View>
               ) : null}
             </Pressable>
             {me.isGuest ? (
-              <Text className="mt-2 text-center text-xs text-amber-700">
+              <Text
+                className="mt-2 text-center text-xs"
+                style={{ color: guestWarningColor }}
+              >
                 {t("guest_mode_avatar_edit_not_allowed")}
               </Text>
             ) : (
               <Text
                 className="mt-2 text-center text-xs"
-                style={{ color: MUTED }}
+                style={{ color: palette.muted }}
               >
                 {t("tap_to_add_photo")}
               </Text>
             )}
             <Text
               className="mt-4 text-center text-2xl font-bold"
-              style={{ color: TEXT }}
+              style={{ color: palette.foreground }}
             >
               {displayName.trim() || me.displayName}
             </Text>
@@ -309,75 +374,120 @@ export default function ProfileEditScreen() {
 
           <View className="px-6">
             <View className="mb-2 flex-row items-center gap-2">
-              <MaterialIcons name="person-outline" size={22} color={PRIMARY} />
-              <Text className="text-base font-bold" style={{ color: TEXT }}>
+              <MaterialIcons
+                name="person-outline"
+                size={22}
+                color={palette.primary}
+              />
+              <Text
+                className="text-base font-bold"
+                style={{ color: palette.foreground }}
+              >
                 {t("profile_information")}
               </Text>
             </View>
 
             <Text
               className="mb-1.5 text-sm font-medium"
-              style={{ color: MUTED }}
+              style={{ color: palette.muted }}
             >
               {t("full_name")}
             </Text>
             <TextInput
-              className="mb-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-[15px]"
-              style={{ color: TEXT }}
+              className="mb-6 rounded-xl px-4 py-3.5 text-[15px]"
+              style={{
+                color: palette.foreground,
+                borderWidth: 1,
+                borderColor: palette.border,
+                backgroundColor: palette.iconSurface,
+              }}
               value={displayName}
               onChangeText={setDisplayName}
               editable={!saving && !me.isGuest}
               placeholder={t("your_name")}
-              placeholderTextColor="#94a3b8"
+              placeholderTextColor={palette.muted}
             />
 
             <Text
               className="mb-1.5 text-sm font-medium"
-              style={{ color: MUTED }}
+              style={{ color: palette.muted }}
             >
               {t("email")}
             </Text>
             <TextInput
-              className="mb-8 rounded-xl border border-slate-200 bg-slate-100 px-4 py-3.5 text-[15px]"
-              style={{ color: MUTED }}
+              className="mb-8 rounded-xl px-4 py-3.5 text-[15px]"
+              style={{
+                color: palette.muted,
+                borderWidth: 1,
+                borderColor: palette.border,
+                backgroundColor: palette.radioOff,
+              }}
               value={email}
               editable={false}
               selectTextOnFocus={false}
             />
 
             <View className="mb-2 flex-row items-center gap-2">
-              <MaterialIcons name="settings" size={22} color={PRIMARY} />
-              <Text className="text-base font-bold" style={{ color: TEXT }}>
+              <MaterialIcons
+                name="settings"
+                size={22}
+                color={palette.primary}
+              />
+              <Text
+                className="text-base font-bold"
+                style={{ color: palette.foreground }}
+              >
                 {t("account_settings")}
               </Text>
             </View>
             <Pressable
               onPress={() => router.push("/settings")}
-              className="mb-8 flex-row items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5"
+              className="mb-8 flex-row items-center justify-between rounded-xl px-4 py-3.5"
+              style={({ pressed }) => ({
+                borderWidth: 1,
+                borderColor: palette.border,
+                backgroundColor: pressed
+                  ? palette.surfacePressed
+                  : palette.iconSurface,
+              })}
             >
-              <Text className="text-[15px] font-medium" style={{ color: TEXT }}>
+              <Text
+                className="text-[15px] font-medium"
+                style={{ color: palette.foreground }}
+              >
                 {t("app_settings")}
               </Text>
-              <MaterialIcons name="chevron-right" size={22} color={MUTED} />
+              <MaterialIcons
+                name="chevron-right"
+                size={22}
+                color={palette.chevron}
+              />
             </Pressable>
 
             <Pressable
               onPress={onSave}
-              disabled={!hasChanges || saving || me.isGuest}
+              disabled={!saveActive}
               className="mb-4 items-center rounded-full py-3.5 shadow-md"
               style={{
-                backgroundColor:
-                  hasChanges && !saving && !me.isGuest ? PRIMARY : "#cbd5e1",
-                shadowColor: PRIMARY,
-                shadowOpacity: 0.2,
+                backgroundColor: saveActive
+                  ? palette.primary
+                  : palette.radioOff,
+                shadowColor: palette.shadow,
+                shadowOpacity: saveActive ? palette.cardShadowOpacity : 0,
                 shadowRadius: 8,
-                elevation: 4,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: saveActive ? 4 : 0,
               }}
             >
               {saving ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={palette.primary} />
               ) : (
-                <Text className="text-sm font-bold text-white">
+                <Text
+                  className="text-sm font-bold"
+                  style={{
+                    color: saveActive ? palette.switchThumb : palette.muted,
+                  }}
+                >
                   {t("save_changes")}
                 </Text>
               )}
@@ -387,7 +497,10 @@ export default function ProfileEditScreen() {
               onPress={() => setDeleteOpen(true)}
               className="items-center py-2"
             >
-              <Text className="text-xs font-semibold text-slate-400 underline">
+              <Text
+                className="text-xs font-semibold underline"
+                style={{ color: palette.versionMuted }}
+              >
                 {t("delete_account")}
               </Text>
             </Pressable>
@@ -396,18 +509,34 @@ export default function ProfileEditScreen() {
       </KeyboardAvoidingView>
 
       <Modal visible={deleteOpen} transparent animationType="fade">
-        <View className="flex-1 items-center justify-center bg-black/50 px-6">
-          <View className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6">
-            <Text className="text-base leading-relaxed" style={{ color: TEXT }}>
+        <View
+          className="flex-1 items-center justify-center px-6"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        >
+          <View
+            className="w-full max-w-md rounded-3xl border p-6"
+            style={{
+              backgroundColor: palette.card,
+              borderColor: palette.border,
+            }}
+          >
+            <Text
+              className="text-base leading-relaxed"
+              style={{ color: palette.foreground }}
+            >
               {t("delete_account_confirmation")}
             </Text>
             <View className="mt-6 flex-row justify-end gap-3">
               <Pressable
                 onPress={() => setDeleteOpen(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2.5"
+                className="rounded-xl border px-4 py-2.5"
+                style={{ borderColor: palette.border }}
                 disabled={deleting}
               >
-                <Text className="font-semibold text-slate-700">
+                <Text
+                  className="font-semibold"
+                  style={{ color: palette.foreground }}
+                >
                   {t("cancel")}
                 </Text>
               </Pressable>
@@ -415,12 +544,17 @@ export default function ProfileEditScreen() {
                 onPress={onConfirmDelete}
                 disabled={deleting}
                 className="rounded-xl px-4 py-2.5"
-                style={{ backgroundColor: "#ef4444" }}
+                style={{ backgroundColor: palette.dangerForeground }}
               >
                 {deleting ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={palette.switchThumb} size="small" />
                 ) : (
-                  <Text className="font-bold text-white">{t("delete")}</Text>
+                  <Text
+                    className="font-bold"
+                    style={{ color: palette.switchThumb }}
+                  >
+                    {t("delete")}
+                  </Text>
                 )}
               </Pressable>
             </View>
