@@ -1,4 +1,5 @@
 import type { TestResponse } from "@/src/features/practice/types/practice.types";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useRef } from "react";
@@ -15,14 +16,12 @@ import {
 } from "../components/result/MistakeNavigator";
 import { useExamResult } from "../hook/useExams";
 
-const BG = "#f4f5f7";
-const TEXT_MUTED = "#64748b";
-
 /** Approximate row height for scrollToIndex (cards vary; good enough to land near target). */
 const EST_ITEM_HEIGHT = 440;
 
 export default function ExamAttemptResult() {
   const router = useRouter();
+  const { palette } = useTheme();
   const { attemptId } = useLocalSearchParams<{ attemptId: string }>();
   const id = attemptId ?? "";
   const { t } = useTranslation();
@@ -54,14 +53,14 @@ export default function ExamAttemptResult() {
     if (!attempt) return t("exam");
     if (attempt.ticketId) return `Ticket · ${attempt.ticketId}`;
     return t("exam");
-  }, [attempt]);
+  }, [attempt, t]);
 
   const retakeLabel = attempt?.ticketId ? t("ticket") : t("exam");
 
   const scoreLabel = useMemo(() => {
     if (!attempt) return undefined;
     return `${attempt.correctAnswers}/${attempt.totalQuestions} · ${t("score")}: ${attempt.score}%`;
-  }, [attempt]);
+  }, [attempt, t]);
 
   const onBack = useCallback(() => {
     router.replace("/(tabs)/exams");
@@ -136,7 +135,10 @@ export default function ExamAttemptResult() {
 
   if (isPending) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={["top"]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: palette.background }}
+        edges={["top"]}
+      >
         <ExamResultSkeleton />
       </SafeAreaView>
     );
@@ -146,18 +148,21 @@ export default function ExamAttemptResult() {
     return (
       <SafeAreaView
         className="flex-1 items-center justify-center px-8"
-        style={{ backgroundColor: BG }}
+        style={{ backgroundColor: palette.background }}
         edges={["top"]}
       >
-        <MaterialIcons name="search-off" size={48} color="#94a3b8" />
+        <MaterialIcons name="search-off" size={48} color={palette.chevron} />
         <Text
           className="mt-4 text-center text-base"
-          style={{ color: TEXT_MUTED }}
+          style={{ color: palette.muted }}
         >
           {t("result_not_found")}
         </Text>
         <Pressable onPress={onBack} className="mt-6">
-          <Text className="text-base font-semibold text-[#137fec]">
+          <Text
+            className="text-base font-semibold"
+            style={{ color: palette.primary }}
+          >
             {t("back_to_exam_history")}
           </Text>
         </Pressable>
@@ -166,7 +171,10 @@ export default function ExamAttemptResult() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={["top"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: palette.background }}
+      edges={["top"]}
+    >
       <ExamResultHeader
         titleLabel={titleLabel}
         incorrectCount={incorrectCount}
@@ -182,7 +190,7 @@ export default function ExamAttemptResult() {
         <View className="flex-1 px-4 pt-4">
           <Text
             className="py-8 text-center text-base"
-            style={{ color: TEXT_MUTED }}
+            style={{ color: palette.muted }}
           >
             {t("no_questions_available")}
           </Text>
@@ -201,6 +209,7 @@ export default function ExamAttemptResult() {
           getItemLayout={getItemLayout}
           onScrollToIndexFailed={onScrollToIndexFailed}
           showsVerticalScrollIndicator={false}
+          style={{ backgroundColor: palette.background }}
           contentContainerStyle={{ paddingBottom: 32 }}
           ListHeaderComponent={
             <View className="mb-2 px-4 pt-4">

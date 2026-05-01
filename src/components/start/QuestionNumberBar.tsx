@@ -8,20 +8,11 @@ import type {
   SubmitAnswerResult,
   TestResponse,
 } from "@/src/features/practice/types/practice.types";
-import React, { useEffect, useRef } from "react";
+import { useTheme } from "@/src/theme";
+import React, { useEffect, useMemo, useRef } from "react";
 import { Pressable, ScrollView, Text } from "react-native";
 
 type QStatus = "unanswered" | "correct" | "incorrect" | "active";
-
-const STATUS_STYLE: Record<
-  QStatus,
-  { bg: string; text: string; border: string }
-> = {
-  active: { bg: COLORS.PRIMARY, text: "#fff", border: COLORS.PRIMARY },
-  correct: { bg: COLORS.SUCCESS, text: "#fff", border: COLORS.SUCCESS },
-  incorrect: { bg: COLORS.ERROR, text: "#fff", border: COLORS.ERROR },
-  unanswered: { bg: "#f1f5f9", text: "#64748b", border: "#e2e8f0" },
-};
 
 function getQStatus(
   r: TestResponse,
@@ -49,7 +40,36 @@ export function QuestionNumberBar({
   results,
   onPress,
 }: QuestionNumberBarProps) {
+  const { palette } = useTheme();
   const ref = useRef<ScrollView>(null);
+
+  const STATUS_STYLE = useMemo<
+    Record<QStatus, { bg: string; text: string; border: string }>
+  >(
+    () => ({
+      active: {
+        bg: palette.primary,
+        text: palette.switchThumb,
+        border: palette.primary,
+      },
+      correct: {
+        bg: COLORS.SUCCESS,
+        text: "#fff",
+        border: COLORS.SUCCESS,
+      },
+      incorrect: {
+        bg: COLORS.ERROR,
+        text: "#fff",
+        border: COLORS.ERROR,
+      },
+      unanswered: {
+        bg: palette.iconSurface,
+        text: palette.muted,
+        border: palette.border,
+      },
+    }),
+    [palette]
+  );
 
   useEffect(() => {
     const offset =
@@ -87,7 +107,7 @@ export function QuestionNumberBar({
               backgroundColor: c.bg,
               borderWidth: isCurrent && st !== "active" ? 2.5 : 1.5,
               borderColor:
-                isCurrent && st !== "active" ? COLORS.PRIMARY : c.border,
+                isCurrent && st !== "active" ? palette.primary : c.border,
               alignItems: "center",
               justifyContent: "center",
             }}

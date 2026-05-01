@@ -1,3 +1,4 @@
+import { useTheme } from "@/src/theme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { Text, View } from "react-native";
@@ -20,7 +21,12 @@ function topicLabel(t: WeakTopic, index: number): string {
 }
 
 export function HomeWeakTopicsSection({ topics }: Props) {
+  const { palette, isDark } = useTheme();
   if (!topics.length) return null;
+
+  const chipBg = isDark ? "rgba(239,68,68,0.14)" : "#fef2f2";
+  const chipBorder = isDark ? "rgba(248,113,113,0.4)" : "#fecaca";
+  const chipText = isDark ? "#fca5a5" : "#991b1b";
 
   return (
     <View className="mt-4 px-5">
@@ -28,9 +34,12 @@ export function HomeWeakTopicsSection({ topics }: Props) {
         <MaterialCommunityIcons
           name="trending-down"
           size={22}
-          color="#ef4444"
+          color={palette.dangerForeground}
         />
-        <Text className="text-lg font-extrabold text-slate-900">
+        <Text
+          className="text-lg font-extrabold"
+          style={{ color: palette.foreground }}
+        >
           Mustahkamlash kerak
         </Text>
       </View>
@@ -38,9 +47,13 @@ export function HomeWeakTopicsSection({ topics }: Props) {
         {topics.slice(0, 6).map((t, i) => (
           <View
             key={i}
-            className="rounded-full border border-red-100 bg-red-50 px-3 py-1.5"
+            className="rounded-full border px-3 py-1.5"
+            style={{
+              backgroundColor: chipBg,
+              borderColor: chipBorder,
+            }}
           >
-            <Text className="text-xs font-semibold text-red-800">
+            <Text className="text-xs font-semibold" style={{ color: chipText }}>
               {topicLabel(t, i)}
             </Text>
           </View>

@@ -1,6 +1,7 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import { COLORS } from "@/src/features/practice/constants/theme";
 import type { Answer } from "@/src/features/practice/types/practice.types";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { Text } from "react-native";
@@ -18,42 +19,40 @@ interface AnswerOptionProps {
 
 export function AnswerOption({
   answer,
-  label,
+  label: _label,
   isSelected,
   feedback,
   disabled,
   onPress,
 }: AnswerOptionProps) {
-  let border = "#e2e8f0";
-  let bg = COLORS.CARD_BG;
-  let circle = "transparent";
-  let cBorder = "#cbd5e1";
-  let cText = COLORS.TEXT_DARK;
+  const { palette, isDark } = useTheme();
+  const successTint = isDark ? "rgba(34,197,94,0.22)" : `${COLORS.SUCCESS}15`;
+  const successRevealTint = isDark
+    ? "rgba(34,197,94,0.14)"
+    : `${COLORS.SUCCESS}0A`;
+  const errorTint = isDark ? "rgba(239,68,68,0.2)" : `${COLORS.ERROR}15`;
+  const primaryTint = isDark ? `${palette.primary}26` : `${palette.primary}0D`;
+
+  let border = palette.border;
+  let bg = palette.card;
+  let answerTextColor = palette.foreground;
 
   if (feedback === "correct") {
     border = COLORS.SUCCESS;
-    bg = `${COLORS.SUCCESS}15`;
-    circle = COLORS.SUCCESS;
-    cBorder = COLORS.SUCCESS;
-    cText = "#fff";
+    bg = successTint;
+    answerTextColor = isDark ? "#86efac" : COLORS.SUCCESS;
   } else if (feedback === "incorrect") {
     border = COLORS.ERROR;
-    bg = `${COLORS.ERROR}15`;
-    circle = COLORS.ERROR;
-    cBorder = COLORS.ERROR;
-    cText = "#fff";
+    bg = errorTint;
+    answerTextColor = isDark ? "#fca5a5" : COLORS.ERROR;
   } else if (feedback === "reveal") {
     border = COLORS.SUCCESS;
-    bg = `${COLORS.SUCCESS}0A`;
-    circle = COLORS.SUCCESS;
-    cBorder = COLORS.SUCCESS;
-    cText = "#fff";
+    bg = successRevealTint;
+    answerTextColor = isDark ? "#86efac" : "#166534";
   } else if (isSelected) {
-    border = COLORS.PRIMARY;
-    bg = `${COLORS.PRIMARY}0D`;
-    circle = COLORS.PRIMARY;
-    cBorder = COLORS.PRIMARY;
-    cText = "#fff";
+    border = palette.primary;
+    bg = primaryTint;
+    answerTextColor = palette.primary;
   }
 
   return (
@@ -74,11 +73,10 @@ export function AnswerOption({
       }}
     >
       <Text
-        // numberOfLines={3}
         style={{
           flex: 1,
           fontSize: 15,
-          color: COLORS.TEXT_DARK,
+          color: answerTextColor,
           fontWeight: isSelected || feedback ? "600" : "500",
           lineHeight: 22,
         }}

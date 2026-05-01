@@ -87,10 +87,7 @@ export default function RootLayout() {
                 name="exams/result/[attemptId]"
                 options={{ headerShown: false, animation: "slide_from_right" }}
               />
-              <Stack.Screen
-                name="onboarding"
-                options={{ headerShown: false }}
-              />
+
               <Stack.Screen
                 name="settings"
                 options={{ headerShown: false, animation: "slide_from_right" }}

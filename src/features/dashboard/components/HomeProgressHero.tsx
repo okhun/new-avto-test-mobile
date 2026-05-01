@@ -1,4 +1,5 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
+import { useTheme } from "@/src/theme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -10,8 +11,6 @@ import {
   xpBarWidth,
 } from "../utils/dashboardFormat";
 
-const PRIMARY = "#137fec"; // Emerald accent for success/growth
-
 type Props = {
   progress: Progress;
   onContinue: () => void;
@@ -19,113 +18,173 @@ type Props = {
 
 export function HomeProgressHero({ progress, onContinue }: Props) {
   const { t } = useTranslation();
+  const { palette, isDark } = useTheme();
   const accuracy = formatPercentString(progress.overallAccuracy);
   const passRate = formatPassRateString(progress.examPassRate);
   const barW = xpBarWidth(progress.xpProgress ?? 0);
   const bestScore = progress.bestExamScore?.trim() || "—";
+  const shieldBg = isDark ? "rgba(96,165,250,0.18)" : "#eff6ff";
 
   return (
     <View className="px-5 py-4">
-      {/* Container with soft, elevated background */}
       <View
-        className="rounded-3xl bg-white p-5"
+        className="rounded-3xl p-5"
         style={{
-          shadowColor: "#137fec",
+          backgroundColor: palette.card,
+          shadowColor: isDark ? palette.shadow : palette.primary,
           shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.06,
+          shadowOpacity: isDark
+            ? palette.cardShadowOpacity + 0.12
+            : palette.cardShadowOpacity + 0.04,
           shadowRadius: 14,
           elevation: 3,
         }}
       >
-        {/* Header Section with Level & Icon */}
-        <View className="flex-row items-center justify-between border-b border-slate-100 pb-5">
+        <View
+          className="flex-row items-center justify-between pb-5"
+          style={{ borderBottomWidth: 1, borderBottomColor: palette.divider }}
+        >
           <View className="flex-1 pr-3">
-            <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <Text
+              className="text-[10px] font-bold uppercase tracking-wider"
+              style={{ color: palette.muted }}
+            >
               {t("your_level")}
             </Text>
             <View className="mt-1 flex-row items-baseline gap-1.5">
-              <Text className="text-4xl font-black text-slate-800">
+              <Text
+                className="text-4xl font-black"
+                style={{ color: palette.foreground }}
+              >
                 {progress.level}
               </Text>
-              <Text className="text-sm font-semibold text-slate-500">
+              <Text
+                className="text-sm font-semibold"
+                style={{ color: palette.muted }}
+              >
                 {t("level")}
               </Text>
             </View>
           </View>
 
-          <View className="h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
+          <View
+            className="h-16 w-16 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: shieldBg }}
+          >
             <MaterialCommunityIcons
               name="shield-check"
               size={32}
-              color={PRIMARY}
+              color={palette.primary}
             />
           </View>
         </View>
 
-        {/* XP Status & Progress Bar */}
         <View className="py-4">
           <View className="flex-row justify-between">
-            <Text className="text-xs font-semibold text-slate-600">
+            <Text
+              className="text-xs font-semibold"
+              style={{ color: palette.muted }}
+            >
               {t("xp_progress")}
             </Text>
-            <Text className="text-xs font-bold text-primary-600">
+            <Text
+              className="text-xs font-bold"
+              style={{ color: palette.primary }}
+            >
               {Math.round(progress.totalXp)} /{" "}
               {Math.round(progress.xpToNextLevel)} XP
             </Text>
           </View>
-          <View className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <View
+            className="mt-2 h-2.5 w-full overflow-hidden rounded-full"
+            style={{ backgroundColor: palette.divider }}
+          >
             <View
-              className="h-full rounded-full bg-blue-500"
-              style={{ width: barW as unknown as number }}
+              className="h-full rounded-full"
+              style={{
+                width: barW as unknown as number,
+                backgroundColor: palette.primary,
+              }}
             />
           </View>
         </View>
 
-        {/* Grid of Statistics (2x2) */}
         <View className="mt-1 flex-row flex-wrap gap-y-3">
-          {/* Accuracy */}
           <View className="w-1/2 pr-2">
-            <View className="rounded-2xl bg-slate-50 p-3.5">
-              <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <View
+              className="rounded-2xl p-3.5"
+              style={{ backgroundColor: palette.iconSurface }}
+            >
+              <Text
+                className="text-[10px] font-bold uppercase tracking-wider"
+                style={{ color: palette.muted }}
+              >
                 {t("gamification.stat_accuracy")}
               </Text>
-              <Text className="mt-1 text-base font-extrabold text-slate-800">
+              <Text
+                className="mt-1 text-base font-extrabold"
+                style={{ color: palette.foreground }}
+              >
                 {accuracy}
               </Text>
             </View>
           </View>
 
-          {/* Pass Rate */}
           <View className="w-1/2 pl-2">
-            <View className="rounded-2xl bg-slate-50 p-3.5">
-              <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <View
+              className="rounded-2xl p-3.5"
+              style={{ backgroundColor: palette.iconSurface }}
+            >
+              <Text
+                className="text-[10px] font-bold uppercase tracking-wider"
+                style={{ color: palette.muted }}
+              >
                 {t("passing_rate")}
               </Text>
-              <Text className="mt-1 text-base font-extrabold text-slate-800">
+              <Text
+                className="mt-1 text-base font-extrabold"
+                style={{ color: palette.foreground }}
+              >
                 {passRate}
               </Text>
             </View>
           </View>
 
-          {/* Best Score */}
           <View className="w-1/2 pr-2">
-            <View className="rounded-2xl bg-slate-50 p-3.5">
-              <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <View
+              className="rounded-2xl p-3.5"
+              style={{ backgroundColor: palette.iconSurface }}
+            >
+              <Text
+                className="text-[10px] font-bold uppercase tracking-wider"
+                style={{ color: palette.muted }}
+              >
                 {t("gamification.stat_best_score")}
               </Text>
-              <Text className="mt-1 text-base font-extrabold text-slate-800">
+              <Text
+                className="mt-1 text-base font-extrabold"
+                style={{ color: palette.foreground }}
+              >
                 {bestScore}
               </Text>
             </View>
           </View>
 
-          {/* Total Questions */}
           <View className="w-1/2 pl-2">
-            <View className="rounded-2xl bg-slate-50 p-3.5">
-              <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <View
+              className="rounded-2xl p-3.5"
+              style={{ backgroundColor: palette.iconSurface }}
+            >
+              <Text
+                className="text-[10px] font-bold uppercase tracking-wider"
+                style={{ color: palette.muted }}
+              >
                 {t("answers")}
               </Text>
-              <Text className="mt-1 text-xs font-extrabold text-slate-800">
+              <Text
+                className="mt-1 text-xs font-extrabold"
+                style={{ color: palette.foreground }}
+              >
                 {progress.totalCorrectAnswers} /{" "}
                 {progress.totalQuestionsAnswered}
               </Text>
@@ -133,24 +192,26 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
           </View>
         </View>
 
-        {/* Call to Action Button */}
         <ScalePressable
           onPress={onContinue}
           style={{
             marginTop: 20,
             borderRadius: 18,
-            backgroundColor: PRIMARY,
+            backgroundColor: palette.primary,
             paddingVertical: 16,
             alignItems: "center",
             justifyContent: "center",
-            shadowColor: PRIMARY,
+            shadowColor: palette.shadow,
             shadowOffset: { width: 0, height: 8 },
-            shadowOpacity: 0.2,
+            shadowOpacity: palette.cardShadowOpacity + 0.12,
             shadowRadius: 10,
             elevation: 4,
           }}
         >
-          <Text className="text-center text-sm font-black uppercase tracking-widest text-white">
+          <Text
+            className="text-center text-sm font-black uppercase tracking-widest"
+            style={{ color: palette.switchThumb }}
+          >
             {t("work_with_tickets")}
           </Text>
         </ScalePressable>

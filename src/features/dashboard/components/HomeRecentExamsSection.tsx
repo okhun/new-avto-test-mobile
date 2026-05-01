@@ -1,4 +1,5 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
+import { useTheme } from "@/src/theme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
@@ -11,10 +12,8 @@ import {
   parsePercentToNumber,
 } from "../utils/dashboardFormat";
 
-const PRIMARY = "#137fec";
 const SUCCESS = "#22c55e";
 const ERROR = "#ef4444";
-const MUTED = "#64748b";
 
 const MODE_UZ: Record<string, string> = {
   practice: "Amaliyot",
@@ -30,7 +29,7 @@ type Props = {
   loading: boolean;
 };
 
-function statusVisual(entry: ExamHistoryEntry) {
+function statusVisual(entry: ExamHistoryEntry, neutralColor: string) {
   if (entry.isPassed) {
     return { color: SUCCESS, label: "passed", icon: "check-circle" as const };
   }
@@ -54,12 +53,18 @@ function statusVisual(entry: ExamHistoryEntry) {
       icon: "hourglass-empty" as const,
     };
   }
-  return { color: MUTED, label: entry.status, icon: "help" as const };
+  return {
+    color: neutralColor,
+    label: entry.status,
+    icon: "help" as const,
+  };
 }
 
 export function HomeRecentExamsSection({ tests, total, loading }: Props) {
   const router = useRouter();
   const { t } = useTranslation();
+  const { palette } = useTheme();
+
   const onViewAll = useCallback(() => {
     router.push("/(tabs)/exams");
   }, [router]);
@@ -71,15 +76,23 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
     [router]
   );
 
+  const primaryTint12 = `${palette.primary}20`;
+
   return (
     <View className="mt-6 px-5 pb-2">
       <View className="mb-3 flex-row items-center justify-between">
-        <Text className="text-lg font-extrabold tracking-tight text-slate-900">
+        <Text
+          className="text-lg font-extrabold tracking-tight"
+          style={{ color: palette.foreground }}
+        >
           {t("recent_exams")}
         </Text>
         {total > 0 ? (
           <Pressable onPress={onViewAll} hitSlop={8}>
-            <Text className="text-sm font-bold" style={{ color: PRIMARY }}>
+            <Text
+              className="text-sm font-bold"
+              style={{ color: palette.primary }}
+            >
               {t("all")} ({total})
             </Text>
           </Pressable>
@@ -88,20 +101,34 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
 
       {loading ? (
         <View className="items-center py-6">
-          <ActivityIndicator size="small" color={PRIMARY} />
-          <Text className="mt-2 text-xs text-slate-400">{t("loading")}</Text>
+          <ActivityIndicator size="small" color={palette.primary} />
+          <Text className="mt-2 text-xs" style={{ color: palette.muted }}>
+            {t("loading")}
+          </Text>
         </View>
       ) : tests.length === 0 ? (
-        <View className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-8">
-          <Text className="text-center text-sm text-slate-500">
+        <View
+          className="rounded-2xl border border-dashed px-4 py-8"
+          style={{
+            borderColor: palette.border,
+            backgroundColor: palette.card,
+          }}
+        >
+          <Text
+            className="text-center text-sm"
+            style={{ color: palette.muted }}
+          >
             {t("no_exam_history_yet")}
           </Text>
           <Pressable
             onPress={onViewAll}
             className="mt-4 self-center rounded-full px-4 py-2"
-            style={{ backgroundColor: `${PRIMARY}18` }}
+            style={{ backgroundColor: primaryTint12 }}
           >
-            <Text className="text-sm font-bold" style={{ color: PRIMARY }}>
+            <Text
+              className="text-sm font-bold"
+              style={{ color: palette.primary }}
+            >
               {t("go_to_exams")}
             </Text>
           </Pressable>
@@ -109,7 +136,8 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
       ) : (
         <View className="gap-3">
           {tests.map((e) => {
-            const st = statusVisual(e);
+            const stRaw = statusVisual(e, palette.chevron);
+            const stColor = stRaw.color;
             const mode = MODE_UZ[e.mode] ?? e.mode;
             const scoreN = parsePercentToNumber(e.score);
             const totalQ = e.totalQuestions ?? 0;
@@ -121,20 +149,19 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                 onPress={() => onOpen(e.id)}
                 style={{
                   borderRadius: 18,
-                  backgroundColor: "#ffffff",
+                  backgroundColor: palette.card,
                   borderWidth: 1,
-                  borderColor: "#e2e8f0",
+                  borderColor: palette.border,
                   borderLeftWidth: 4,
-                  borderLeftColor: st.color,
+                  borderLeftColor: stColor,
                   paddingVertical: 14,
                   paddingHorizontal: 14,
                   flexDirection: "row",
                   alignItems: "stretch",
                   gap: 12,
-                  // subtle shadow
-                  shadowColor: "#0f172a",
+                  shadowColor: palette.shadow,
                   shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
+                  shadowOpacity: palette.cardShadowOpacity,
                   shadowRadius: 4,
                   elevation: 1,
                 }}
@@ -144,11 +171,11 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                     <View className="flex-row items-start justify-between gap-2">
                       <View
                         className="max-w-[58%] rounded-lg px-2.5 py-1"
-                        style={{ backgroundColor: `${PRIMARY}12` }}
+                        style={{ backgroundColor: primaryTint12 }}
                       >
                         <Text
                           className="text-[12px] font-extrabold"
-                          style={{ color: PRIMARY }}
+                          style={{ color: palette.primary }}
                           numberOfLines={1}
                         >
                           {mode}
@@ -158,9 +185,12 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                         <MaterialIcons
                           name="schedule"
                           size={13}
-                          color="#94a3b8"
+                          color={palette.chevron}
                         />
-                        <Text className="text-[11px] font-medium text-slate-400">
+                        <Text
+                          className="text-[11px] font-medium"
+                          style={{ color: palette.muted }}
+                        >
                           {formatDateShort(e.startedAt ?? e.createdAt)}
                         </Text>
                       </View>
@@ -168,20 +198,29 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
 
                     <View className="mt-3">
                       <View className="mb-1.5 flex-row items-end justify-between">
-                        <Text className="text-xs font-semibold text-slate-500">
+                        <Text
+                          className="text-xs font-semibold"
+                          style={{ color: palette.muted }}
+                        >
                           {t("correct_answers")}
                         </Text>
-                        <Text className="text-sm font-bold text-slate-800">
+                        <Text
+                          className="text-sm font-bold"
+                          style={{ color: palette.foreground }}
+                        >
                           {correct}
-                          <Text className="text-slate-300"> / </Text>
+                          <Text style={{ color: palette.chevron }}> / </Text>
                           {totalQ > 0 ? totalQ : "—"}
                         </Text>
                       </View>
-                      <View className="h-2 overflow-hidden rounded-full bg-slate-100">
+                      <View
+                        className="h-2 overflow-hidden rounded-full"
+                        style={{ backgroundColor: palette.divider }}
+                      >
                         <View
                           style={{
                             width: `${Math.min(100, Math.round(ratio * 1000) / 10)}%`,
-                            backgroundColor: st.color,
+                            backgroundColor: stColor,
                             height: "100%",
                             borderRadius: 9999,
                           }}
@@ -192,28 +231,31 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                     <View className="mt-3 flex-row items-center justify-between">
                       <View
                         className="flex-row items-center gap-1.5 rounded-full px-2.5 py-1"
-                        style={{ backgroundColor: `${st.color}14` }}
+                        style={{ backgroundColor: `${stColor}22` }}
                       >
                         <MaterialIcons
-                          name={st.icon}
+                          name={stRaw.icon}
                           size={15}
-                          color={st.color}
+                          color={stColor}
                         />
                         <Text
                           className="text-[11px] font-bold"
-                          style={{ color: st.color }}
+                          style={{ color: stColor }}
                         >
-                          {t(`${st.label}`)}
+                          {t(`${stRaw.label}`)}
                         </Text>
                       </View>
                       <View className="flex-row items-center gap-0.5">
-                        <Text className="text-[11px] font-semibold text-slate-400">
+                        <Text
+                          className="text-[11px] font-semibold"
+                          style={{ color: palette.muted }}
+                        >
                           {t("detailed")}
                         </Text>
                         <MaterialCommunityIcons
                           name="chevron-right"
                           size={18}
-                          color="#94a3b8"
+                          color={palette.chevron}
                         />
                       </View>
                     </View>
@@ -223,9 +265,9 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                     <View
                       className="h-[72px] w-[72px] items-center justify-center rounded-full"
                       style={{
-                        backgroundColor: `${st.color}12`,
+                        backgroundColor: `${stColor}18`,
                         borderWidth: 2,
-                        borderColor: `${st.color}30`,
+                        borderColor: `${stColor}44`,
                       }}
                     >
                       {scoreN != null ? (
@@ -233,30 +275,39 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                           <View className="flex-row items-baseline">
                             <Text
                               className="text-[22px] font-black tabular-nums"
-                              style={{ color: st.color, lineHeight: 26 }}
+                              style={{ color: stColor, lineHeight: 26 }}
                             >
                               {Math.round(scoreN)}
                             </Text>
                             <Text
                               className="ml-0.5 text-sm font-extrabold"
-                              style={{ color: st.color, opacity: 0.75 }}
+                              style={{ color: stColor, opacity: 0.75 }}
                             >
                               %
                             </Text>
                           </View>
-                          <Text className="mt-0.5 text-[10px] font-semibold text-slate-500">
+                          <Text
+                            className="mt-0.5 text-[10px] font-semibold"
+                            style={{ color: palette.muted }}
+                          >
                             {t("score")}
                           </Text>
                         </View>
                       ) : (
                         <>
                           <Text
-                            className="text-2xl font-bold text-slate-300"
-                            style={{ lineHeight: 28 }}
+                            className="text-2xl font-bold"
+                            style={{
+                              color: palette.chevron,
+                              lineHeight: 28,
+                            }}
                           >
                             —
                           </Text>
-                          <Text className="mt-0.5 text-[10px] font-medium text-slate-400">
+                          <Text
+                            className="mt-0.5 text-[10px] font-medium"
+                            style={{ color: palette.muted }}
+                          >
                             {t("score")}
                           </Text>
                         </>

@@ -1,3 +1,4 @@
+import { useTheme } from "@/src/theme";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -12,6 +13,7 @@ type Props = {
 
 export function HomeQuickStats({ progress, streak }: Props) {
   const { t } = useTranslation();
+  const { palette, isDark } = useTheme();
   const acc = formatPercentString(progress.overallAccuracy);
   const tests = progress.totalTestsTaken ?? 0;
   const passed = progress.totalTestsPassed ?? 0;
@@ -20,21 +22,21 @@ export function HomeQuickStats({ progress, streak }: Props) {
     {
       icon: "fire" as const,
       color: "#f97316",
-      bg: "#fff7ed",
+      bg: isDark ? "rgba(249,115,22,0.22)" : "#fff7ed",
       label: t("streak"),
       value: `${streak.currentStreak} ${t("days")}`,
     },
     {
       icon: "bullseye-arrow" as const,
       color: "#22c55e",
-      bg: "#f0fdf4",
+      bg: isDark ? "rgba(34,197,94,0.18)" : "#f0fdf4",
       label: t("accuracy"),
       value: acc,
     },
     {
       icon: "school" as const,
-      color: "#137fec",
-      bg: "#eff6ff",
+      color: palette.primary,
+      bg: isDark ? "rgba(96,165,250,0.18)" : "#eff6ff",
       label: t("exams"),
       value: `${passed}/${tests} ${t("passed")}`,
     },
@@ -45,11 +47,13 @@ export function HomeQuickStats({ progress, streak }: Props) {
       {items.map((it) => (
         <View
           key={it.label}
-          className="min-w-[30%] flex-1 rounded-2xl border border-slate-100 bg-white p-4"
+          className="min-w-[30%] flex-1 rounded-2xl border p-4"
           style={{
-            shadowColor: "#000",
+            backgroundColor: palette.card,
+            borderColor: palette.border,
+            shadowColor: palette.shadow,
             shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.05,
+            shadowOpacity: palette.cardShadowOpacity,
             shadowRadius: 8,
             elevation: 2,
           }}
@@ -60,11 +64,15 @@ export function HomeQuickStats({ progress, streak }: Props) {
           >
             <MaterialCommunityIcons name={it.icon} size={22} color={it.color} />
           </View>
-          <Text className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+          <Text
+            className="text-[10px] font-bold uppercase tracking-wide"
+            style={{ color: palette.muted }}
+          >
             {it.label}
           </Text>
           <Text
-            className="mt-1 text-base font-extrabold text-slate-900"
+            className="mt-1 text-base font-extrabold"
+            style={{ color: palette.foreground }}
             numberOfLines={2}
           >
             {it.value}

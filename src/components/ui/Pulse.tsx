@@ -12,9 +12,11 @@ interface PulseProps {
   h: number;
   r?: number;
   style?: object;
+  /** Skeleton fill; defaults to a light gray. */
+  color?: string;
 }
 
-export function Pulse({ w, h, r = 8, style }: PulseProps) {
+export function Pulse({ w, h, r = 8, style, color = "#e2e8f0" }: PulseProps) {
   const opacity = useSharedValue(0.3);
 
   useEffect(() => {
@@ -34,7 +36,7 @@ export function Pulse({ w, h, r = 8, style }: PulseProps) {
           width: w as any,
           height: h,
           borderRadius: r,
-          backgroundColor: "#e2e8f0",
+          backgroundColor: color,
         },
         anim,
         style,

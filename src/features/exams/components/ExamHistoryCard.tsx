@@ -1,16 +1,15 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import type { ExamHistoryEntry } from "../../practice/types/practice.types";
 
-const PRIMARY = "#137fec";
 const SUCCESS = "#22c55e";
 const ERROR = "#ef4444";
 const WARNING = "#f59e0b";
-const TEXT_DARK = "#0f172a";
-const CARD_BG = "#ffffff";
+const XP_ACCENT = "#f59e0b";
 
 type StatusKey = "passed" | "failed" | "in_progress" | "completed";
 
@@ -36,6 +35,8 @@ interface ExamHistoryCardProps {
 
 export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
   const { t } = useTranslation();
+  const { palette } = useTheme();
+
   const STATUS_CONFIG: Record<
     StatusKey,
     {
@@ -47,7 +48,11 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
     passed: { color: SUCCESS, icon: "check-circle", label: t("passed") },
     failed: { color: ERROR, icon: "cancel", label: t("failed") },
     in_progress: { color: WARNING, icon: "timelapse", label: t("in_progress") },
-    completed: { color: PRIMARY, icon: "task-alt", label: t("completed") },
+    completed: {
+      color: palette.primary,
+      icon: "task-alt",
+      label: t("completed"),
+    },
   };
   const MODE_LABELS: Record<string, string> = {
     practice: t("practice"),
@@ -68,25 +73,30 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
     <ScalePressable
       onPress={onPress}
       style={{
-        backgroundColor: CARD_BG,
+        backgroundColor: palette.card,
         borderRadius: 16,
         padding: 16,
         borderWidth: 1,
-        borderColor: "#f1f5f9",
+        borderColor: palette.border,
       }}
     >
-      {/* Top row: mode + status */}
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <View
             className="rounded-lg px-2.5 py-1"
-            style={{ backgroundColor: `${PRIMARY}12` }}
+            style={{ backgroundColor: `${palette.primary}12` }}
           >
-            <Text style={{ color: PRIMARY, fontSize: 12, fontWeight: "700" }}>
+            <Text
+              style={{
+                color: palette.primary,
+                fontSize: 12,
+                fontWeight: "700",
+              }}
+            >
               {modeLabel}
             </Text>
           </View>
-          <Text className="text-xs text-slate-400">
+          <Text className="text-xs" style={{ color: palette.chevron }}>
             {formatDate(entry.startedAt)}
           </Text>
         </View>
@@ -101,7 +111,6 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
         </View>
       </View>
 
-      {/* Score row */}
       <View className="mt-3 flex-row items-end justify-between">
         <View className="flex-row items-baseline gap-1">
           <Text
@@ -111,16 +120,18 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
             {scorePercent}%
           </Text>
         </View>
-        <Text className="text-sm text-slate-500">
-          <Text style={{ color: TEXT_DARK, fontWeight: "700" }}>
+        <Text className="text-sm" style={{ color: palette.muted }}>
+          <Text style={{ color: palette.foreground, fontWeight: "700" }}>
             {entry.correctAnswers}
           </Text>
           /{entry.totalQuestions} {t("correct")}
         </Text>
       </View>
 
-      {/* Progress bar */}
-      <View className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+      <View
+        className="mt-2 h-1.5 w-full overflow-hidden rounded-full"
+        style={{ backgroundColor: palette.divider }}
+      >
         <View
           className="h-full rounded-full"
           style={{
@@ -130,34 +141,42 @@ export function ExamHistoryCard({ entry, onPress }: ExamHistoryCardProps) {
         />
       </View>
 
-      {/* Bottom stats */}
       <View className="mt-3 flex-row items-center gap-4">
         <View className="flex-row items-center gap-1">
-          <MaterialIcons name="schedule" size={14} color="#94a3b8" />
-          <Text className="text-xs font-medium text-slate-400">
+          <MaterialIcons name="schedule" size={14} color={palette.muted} />
+          <Text
+            className="text-xs font-medium"
+            style={{ color: palette.muted }}
+          >
             {formatTime(entry.timeSpentSeconds)}
           </Text>
         </View>
         {entry.wrongAnswers > 0 && (
           <View className="flex-row items-center gap-1">
-            <MaterialIcons name="close" size={14} color="#94a3b8" />
-            <Text className="text-xs font-medium text-slate-400">
+            <MaterialIcons name="close" size={14} color={palette.muted} />
+            <Text
+              className="text-xs font-medium"
+              style={{ color: palette.muted }}
+            >
               {entry.wrongAnswers} {t("wrong")}
             </Text>
           </View>
         )}
         {entry.skippedQuestions > 0 && (
           <View className="flex-row items-center gap-1">
-            <MaterialIcons name="skip-next" size={14} color="#94a3b8" />
-            <Text className="text-xs font-medium text-slate-400">
+            <MaterialIcons name="skip-next" size={14} color={palette.muted} />
+            <Text
+              className="text-xs font-medium"
+              style={{ color: palette.muted }}
+            >
               {entry.skippedQuestions} {t("skipped")}
             </Text>
           </View>
         )}
         {entry.xpEarned != null && entry.xpEarned > 0 && (
           <View className="ml-auto flex-row items-center gap-1">
-            <MaterialIcons name="star" size={14} color="#f59e0b" />
-            <Text className="text-xs font-bold" style={{ color: "#f59e0b" }}>
+            <MaterialIcons name="star" size={14} color={XP_ACCENT} />
+            <Text className="text-xs font-bold" style={{ color: XP_ACCENT }}>
               +{entry.xpEarned} XP
             </Text>
           </View>

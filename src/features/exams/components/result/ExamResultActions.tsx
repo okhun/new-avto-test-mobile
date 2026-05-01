@@ -1,11 +1,9 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
-
-const PRIMARY = "#137fec";
-const TEXT_DARK = "#0f172a";
 
 type Props = {
   onBackToExams: () => void;
@@ -19,6 +17,8 @@ export function ExamResultActions({
   retakeLabel,
 }: Props) {
   const { t } = useTranslation();
+  const { palette } = useTheme();
+
   return (
     <View className="mt-2 gap-3 pb-8">
       <ScalePressable
@@ -28,13 +28,16 @@ export function ExamResultActions({
           alignItems: "center",
           justifyContent: "center",
           gap: 8,
-          backgroundColor: PRIMARY,
+          backgroundColor: palette.primary,
           borderRadius: 14,
           paddingVertical: 14,
         }}
       >
-        <MaterialIcons name="replay" size={22} color="#ffffff" />
-        <Text className="text-base font-bold text-white">
+        <MaterialIcons name="replay" size={22} color={palette.switchThumb} />
+        <Text
+          className="text-base font-bold"
+          style={{ color: palette.switchThumb }}
+        >
           {t("retake")} ({retakeLabel})
         </Text>
       </ScalePressable>
@@ -46,13 +49,18 @@ export function ExamResultActions({
           alignItems: "center",
           justifyContent: "center",
           gap: 8,
-          backgroundColor: "#f1f5f9",
+          backgroundColor: palette.iconSurface,
           borderRadius: 14,
           paddingVertical: 14,
+          borderWidth: 1,
+          borderColor: palette.border,
         }}
       >
-        <MaterialIcons name="list-alt" size={22} color={TEXT_DARK} />
-        <Text className="text-base font-semibold" style={{ color: TEXT_DARK }}>
+        <MaterialIcons name="list-alt" size={22} color={palette.foreground} />
+        <Text
+          className="text-base font-semibold"
+          style={{ color: palette.foreground }}
+        >
           {t("exam_history")}
         </Text>
       </ScalePressable>

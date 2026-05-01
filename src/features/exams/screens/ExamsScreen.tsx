@@ -1,4 +1,5 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
@@ -19,17 +20,12 @@ import { ExamListSkeleton } from "../components/ExamListSkeleton";
 import { useExamHistoryInfinite } from "../hook/useExams";
 import type { GetExamHistoryParams } from "../types/exams.types";
 
-const PRIMARY = "#137fec";
-const BG = "#f4f5f7";
 const SUCCESS = "#22c55e";
 const ERROR = "#ef4444";
 const WARNING = "#f59e0b";
-const TEXT_DARK = "#0f172a";
-const CARD_BG = "#ffffff";
 
 type FilterId = "all" | "passed" | "failed" | "in_progress";
 
-// ─── Stat card ────────────────────────────────────────────
 function StatCard({
   icon,
   iconColor,
@@ -41,28 +37,34 @@ function StatCard({
   value: number;
   label: string;
 }) {
+  const { palette } = useTheme();
   return (
     <View
-      className="flex-1 flex-col gap-1 rounded-2xl border border-slate-100 p-4"
-      style={{ backgroundColor: CARD_BG }}
+      className="flex-1 flex-col gap-1 rounded-2xl border p-4"
+      style={{
+        backgroundColor: palette.card,
+        borderColor: palette.border,
+      }}
     >
       <View className="mb-1">
         <MaterialIcons name={icon} size={20} color={iconColor} />
       </View>
       <Text
         className="text-2xl font-bold leading-tight"
-        style={{ color: TEXT_DARK }}
+        style={{ color: palette.foreground }}
       >
         {value}
       </Text>
-      <Text className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+      <Text
+        className="text-[10px] font-semibold uppercase tracking-wider"
+        style={{ color: palette.muted }}
+      >
         {label}
       </Text>
     </View>
   );
 }
 
-// ─── Filter pill ──────────────────────────────────────────
 function FilterPill({
   label,
   isActive,
@@ -72,6 +74,7 @@ function FilterPill({
   isActive: boolean;
   onPress: () => void;
 }) {
+  const { palette } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -79,14 +82,14 @@ function FilterPill({
       style={{
         height: 36,
         paddingHorizontal: 20,
-        backgroundColor: isActive ? PRIMARY : CARD_BG,
-        borderColor: isActive ? PRIMARY : "#e2e8f0",
+        backgroundColor: isActive ? palette.primary : palette.card,
+        borderColor: isActive ? palette.primary : palette.border,
       }}
     >
       <Text
         style={{
           fontSize: 13,
-          color: isActive ? "#ffffff" : "#475569",
+          color: isActive ? palette.switchThumb : palette.muted,
           fontWeight: isActive ? "600" : "500",
         }}
       >
@@ -96,35 +99,41 @@ function FilterPill({
   );
 }
 
-// ─── Empty state ──────────────────────────────────────────
-function EmptyState({ filterLabel }: { filterLabel: string }) {
+function EmptyState() {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   return (
     <View className="items-center justify-center px-8 py-20">
-      <MaterialIcons name="history" size={48} color="#cbd5e1" />
-      <Text className="mt-3 text-center text-base font-semibold text-slate-400">
+      <MaterialIcons name="history" size={48} color={palette.chevron} />
+      <Text
+        className="mt-3 text-center text-base font-semibold"
+        style={{ color: palette.muted }}
+      >
         {t("no_exams_yet")}
       </Text>
-      <Text className="mt-1 text-center text-xs text-slate-400">
+      <Text
+        className="mt-1 text-center text-xs"
+        style={{ color: palette.chevron }}
+      >
         {t("your_exam_results_will_appear_here")}
       </Text>
     </View>
   );
 }
 
-// ─── Footer loader ────────────────────────────────────────
 function ListFooter({ isLoading }: { isLoading: boolean }) {
+  const { palette } = useTheme();
   if (!isLoading) return null;
   return (
     <View className="items-center py-6">
-      <ActivityIndicator size="small" color={PRIMARY} />
+      <ActivityIndicator size="small" color={palette.primary} />
     </View>
   );
 }
 
-// ─── Main screen ──────────────────────────────────────────
 export default function ExamsScreen() {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
   const FILTERS: ReadonlyArray<{ id: FilterId; label: string }> = [
@@ -173,9 +182,6 @@ export default function ExamsScreen() {
     return { passed, failed, inProgress };
   }, [entries]);
 
-  const activeFilterLabel =
-    FILTERS.find((f) => f.id === activeFilter)?.label ?? t("view_all");
-
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
@@ -189,21 +195,85 @@ export default function ExamsScreen() {
         />
       </View>
     ),
-    []
+    [router]
   );
 
-  // ── Initial loading ──
+  const listHeader = (
+    <>
+      <View className="px-4 pb-2 pt-4">
+        <Text
+          className="text-2xl font-bold tracking-tight"
+          style={{ color: palette.foreground }}
+        >
+          {t("exam_history_title")}
+        </Text>
+        <Text
+          className="mt-1 text-sm leading-snug"
+          style={{ color: palette.muted }}
+        >
+          {t("exam_history_description")}
+        </Text>
+      </View>
+
+      <View className="flex-row gap-3 px-4 py-2">
+        <StatCard
+          icon="check-circle"
+          iconColor={SUCCESS}
+          value={stats.passed}
+          label={t("passed")}
+        />
+        <StatCard
+          icon="cancel"
+          iconColor={ERROR}
+          value={stats.failed}
+          label={t("failed")}
+        />
+        <StatCard
+          icon="timelapse"
+          iconColor={WARNING}
+          value={stats.inProgress}
+          label={t("in_progress")}
+        />
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingVertical: 8,
+          gap: 8,
+        }}
+      >
+        {FILTERS.map((f) => (
+          <FilterPill
+            key={f.id}
+            label={f.label}
+            isActive={activeFilter === f.id}
+            onPress={() => setActiveFilter(f.id)}
+          />
+        ))}
+      </ScrollView>
+    </>
+  );
+
   if (isLoading && entries.length === 0) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={["top"]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: palette.background }}
+        edges={["top"]}
+      >
         <View className="px-4 pb-2 pt-4">
           <Text
             className="text-2xl font-bold tracking-tight"
-            style={{ color: TEXT_DARK }}
+            style={{ color: palette.foreground }}
           >
             {t("exam_history_title")}
           </Text>
-          <Text className="mt-1 text-sm leading-snug text-slate-400">
+          <Text
+            className="mt-1 text-sm leading-snug"
+            style={{ color: palette.muted }}
+          >
             {t("exam_history_description")}
           </Text>
         </View>
@@ -213,7 +283,10 @@ export default function ExamsScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: BG }} edges={["top"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: palette.background }}
+      edges={["top"]}
+    >
       <FlatList
         data={entries}
         renderItem={renderItem}
@@ -226,88 +299,37 @@ export default function ExamsScreen() {
           <RefreshControl
             refreshing={isRefetching && !isFetchingNextPage}
             onRefresh={() => refetch()}
-            tintColor={PRIMARY}
+            tintColor={palette.primary}
           />
         }
-        ListHeaderComponent={
-          <>
-            {/* Title */}
-            <View className="px-4 pb-2 pt-4">
-              <Text
-                className="text-2xl font-bold tracking-tight"
-                style={{ color: TEXT_DARK }}
-              >
-                {t("exam_history_title")}
-              </Text>
-              <Text className="mt-1 text-sm leading-snug text-slate-400">
-                {t("exam_history_description")}
-              </Text>
-            </View>
-
-            {/* Stats */}
-            <View className="flex-row gap-3 px-4 py-2">
-              <StatCard
-                icon="check-circle"
-                iconColor={SUCCESS}
-                value={stats.passed}
-                label={t("passed")}
-              />
-              <StatCard
-                icon="cancel"
-                iconColor={ERROR}
-                value={stats.failed}
-                label={t("failed")}
-              />
-              <StatCard
-                icon="timelapse"
-                iconColor={WARNING}
-                value={stats.inProgress}
-                label={t("in_progress")}
-              />
-            </View>
-
-            {/* Filters */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                gap: 8,
-              }}
-            >
-              {FILTERS.map((f) => (
-                <FilterPill
-                  key={f.id}
-                  label={f.label}
-                  isActive={activeFilter === f.id}
-                  onPress={() => setActiveFilter(f.id)}
-                />
-              ))}
-            </ScrollView>
-          </>
-        }
-        ListEmptyComponent={<EmptyState filterLabel={activeFilterLabel} />}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={<EmptyState />}
         ListFooterComponent={<ListFooter isLoading={isFetchingNextPage} />}
       />
 
-      {/* Start New Exam — fixed at bottom */}
       <View className="absolute bottom-0 left-0 right-0 px-6 pb-24 pt-2">
         <ScalePressable
           onPress={() => router.push("/exams/start")}
           style={{
-            backgroundColor: PRIMARY,
-            shadowColor: PRIMARY,
+            backgroundColor: palette.primary,
+            shadowColor: palette.shadow,
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
+            shadowOpacity: palette.cardShadowOpacity + 0.08,
             shadowRadius: 8,
             elevation: 8,
           }}
           className="rounded-2xl py-4"
         >
           <View className="flex-row items-center justify-center gap-2">
-            <MaterialIcons name="play-arrow" size={20} color="#ffffff" />
-            <Text className="text-base font-bold text-white">
+            <MaterialIcons
+              name="play-arrow"
+              size={20}
+              color={palette.switchThumb}
+            />
+            <Text
+              className="text-base font-bold"
+              style={{ color: palette.switchThumb }}
+            >
               {t("start_exam")}
             </Text>
           </View>

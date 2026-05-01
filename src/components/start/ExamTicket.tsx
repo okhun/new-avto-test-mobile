@@ -3,7 +3,6 @@ import "@/src/config/reanimated";
 import { getExamResult } from "@/src/features/practice/api/practice.api";
 import {
   ANSWER_LABELS,
-  COLORS,
   FEEDBACK_DELAY_MS,
   SCREEN_WIDTH,
 } from "@/src/features/practice/constants/theme";
@@ -19,6 +18,7 @@ import type {
   TestResponse,
 } from "@/src/features/practice/types/practice.types";
 import { TestMode } from "@/src/features/practice/types/practice.types";
+import { useTheme } from "@/src/theme";
 import { API_CONFIG } from "@/src/utils/constants";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useLocalSearchParams, useRouter, useSegments } from "expo-router";
@@ -93,6 +93,7 @@ function mergeSubmitIntoAttempt(
 // ─── Main Screen ──────────────────────────────────────────
 export default function ExamTicketScreen() {
   const { t } = useTranslation();
+  const { palette, isDark } = useTheme();
   const { mutateAsync: startTicketAsync } = useStartTicket();
   const { mutateAsync: submitAnswerAsync, isPending: isSubmitting } =
     useSubmitAnswer();
@@ -186,22 +187,31 @@ export default function ExamTicketScreen() {
   const timerStyles = useMemo(() => {
     if (timerTone === "danger")
       return {
-        wrap: { backgroundColor: "#fef2f2", borderColor: "#fecaca" as const },
-        text: "#dc2626",
-        icon: "#dc2626",
+        wrap: {
+          backgroundColor: isDark ? "rgba(220,38,38,0.18)" : "#fef2f2",
+          borderColor: isDark ? "rgba(248,113,113,0.45)" : "#fecaca",
+        },
+        text: isDark ? "#fca5a5" : "#dc2626",
+        icon: isDark ? "#fca5a5" : "#dc2626",
       };
     if (timerTone === "warn")
       return {
-        wrap: { backgroundColor: "#fffbeb", borderColor: "#fde68a" as const },
-        text: "#d97706",
-        icon: "#d97706",
+        wrap: {
+          backgroundColor: isDark ? "rgba(245,158,11,0.15)" : "#fffbeb",
+          borderColor: isDark ? "rgba(251,191,36,0.35)" : "#fde68a",
+        },
+        text: isDark ? "#fbbf24" : "#d97706",
+        icon: isDark ? "#fbbf24" : "#d97706",
       };
     return {
-      wrap: { backgroundColor: "#f1f5f9", borderColor: "#e2e8f0" as const },
-      text: COLORS.PRIMARY,
-      icon: COLORS.PRIMARY,
+      wrap: {
+        backgroundColor: palette.iconSurface,
+        borderColor: palette.border,
+      },
+      text: palette.primary,
+      icon: palette.primary,
     };
-  }, [timerTone]);
+  }, [timerTone, isDark, palette]);
 
   // ── Start attempt on mount ──
   useEffect(() => {
@@ -471,7 +481,7 @@ export default function ExamTicketScreen() {
           <View className={q.imageUrl ? "mt-4 gap-1" : "gap-1"}>
             <Text
               className="text-xl font-bold leading-tight tracking-tight"
-              style={{ color: COLORS.TEXT_DARK }}
+              style={{ color: palette.foreground }}
             >
               {q.text}
             </Text>
@@ -480,14 +490,21 @@ export default function ExamTicketScreen() {
           {!isExamMode && !!q.explanation && (
             <Pressable
               onPress={() => setShowExplanation((v) => !v)}
-              className="mt-4 flex-row items-center gap-2 self-start rounded-xl border border-amber-200 bg-amber-50 px-3 py-2"
+              className="mt-4 flex-row items-center gap-2 self-start rounded-xl border px-3 py-2"
+              style={{
+                borderColor: isDark ? "rgba(251,191,36,0.35)" : "#fde68a",
+                backgroundColor: isDark ? "rgba(251,191,36,0.12)" : "#fffbeb",
+              }}
             >
               <MaterialIcons
                 name="lightbulb-outline"
                 size={20}
-                color="#d97706"
+                color={isDark ? "#fbbf24" : "#d97706"}
               />
-              <Text className="text-sm font-bold text-amber-800">
+              <Text
+                className="text-sm font-bold"
+                style={{ color: isDark ? "#fcd34d" : "#92400e" }}
+              >
                 {showExplanation
                   ? t("hide_explanation")
                   : t("show_explanation")}
@@ -495,14 +512,23 @@ export default function ExamTicketScreen() {
               <MaterialIcons
                 name={showExplanation ? "expand-less" : "expand-more"}
                 size={22}
-                color="#92400e"
+                color={isDark ? "#fbbf24" : "#92400e"}
               />
             </Pressable>
           )}
 
           {!isExamMode && showExplanation && !!q.explanation && (
-            <View className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
-              <Text className="text-sm leading-relaxed text-slate-700">
+            <View
+              className="mt-3 rounded-xl border p-3"
+              style={{
+                borderColor: palette.border,
+                backgroundColor: palette.card,
+              }}
+            >
+              <Text
+                className="text-sm leading-relaxed"
+                style={{ color: palette.foreground }}
+              >
                 {q.explanation}
               </Text>
             </View>
@@ -545,13 +571,16 @@ export default function ExamTicketScreen() {
       showExplanation,
       showSuccessModal,
       showFailModal,
+      palette,
+      isDark,
+      t,
     ]
   );
 
   if (isStarting) {
     return (
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: COLORS.BG }}
+        style={{ flex: 1, backgroundColor: palette.background }}
         edges={["top"]}
       >
         <LoadingSkeleton />
@@ -562,20 +591,29 @@ export default function ExamTicketScreen() {
   if ((!isExamMode && !ticketId) || !attempt || responses.length === 0) {
     return (
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: COLORS.BG }}
+        style={{ flex: 1, backgroundColor: palette.background }}
         edges={["top"]}
       >
         <View className="flex-1 items-center justify-center gap-4">
-          <MaterialIcons name="error-outline" size={48} color="#94a3b8" />
-          <Text className="text-base font-medium text-slate-500">
+          <MaterialIcons
+            name="error-outline"
+            size={48}
+            color={palette.chevron}
+          />
+          <Text
+            className="text-base font-medium"
+            style={{ color: palette.muted }}
+          >
             {isExamMode ? t("exam_not_loaded") : t("ticket_not_found")}
           </Text>
           <Pressable
             onPress={exitToList}
             className="rounded-xl px-6 py-3"
-            style={{ backgroundColor: COLORS.PRIMARY }}
+            style={{ backgroundColor: palette.primary }}
           >
-            <Text className="font-bold text-white">{t("back")}</Text>
+            <Text className="font-bold" style={{ color: palette.switchThumb }}>
+              {t("back")}
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -586,23 +624,27 @@ export default function ExamTicketScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: COLORS.BG }}
+      style={{ flex: 1, backgroundColor: palette.background }}
       edges={["top"]}
     >
       <View
-        className="flex-row items-center justify-between border-b border-slate-200 px-4 py-3"
-        style={{ backgroundColor: `${COLORS.BG}CC` }}
+        className="flex-row items-center justify-between px-4 py-3"
+        style={{
+          backgroundColor: `${palette.background}CC`,
+          borderBottomWidth: 1,
+          borderBottomColor: palette.border,
+        }}
       >
         <Pressable
           onPress={exitToList}
           className="h-10 w-10 items-center justify-center rounded-full active:opacity-70"
           hitSlop={8}
         >
-          <MaterialIcons name="close" size={24} color={COLORS.TEXT_DARK} />
+          <MaterialIcons name="close" size={24} color={palette.foreground} />
         </Pressable>
         <Text
           className="flex-1 text-center text-lg font-bold leading-tight tracking-tight"
-          style={{ color: COLORS.TEXT_DARK }}
+          style={{ color: palette.foreground }}
           numberOfLines={1}
         >
           {headerTitle}
@@ -629,18 +671,24 @@ export default function ExamTicketScreen() {
         <View className="flex-row items-center justify-between">
           <Text
             className="text-xs font-semibold uppercase tracking-wider"
-            style={{ color: COLORS.TEXT_DARK }}
+            style={{ color: palette.foreground }}
           >
             {t("progress")}
           </Text>
-          <Text className="text-sm font-bold" style={{ color: COLORS.PRIMARY }}>
+          <Text
+            className="text-sm font-bold"
+            style={{ color: palette.primary }}
+          >
             {answeredCount}/{total}
           </Text>
         </View>
-        <View className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+        <View
+          className="h-2 w-full overflow-hidden rounded-full"
+          style={{ backgroundColor: palette.divider }}
+        >
           <View
             className="h-full rounded-full"
-            style={{ width: `${progress}%`, backgroundColor: COLORS.PRIMARY }}
+            style={{ width: `${progress}%`, backgroundColor: palette.primary }}
           />
         </View>
       </View>
@@ -675,6 +723,8 @@ export default function ExamTicketScreen() {
           showExplanation,
           showSuccessModal,
           showFailModal,
+          palette.foreground,
+          isDark,
         ]}
       />
 

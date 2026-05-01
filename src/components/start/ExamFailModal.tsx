@@ -1,4 +1,5 @@
 import { COLORS } from "@/src/features/practice/constants/theme";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -24,6 +25,7 @@ export function ExamFailModal({
   onBackToStudy,
 }: Props) {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   return (
     <Modal
       visible={visible}
@@ -33,8 +35,13 @@ export function ExamFailModal({
     >
       <View className="flex-1 items-center justify-center bg-black/50 px-6">
         <View
-          className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
-          style={{ elevation: 8 }}
+          className="w-full max-w-md rounded-2xl p-6 shadow-xl"
+          style={{
+            elevation: 8,
+            backgroundColor: palette.card,
+            borderWidth: 1,
+            borderColor: palette.border,
+          }}
         >
           <View className="mb-4 items-center">
             <View
@@ -49,11 +56,14 @@ export function ExamFailModal({
             </View>
             <Text
               className="text-center text-xl font-bold"
-              style={{ color: COLORS.TEXT_DARK }}
+              style={{ color: palette.foreground }}
             >
               {t("exam_finished")}
             </Text>
-            <Text className="mt-2 text-center text-base text-slate-600">
+            <Text
+              className="mt-2 text-center text-base"
+              style={{ color: palette.muted }}
+            >
               {correctAnswers} / {totalQuestions} {t("correct")}({t("passing")}:{" "}
               {passingScore}+)
             </Text>
@@ -63,19 +73,23 @@ export function ExamFailModal({
             <Pressable
               onPress={onReviewMistakes}
               className="rounded-xl py-3.5"
-              style={{ backgroundColor: COLORS.PRIMARY }}
+              style={{ backgroundColor: palette.primary }}
             >
-              <Text className="text-center text-base font-bold text-white">
+              <Text
+                className="text-center text-base font-bold"
+                style={{ color: palette.switchThumb }}
+              >
                 {t("view_mistakes")}
               </Text>
             </Pressable>
             <Pressable
               onPress={onTryAgain}
-              className="rounded-xl border border-slate-200 py-3.5"
+              className="rounded-xl border py-3.5"
+              style={{ borderColor: palette.border }}
             >
               <Text
                 className="text-center text-base font-semibold"
-                style={{ color: COLORS.TEXT_DARK }}
+                style={{ color: palette.foreground }}
               >
                 {t("try_again")}
               </Text>
@@ -83,7 +97,7 @@ export function ExamFailModal({
             <Pressable onPress={onBackToStudy} className="rounded-xl py-3">
               <Text
                 className="text-center text-base font-semibold"
-                style={{ color: COLORS.PRIMARY }}
+                style={{ color: palette.primary }}
               >
                 {t("back_to_study")}
               </Text>

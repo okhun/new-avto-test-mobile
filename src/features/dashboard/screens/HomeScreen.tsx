@@ -6,6 +6,7 @@ import { HomeRecentExamsSection } from "@/src/features/dashboard/components/Home
 import { HomeScreenSkeleton } from "@/src/features/dashboard/components/HomeScreenSkeleton";
 import { HomeWeakTopicsSection } from "@/src/features/dashboard/components/HomeWeakTopicsSection";
 import { useAuthStore } from "@/src/store/auth.store";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback } from "react";
@@ -14,10 +15,9 @@ import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useExamHistory, useGemificationSummary } from "../hook/useDashboard";
 
-const PRIMARY = "#137fec";
-
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   const router = useRouter();
   const displayName = useAuthStore((s) => s.user?.displayName);
   const avatarUrl = useAuthStore((s) => s.user?.avatarUrl);
@@ -47,7 +47,10 @@ export default function HomeScreen() {
 
   if (loadingSummary && !summary) {
     return (
-      <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: palette.background }}
+        edges={["top"]}
+      >
         <HomeScreenSkeleton />
       </SafeAreaView>
     );
@@ -55,18 +58,25 @@ export default function HomeScreen() {
 
   if (errorSummary || !summary) {
     return (
-      <SafeAreaView className="flex-1 bg-slate-50 px-6" edges={["top"]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: palette.background }}
+        className="px-6"
+        edges={["top"]}
+      >
         <View className="flex-1 items-center justify-center">
-          <MaterialIcons name="cloud-off" size={48} color="#cbd5e1" />
-          <Text className="mt-3 text-center text-base text-slate-600">
+          <MaterialIcons name="cloud-off" size={48} color={palette.chevron} />
+          <Text
+            className="mt-3 text-center text-base"
+            style={{ color: palette.muted }}
+          >
             {t("data_not_loaded")}
           </Text>
           <Pressable
             onPress={() => refetchSummary()}
             className="mt-5 rounded-2xl px-6 py-3"
-            style={{ backgroundColor: PRIMARY }}
+            style={{ backgroundColor: palette.primary }}
           >
-            <Text className="font-bold text-white">
+            <Text className="font-bold" style={{ color: palette.switchThumb }}>
               {t("try_again_loading")}
             </Text>
           </Pressable>
@@ -80,7 +90,10 @@ export default function HomeScreen() {
   const totalExams = examData?.total ?? 0;
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50" edges={["top"]}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: palette.background }}
+      edges={["top"]}
+    >
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}

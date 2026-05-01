@@ -1,14 +1,14 @@
 import { ANSWER_LABELS } from "@/src/features/practice/constants/theme";
 import type { Answer } from "@/src/features/practice/types/practice.types";
+import { useTheme } from "@/src/theme";
 import { API_CONFIG } from "@/src/utils/constants";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, Text, View } from "react-native";
-const TEXT_DARK = "#0f172a";
+
 const SUCCESS = "#22c55e";
 const ERROR = "#ef4444";
-const MUTED = "#64748b";
 
 type Props = {
   questionOrder: number;
@@ -30,6 +30,7 @@ export function ExamResultQuestionCard({
   explanation,
 }: Props) {
   const { t } = useTranslation();
+  const { palette, isDark } = useTheme();
   const sorted = useMemo(
     () => [...answers].sort((a, b) => a.displayOrder - b.displayOrder),
     [answers]
@@ -37,12 +38,29 @@ export function ExamResultQuestionCard({
 
   const uri = imageUrl ? `${API_CONFIG.API_URL}/images/${imageUrl}.webp` : null;
 
+  const neutralBadgeBg = isDark ? palette.iconSurface : "#f1f5f9";
+
+  const explBg = isDark
+    ? "rgba(245, 158, 11, 0.14)"
+    : "rgba(255, 251, 235, 0.92)";
+  const explBorder = isDark ? "rgba(251, 191, 36, 0.35)" : "#fde68a";
+  const explIcon = isDark ? "#fbbf24" : "#d97706";
+  const explTitle = isDark ? "#fcd34d" : "#92400e";
+  const explBody = isDark ? "#fef3c7" : "#78350f";
+
   return (
     <View
-      className="mb-4 overflow-hidden rounded-2xl border border-slate-200 bg-white"
-      style={{ elevation: 1 }}
+      className="mb-4 overflow-hidden rounded-2xl border"
+      style={{
+        borderColor: palette.border,
+        backgroundColor: palette.card,
+        elevation: 1,
+      }}
     >
-      <View className="border-b border-slate-100 px-4 py-3">
+      <View
+        className="border-b px-4 py-3"
+        style={{ borderBottomColor: palette.divider }}
+      >
         <View className="flex-row items-center justify-between gap-2">
           <View
             className="rounded-full px-2.5 py-0.5"
@@ -52,7 +70,7 @@ export function ExamResultQuestionCard({
                   ? `${SUCCESS}18`
                   : isCorrect === false
                     ? `${ERROR}18`
-                    : "#f1f5f9",
+                    : neutralBadgeBg,
             }}
           >
             <Text
@@ -63,7 +81,7 @@ export function ExamResultQuestionCard({
                     ? SUCCESS
                     : isCorrect === false
                       ? ERROR
-                      : MUTED,
+                      : palette.muted,
               }}
             >
               {t("question")} {questionOrder}
@@ -78,7 +96,7 @@ export function ExamResultQuestionCard({
         </View>
         <Text
           className="mt-2 text-base font-bold leading-snug"
-          style={{ color: TEXT_DARK }}
+          style={{ color: palette.foreground }}
         >
           {questionText}
         </Text>
@@ -88,8 +106,11 @@ export function ExamResultQuestionCard({
         {uri ? (
           <Image
             source={{ uri }}
-            className="mb-4 w-full rounded-xl bg-slate-100"
-            style={{ aspectRatio: 16 / 9 }}
+            className="mb-4 w-full rounded-xl"
+            style={{
+              aspectRatio: 16 / 9,
+              backgroundColor: palette.iconSurface,
+            }}
             resizeMode="contain"
           />
         ) : null}
@@ -101,21 +122,21 @@ export function ExamResultQuestionCard({
             const showCorrect = a.isCorrect;
             const showWrongSelection = isSelected && !a.isCorrect;
 
-            let borderColor = "#e2e8f0";
-            let bg = "#fafafa";
-            let labelColor = TEXT_DARK;
+            let borderColor = palette.border;
+            let bg = isDark ? `${palette.iconSurface}99` : "#fafafa";
+            let labelColor = palette.foreground;
 
             if (showCorrect) {
               borderColor = SUCCESS;
               bg = `${SUCCESS}12`;
-              labelColor = "#166534";
+              labelColor = isDark ? "#86efac" : "#166534";
             } else if (showWrongSelection) {
               borderColor = ERROR;
               bg = `${ERROR}12`;
-              labelColor = "#b91c1c";
+              labelColor = isDark ? "#fca5a5" : "#b91c1c";
             } else if (isSelected) {
-              borderColor = "#cbd5e1";
-              bg = "#f8fafc";
+              borderColor = palette.border;
+              bg = isDark ? palette.surfacePressed : "#f8fafc";
             }
 
             return (
@@ -131,10 +152,15 @@ export function ExamResultQuestionCard({
                       ? SUCCESS
                       : showWrongSelection
                         ? ERROR
-                        : "#e2e8f0",
+                        : palette.radioOff,
                   }}
                 >
-                  <Text className="text-sm font-bold text-white">{label}</Text>
+                  <Text
+                    className="text-sm font-bold"
+                    style={{ color: palette.switchThumb }}
+                  >
+                    {label}
+                  </Text>
                 </View>
                 <Text
                   className="min-w-0 flex-1 text-[15px] font-semibold leading-snug"
@@ -148,18 +174,30 @@ export function ExamResultQuestionCard({
         </View>
 
         {explanation ? (
-          <View className="mt-4 rounded-xl border border-amber-100 bg-amber-50/80 px-3 py-3">
+          <View
+            className="mt-4 rounded-xl border px-3 py-3"
+            style={{
+              backgroundColor: explBg,
+              borderColor: explBorder,
+            }}
+          >
             <View className="mb-1 flex-row items-center gap-1">
               <MaterialIcons
                 name="lightbulb-outline"
                 size={18}
-                color="#d97706"
+                color={explIcon}
               />
-              <Text className="text-xs font-bold uppercase text-amber-800">
+              <Text
+                className="text-xs font-bold uppercase"
+                style={{ color: explTitle }}
+              >
                 {t("explanation")}
               </Text>
             </View>
-            <Text className="text-sm leading-relaxed text-amber-950/90">
+            <Text
+              className="text-sm leading-relaxed"
+              style={{ color: explBody }}
+            >
               {explanation}
             </Text>
           </View>

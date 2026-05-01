@@ -1,4 +1,5 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
+import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
@@ -15,14 +16,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useGetTicketsHistory } from "../hook/usePractice";
 import type { TicketHistory, TicketStatus } from "../types/practice.types";
 
-const PRIMARY = "#137fec";
-const BACKGROUND_LIGHT = "#f4f5f7";
-const SUCCESS = "#2ecc71";
-const ERROR = "#e74c3c";
-const INFO = "#3498db";
+const SUCCESS = "#22c55e";
+const ERROR = "#ef4444";
+const INFO = "#3b82f6";
 const WARNING = "#f59e0b";
-const TEXT_DARK = "#0f172a";
-const CARD_BG = "#ffffff";
 
 type FilterId = "all" | TicketStatus;
 
@@ -55,21 +52,28 @@ function StatCard({
   value: number;
   label: string;
 }) {
+  const { palette } = useTheme();
   return (
     <View
-      className="flex-1 flex-col gap-1 rounded-2xl border border-slate-100 p-4"
-      style={{ backgroundColor: CARD_BG }}
+      className="flex-1 flex-col gap-1 rounded-2xl border p-4"
+      style={{
+        backgroundColor: palette.card,
+        borderColor: palette.border,
+      }}
     >
       <View className="mb-1">
         <MaterialIcons name={icon} size={20} color={iconColor} />
       </View>
       <Text
         className="text-2xl font-bold leading-tight"
-        style={{ color: TEXT_DARK }}
+        style={{ color: palette.foreground }}
       >
         {value}
       </Text>
-      <Text className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+      <Text
+        className="text-[10px] font-semibold uppercase tracking-wider"
+        style={{ color: palette.muted }}
+      >
         {label}
       </Text>
     </View>
@@ -89,6 +93,7 @@ function FilterPill({
   isActive: boolean;
   onPress: () => void;
 }) {
+  const { palette } = useTheme();
   return (
     <Pressable
       onPress={onPress}
@@ -96,15 +101,15 @@ function FilterPill({
       style={{
         height: 36,
         paddingHorizontal: 16,
-        backgroundColor: isActive ? PRIMARY : CARD_BG,
-        borderColor: isActive ? PRIMARY : "#e2e8f0",
+        backgroundColor: isActive ? palette.primary : palette.card,
+        borderColor: isActive ? palette.primary : palette.border,
         gap: 6,
       }}
     >
       <Text
         style={{
           fontSize: 13,
-          color: isActive ? "#ffffff" : "#475569",
+          color: isActive ? palette.switchThumb : palette.muted,
           fontWeight: isActive ? "600" : "500",
         }}
       >
@@ -116,14 +121,16 @@ function FilterPill({
           minWidth: 20,
           height: 20,
           paddingHorizontal: 5,
-          backgroundColor: isActive ? "rgba(255,255,255,0.25)" : "#f1f5f9",
+          backgroundColor: isActive
+            ? "rgba(255,255,255,0.25)"
+            : palette.iconSurface,
         }}
       >
         <Text
           style={{
             fontSize: 11,
             fontWeight: "700",
-            color: isActive ? "#ffffff" : "#94a3b8",
+            color: isActive ? palette.switchThumb : palette.chevron,
           }}
         >
           {count}
@@ -136,8 +143,12 @@ function FilterPill({
 // --- Progress bar ---
 
 function ProgressBar({ progress, color }: { progress: number; color: string }) {
+  const { palette } = useTheme();
   return (
-    <View className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+    <View
+      className="mt-2 h-1.5 w-full overflow-hidden rounded-full"
+      style={{ backgroundColor: palette.divider }}
+    >
       <View
         className="h-full rounded-full"
         style={{
@@ -161,6 +172,7 @@ function TicketCard({
   onPress: () => void;
 }) {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   const STATUS_META: Record<
     TicketStatus,
     {
@@ -221,8 +233,8 @@ function TicketCard({
         borderRadius: 16,
         padding: 16,
         borderWidth: 1,
-        backgroundColor: CARD_BG,
-        borderColor: "#f1f5f9",
+        backgroundColor: palette.card,
+        borderColor: palette.border,
       }}
     >
       <View>
@@ -239,14 +251,15 @@ function TicketCard({
 
         <Text
           className="text-base font-bold"
-          style={{ color: TEXT_DARK }}
+          style={{ color: palette.foreground }}
           numberOfLines={1}
         >
           {t("ticket_number", { number: String(ticket.ticketNumber) })}
         </Text>
 
         <Text
-          className="mt-0.5 text-[11px] font-medium text-slate-400"
+          className="mt-0.5 text-[11px] font-medium"
+          style={{ color: palette.muted }}
           numberOfLines={1}
         >
           {scoreLabel()}
@@ -269,10 +282,14 @@ function TicketCard({
 
 function EmptyState() {
   const { t } = useTranslation();
+  const { palette } = useTheme();
   return (
     <View className="items-center justify-center px-8 py-16">
-      <MaterialIcons name="inbox" size={48} color="#cbd5e1" />
-      <Text className="mt-3 text-center text-base font-semibold text-slate-400">
+      <MaterialIcons name="inbox" size={48} color={palette.chevron} />
+      <Text
+        className="mt-3 text-center text-base font-semibold"
+        style={{ color: palette.muted }}
+      >
         {t("no_tests_found")}
       </Text>
       {/* <Text className="mt-1 text-center text-xs text-slate-400">
@@ -288,6 +305,7 @@ export default function TicketsListScreen() {
   const { data: ticketsHistory, isLoading, refetch } = useGetTicketsHistory();
   const router = useRouter();
   const { t } = useTranslation();
+  const { palette } = useTheme();
   useFocusEffect(
     useCallback(() => {
       refetch();
@@ -338,12 +356,15 @@ export default function TicketsListScreen() {
   if (isLoading) {
     return (
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: BACKGROUND_LIGHT }}
+        style={{ flex: 1, backgroundColor: palette.background }}
         edges={["top"]}
       >
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={PRIMARY} />
-          <Text className="mt-3 text-sm font-medium text-slate-400">
+          <ActivityIndicator size="large" color={palette.primary} />
+          <Text
+            className="mt-3 text-sm font-medium"
+            style={{ color: palette.muted }}
+          >
             Loading tickets…
           </Text>
         </View>
@@ -353,7 +374,7 @@ export default function TicketsListScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: BACKGROUND_LIGHT }}
+      style={{ flex: 1, backgroundColor: palette.background }}
       edges={["top"]}
     >
       <ScrollView
@@ -442,18 +463,21 @@ export default function TicketsListScreen() {
             })
           }
           style={{
-            backgroundColor: PRIMARY,
-            shadowColor: PRIMARY,
+            backgroundColor: palette.primary,
+            shadowColor: palette.shadow,
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
+            shadowOpacity: palette.cardShadowOpacity + 0.08,
             shadowRadius: 8,
             elevation: 8,
           }}
           className="rounded-2xl py-4"
         >
           <View className="flex-row items-center justify-center gap-2">
-            <MaterialIcons name="bolt" size={20} color="#ffffff" />
-            <Text className="text-base font-bold text-white">
+            <MaterialIcons name="bolt" size={20} color={palette.switchThumb} />
+            <Text
+              className="text-base font-bold"
+              style={{ color: palette.switchThumb }}
+            >
               {t("start_exam")}
             </Text>
           </View>
