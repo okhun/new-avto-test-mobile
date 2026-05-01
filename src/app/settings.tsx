@@ -1,8 +1,12 @@
 import LangSwitcher from "@/components/LangSwitcher";
+import { useResolvedTheme, useThemePreference } from "@/src/config/theme";
 import { useAuthStore } from "@/src/store/auth.store";
+import { useThemeStore, type ThemePreference } from "@/src/store/theme.store";
+import { darkColors } from "@/src/theme/colors.dark";
+import { lightColors } from "@/src/theme/colors.light";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 import Animated, {
@@ -12,14 +16,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const PRIMARY = "#258cf4";
-const BACKGROUND_LIGHT = "#f5f7f8";
-const TEXT_DARK = "#0d141c";
-const TEXT_SECONDARY = "#4f7396";
-const CARD_BG = "#ffffff";
 const springConfig = { damping: 15, stiffness: 400 };
-
-type ThemeOption = "light" | "dark" | "system";
 
 function ScalePressable({
   children,
@@ -50,11 +47,17 @@ function ScalePressable({
   );
 }
 
-function SectionHeader({ title }: { title: string }) {
+function SectionHeader({
+  title,
+  mutedColor,
+}: {
+  title: string;
+  mutedColor: string;
+}) {
   return (
     <Text
       className="px-1 pb-3 pt-6 text-xs font-bold uppercase tracking-wider"
-      style={{ color: TEXT_SECONDARY }}
+      style={{ color: mutedColor }}
     >
       {title}
     </Text>
@@ -64,30 +67,59 @@ function SectionHeader({ title }: { title: string }) {
 export default function SettingsTabScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [theme, setTheme] = useState<ThemeOption>("light");
+  const themePreference = useThemePreference();
+  const setThemePreference = useThemeStore((s) => s.setTheme);
+  const resolvedTheme = useResolvedTheme();
+  const isDark = resolvedTheme === "dark";
+
+  const palette = useMemo(() => {
+    const base = isDark ? darkColors : lightColors;
+    return {
+      ...base,
+      border: isDark ? "#334155" : "#e2e8f0",
+      divider: isDark ? "#1e293b" : "#f1f5f9",
+      iconSurface: isDark ? "#1e293b" : "#f1f5f9",
+      radioOff: isDark ? "#475569" : "#e2e8f0",
+      chevron: isDark ? "#64748b" : "#94a3b8",
+      versionMuted: isDark ? "#64748b" : "#94a3b8",
+      dangerBg: isDark ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.1)",
+      cardShadowOpacity: isDark ? 0.25 : 0.05,
+    };
+  }, [isDark]);
+
+  const selectTheme = (next: ThemePreference) => setThemePreference(next);
+
   const [pushNotifications, setPushNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
   const logout = useAuthStore((s) => s.logout);
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: BACKGROUND_LIGHT }}
+      style={{ flex: 1, backgroundColor: palette.background }}
       edges={["top"]}
     >
       {/* Header */}
       <View
-        className="flex-row items-center justify-between border-b border-slate-200 px-4 pb-2 pt-4"
-        style={{ backgroundColor: BACKGROUND_LIGHT }}
+        className="flex-row items-center justify-between px-4 pb-2 pt-4"
+        style={{
+          backgroundColor: palette.background,
+          borderBottomWidth: 1,
+          borderBottomColor: palette.border,
+        }}
       >
         <Pressable
           onPress={() => router.back()}
           className="h-12 w-12 shrink-0 items-center justify-center active:opacity-70"
           hitSlop={8}
         >
-          <MaterialIcons name="arrow-back" size={24} color={TEXT_DARK} />
+          <MaterialIcons
+            name="arrow-back"
+            size={24}
+            color={palette.foreground}
+          />
         </Pressable>
         <Text
           className="flex-1 pr-12 text-center text-lg font-bold leading-tight tracking-tight"
-          style={{ color: TEXT_DARK }}
+          style={{ color: palette.foreground }}
         >
           {t("settings")}
         </Text>
@@ -99,11 +131,11 @@ export default function SettingsTabScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* Appearance */}
-        <SectionHeader title={t("appearance")} />
+        <SectionHeader title={t("appearance")} mutedColor={palette.muted} />
         <View className="flex-row gap-3">
           {/* Light */}
           <ScalePressable
-            onPress={() => setTheme("light")}
+            onPress={() => selectTheme("light")}
             style={{
               flex: 1,
               alignItems: "center",
@@ -111,22 +143,30 @@ export default function SettingsTabScreen() {
               padding: 16,
               borderRadius: 16,
               borderWidth: 2,
-              borderColor: theme === "light" ? PRIMARY : "transparent",
-              backgroundColor: CARD_BG,
+              borderColor:
+                themePreference === "light" ? palette.primary : "transparent",
+              backgroundColor: palette.card,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
+              shadowOpacity: palette.cardShadowOpacity,
               shadowRadius: 2,
               elevation: 2,
             }}
           >
             <View
               className="h-10 w-10 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${PRIMARY}1A` }}
+              style={{ backgroundColor: `${palette.primary}1A` }}
             >
-              <MaterialIcons name="wb-sunny" size={22} color={PRIMARY} />
+              <MaterialIcons
+                name="wb-sunny"
+                size={22}
+                color={palette.primary}
+              />
             </View>
-            <Text className="text-sm font-semibold text-[#0d141c]">
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: palette.foreground }}
+            >
               {t("light")}
             </Text>
             <View className="flex-row items-center justify-center">
@@ -136,18 +176,21 @@ export default function SettingsTabScreen() {
                   height: 20,
                   borderRadius: 10,
                   borderWidth: 2,
-                  borderColor: theme === "light" ? PRIMARY : "#e2e8f0",
+                  borderColor:
+                    themePreference === "light"
+                      ? palette.primary
+                      : palette.radioOff,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {theme === "light" && (
+                {themePreference === "light" && (
                   <View
                     style={{
                       width: 10,
                       height: 10,
                       borderRadius: 5,
-                      backgroundColor: PRIMARY,
+                      backgroundColor: palette.primary,
                     }}
                   />
                 )}
@@ -156,7 +199,7 @@ export default function SettingsTabScreen() {
           </ScalePressable>
           {/* Dark */}
           <ScalePressable
-            onPress={() => setTheme("dark")}
+            onPress={() => selectTheme("dark")}
             style={{
               flex: 1,
               alignItems: "center",
@@ -164,19 +207,30 @@ export default function SettingsTabScreen() {
               padding: 16,
               borderRadius: 16,
               borderWidth: 2,
-              borderColor: theme === "dark" ? PRIMARY : "transparent",
-              backgroundColor: CARD_BG,
+              borderColor:
+                themePreference === "dark" ? palette.primary : "transparent",
+              backgroundColor: palette.card,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
+              shadowOpacity: palette.cardShadowOpacity,
               shadowRadius: 2,
               elevation: 2,
             }}
           >
-            <View className="h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-              <MaterialIcons name="nights-stay" size={22} color="#64748b" />
+            <View
+              className="h-10 w-10 items-center justify-center rounded-full"
+              style={{ backgroundColor: palette.iconSurface }}
+            >
+              <MaterialIcons
+                name="nights-stay"
+                size={22}
+                color={palette.muted}
+              />
             </View>
-            <Text className="text-sm font-semibold text-[#0d141c]">
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: palette.foreground }}
+            >
               {t("dark")}
             </Text>
             <View className="flex-row items-center justify-center">
@@ -186,18 +240,21 @@ export default function SettingsTabScreen() {
                   height: 20,
                   borderRadius: 10,
                   borderWidth: 2,
-                  borderColor: theme === "dark" ? PRIMARY : "#e2e8f0",
+                  borderColor:
+                    themePreference === "dark"
+                      ? palette.primary
+                      : palette.radioOff,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {theme === "dark" && (
+                {themePreference === "dark" && (
                   <View
                     style={{
                       width: 10,
                       height: 10,
                       borderRadius: 5,
-                      backgroundColor: PRIMARY,
+                      backgroundColor: palette.primary,
                     }}
                   />
                 )}
@@ -206,7 +263,7 @@ export default function SettingsTabScreen() {
           </ScalePressable>
           {/* System */}
           <ScalePressable
-            onPress={() => setTheme("system")}
+            onPress={() => selectTheme("system")}
             style={{
               flex: 1,
               alignItems: "center",
@@ -214,19 +271,30 @@ export default function SettingsTabScreen() {
               padding: 16,
               borderRadius: 16,
               borderWidth: 2,
-              borderColor: theme === "system" ? PRIMARY : "transparent",
-              backgroundColor: CARD_BG,
+              borderColor:
+                themePreference === "system" ? palette.primary : "transparent",
+              backgroundColor: palette.card,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
+              shadowOpacity: palette.cardShadowOpacity,
               shadowRadius: 2,
               elevation: 2,
             }}
           >
-            <View className=" h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-              <MaterialIcons name="brightness-6" size={22} color="#64748b" />
+            <View
+              className="h-10 w-10 items-center justify-center rounded-full"
+              style={{ backgroundColor: palette.iconSurface }}
+            >
+              <MaterialIcons
+                name="brightness-6"
+                size={22}
+                color={palette.muted}
+              />
             </View>
-            <Text className="text-sm font-semibold text-[#0d141c]">
+            <Text
+              className="text-sm font-semibold"
+              style={{ color: palette.foreground }}
+            >
               {t("system")}
             </Text>
             <View className="flex-row items-center justify-center">
@@ -236,18 +304,21 @@ export default function SettingsTabScreen() {
                   height: 20,
                   borderRadius: 10,
                   borderWidth: 2,
-                  borderColor: theme === "system" ? PRIMARY : "#e2e8f0",
+                  borderColor:
+                    themePreference === "system"
+                      ? palette.primary
+                      : palette.radioOff,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {theme === "system" && (
+                {themePreference === "system" && (
                   <View
                     style={{
                       width: 10,
                       height: 10,
                       borderRadius: 5,
-                      backgroundColor: PRIMARY,
+                      backgroundColor: palette.primary,
                     }}
                   />
                 )}
@@ -256,26 +327,33 @@ export default function SettingsTabScreen() {
           </ScalePressable>
         </View>
 
-        <SectionHeader title={t("language")} />
+        <SectionHeader title={t("language")} mutedColor={palette.muted} />
         <LangSwitcher />
 
         {/* Preferences */}
-        <SectionHeader title={t("preferences")} />
+        <SectionHeader title={t("preferences")} mutedColor={palette.muted} />
         <View
           className="overflow-hidden rounded-2xl shadow-sm"
-          style={{ backgroundColor: CARD_BG }}
+          style={{ backgroundColor: palette.card }}
         >
-          <View className="min-h-[60px] flex-row items-center justify-between gap-4 border-b border-slate-100 px-4">
+          <View
+            className="min-h-[60px] flex-row items-center justify-between gap-4 px-4"
+            style={{ borderBottomWidth: 1, borderBottomColor: palette.divider }}
+          >
             <View className="flex-row flex-1 items-center gap-4">
-              <View className="h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+              <View
+                className="h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                style={{ backgroundColor: palette.iconSurface }}
+              >
                 <MaterialIcons
                   name="notifications"
                   size={22}
-                  color={TEXT_DARK}
+                  color={palette.foreground}
                 />
               </View>
               <Text
-                className="flex-1 text-base font-medium text-[#0d141c]"
+                className="flex-1 text-base font-medium"
+                style={{ color: palette.foreground }}
                 numberOfLines={1}
               >
                 {t("push_notifications")}
@@ -285,18 +363,26 @@ export default function SettingsTabScreen() {
               <Switch
                 value={pushNotifications}
                 onValueChange={setPushNotifications}
-                trackColor={{ false: "#e2e8f0", true: PRIMARY }}
-                thumbColor="#ffffff"
+                trackColor={{ false: palette.radioOff, true: palette.primary }}
+                thumbColor={isDark ? "#e2e8f0" : "#ffffff"}
               />
             </View>
           </View>
-          <View className="min-h-[60px] flex-row items-center justify-between gap-4 border-b border-slate-100 px-4">
+          <View className="min-h-[60px] flex-row items-center justify-between gap-4 px-4">
             <View className="flex-row flex-1 items-center gap-4">
-              <View className="h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                <MaterialIcons name="volume-up" size={22} color={TEXT_DARK} />
+              <View
+                className="h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                style={{ backgroundColor: palette.iconSurface }}
+              >
+                <MaterialIcons
+                  name="volume-up"
+                  size={22}
+                  color={palette.foreground}
+                />
               </View>
               <Text
-                className="flex-1 text-base font-medium text-[#0d141c]"
+                className="flex-1 text-base font-medium"
+                style={{ color: palette.foreground }}
                 numberOfLines={1}
               >
                 {t("sound_effects")}
@@ -306,8 +392,8 @@ export default function SettingsTabScreen() {
               <Switch
                 value={soundEffects}
                 onValueChange={setSoundEffects}
-                trackColor={{ false: "#e2e8f0", true: PRIMARY }}
-                thumbColor="#ffffff"
+                trackColor={{ false: palette.radioOff, true: palette.primary }}
+                thumbColor={isDark ? "#e2e8f0" : "#ffffff"}
               />
             </View>
           </View>
@@ -341,48 +427,74 @@ export default function SettingsTabScreen() {
         </View>
 
         {/* Support */}
-        <SectionHeader title={t("support")} />
+        <SectionHeader title={t("support")} mutedColor={palette.muted} />
         <View
           className="overflow-hidden rounded-2xl shadow-sm"
-          style={{ backgroundColor: CARD_BG }}
+          style={{ backgroundColor: palette.card }}
         >
           <Pressable
-            className="min-h-[60px] flex-row items-center justify-between gap-4 active:bg-slate-50"
+            className="min-h-[60px] flex-row items-center justify-between gap-4"
+            style={({ pressed }) =>
+              pressed
+                ? { backgroundColor: isDark ? "#1e293b" : "#f8fafc" }
+                : undefined
+            }
             onPress={() => router.push("/conversations")}
           >
             <View className="flex-row flex-1 items-center gap-4 px-4">
               <View
                 className="h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                style={{ backgroundColor: `${PRIMARY}1A` }}
+                style={{ backgroundColor: `${palette.primary}1A` }}
               >
-                <MaterialIcons name="help" size={22} color={PRIMARY} />
+                <MaterialIcons name="help" size={22} color={palette.primary} />
               </View>
               <Text
-                className="flex-1 text-base font-medium text-[#0d141c]"
+                className="flex-1 text-base font-medium"
+                style={{ color: palette.foreground }}
                 numberOfLines={1}
               >
                 {t("help_and_support")}
               </Text>
             </View>
-            <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={palette.chevron}
+            />
           </Pressable>
-          <View className="h-px bg-slate-100" />
-          <Pressable className="min-h-[60px] flex-row items-center justify-between gap-4 active:bg-slate-50">
+          <View className="h-px" style={{ backgroundColor: palette.divider }} />
+          <Pressable
+            className="min-h-[60px] flex-row items-center justify-between gap-4"
+            style={({ pressed }) =>
+              pressed
+                ? { backgroundColor: isDark ? "#1e293b" : "#f8fafc" }
+                : undefined
+            }
+          >
             <View className="flex-row flex-1 items-center gap-4 px-4">
               <View
                 className="h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                style={{ backgroundColor: `${PRIMARY}1A` }}
+                style={{ backgroundColor: `${palette.primary}1A` }}
               >
-                <MaterialIcons name="policy" size={22} color={PRIMARY} />
+                <MaterialIcons
+                  name="policy"
+                  size={22}
+                  color={palette.primary}
+                />
               </View>
               <Text
-                className="flex-1 text-base font-medium text-[#0d141c]"
+                className="flex-1 text-base font-medium"
+                style={{ color: palette.foreground }}
                 numberOfLines={1}
               >
                 {t("privacy_policy")}
               </Text>
             </View>
-            <MaterialIcons name="chevron-right" size={24} color="#94a3b8" />
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={palette.chevron}
+            />
           </Pressable>
         </View>
 
@@ -397,7 +509,7 @@ export default function SettingsTabScreen() {
               width: "100%",
               height: 56,
               borderRadius: 16,
-              backgroundColor: "rgba(239, 68, 68, 0.1)",
+              backgroundColor: palette.dangerBg,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
@@ -413,7 +525,7 @@ export default function SettingsTabScreen() {
           </ScalePressable>
           <Text
             className="mt-6 text-center text-sm"
-            style={{ color: "#94a3b8" }}
+            style={{ color: palette.versionMuted }}
           >
             {t("version")} 2.4.0 (Build 108)
           </Text>

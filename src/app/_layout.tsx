@@ -2,6 +2,7 @@ import { api } from "@/services/api/axios";
 import "@/services/api/interceptors";
 import { setLogoutCallback } from "@/services/api/interceptors";
 import "@/src/config/reanimated";
+import { ThemeProvider } from "@/src/config/theme";
 import type { GetMeResponse } from "@/src/features/auth/types/auth.types";
 import { QueryProvider } from "@/src/providers";
 import { useAuthStore } from "@/src/store/auth.store";
@@ -65,45 +66,50 @@ export default function RootLayout() {
     <GestureHandlerRootView className="flex-1">
       <QueryProvider>
         <SafeAreaProvider>
-          {/* <AuthBootstrapProvider> */}
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="(tabs)"
-              options={{ headerShown: false, animation: "slide_from_left" }}
-            />
-            <Stack.Screen name="auth" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="tickets/[id]"
-              options={{ headerShown: false, animation: "slide_from_right" }}
-            />
-            <Stack.Screen
-              name="exams/start"
-              options={{ headerShown: false, animation: "slide_from_right" }}
-            />
-            <Stack.Screen
-              name="exams/result/[attemptId]"
-              options={{ headerShown: false, animation: "slide_from_right" }}
-            />
-            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="settings"
-              options={{ headerShown: false, animation: "slide_from_right" }}
-            />
-            <Stack.Screen
-              name="edit-profile"
-              options={{ headerShown: false, animation: "slide_from_right" }}
-            />
-            <Stack.Screen
-              name="leaderboard"
-              options={{ headerShown: false, animation: "slide_from_right" }}
-            />
-            <Stack.Screen
-              name="badges"
-              options={{ headerShown: false, animation: "slide_from_right" }}
-            />
-          </Stack>
-          {/* </AuthBootstrapProvider> */}
+          <ThemeProvider>
+            {/* <AuthBootstrapProvider> */}
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="(tabs)"
+                options={{ headerShown: false, animation: "slide_from_left" }}
+              />
+              <Stack.Screen name="auth" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="tickets/[id]"
+                options={{ headerShown: false, animation: "slide_from_right" }}
+              />
+              <Stack.Screen
+                name="exams/start"
+                options={{ headerShown: false, animation: "slide_from_right" }}
+              />
+              <Stack.Screen
+                name="exams/result/[attemptId]"
+                options={{ headerShown: false, animation: "slide_from_right" }}
+              />
+              <Stack.Screen
+                name="onboarding"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="settings"
+                options={{ headerShown: false, animation: "slide_from_right" }}
+              />
+              <Stack.Screen
+                name="edit-profile"
+                options={{ headerShown: false, animation: "slide_from_right" }}
+              />
+              <Stack.Screen
+                name="leaderboard"
+                options={{ headerShown: false, animation: "slide_from_right" }}
+              />
+              <Stack.Screen
+                name="badges"
+                options={{ headerShown: false, animation: "slide_from_right" }}
+              />
+            </Stack>
+            {/* </AuthBootstrapProvider> */}
+          </ThemeProvider>
         </SafeAreaProvider>
       </QueryProvider>
     </GestureHandlerRootView>
