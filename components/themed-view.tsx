@@ -1,14 +1,29 @@
-import { View, type ViewProps } from 'react-native';
+import { View, type ViewProps } from "react-native";
 
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTheme } from "@/src/theme";
 
 export type ThemedViewProps = ViewProps & {
-  lightColor?: string;
-  darkColor?: string;
+  /**
+   * Background from the active palette.
+   * `transparent` skips background so layout-only className styling applies.
+   */
+  variant?: "background" | "card" | "transparent";
 };
 
-export function ThemedView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
-  const backgroundColor = useThemeColor({ light: lightColor, dark: darkColor }, 'background');
+export function ThemedView({
+  style,
+  variant = "background",
+  ...rest
+}: ThemedViewProps) {
+  const { palette } = useTheme();
 
-  return <View style={[{ backgroundColor }, style]} {...otherProps} />;
+  const backgroundColor =
+    variant === "transparent" ? undefined : palette[variant];
+
+  return (
+    <View
+      style={backgroundColor != null ? [{ backgroundColor }, style] : style}
+      {...rest}
+    />
+  );
 }

@@ -1,31 +1,45 @@
-import { StyleSheet, Text, type TextProps } from 'react-native';
+import { StyleSheet, Text, type TextProps } from "react-native";
 
-import { useThemeColor } from '@/hooks/use-theme-color';
+import { useTheme } from "@/src/theme";
 
 export type ThemedTextProps = TextProps & {
-  lightColor?: string;
-  darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  /**
+   * Color role from palette. Overrides only the text color, not typography.
+   * @default foreground
+   */
+  color?: "foreground" | "muted" | "primary" | "secondary" | "destructive";
+  /** Legacy typography presets (spacing / weight); colors come from palette when not overridden */
+  type?: "default" | "title" | "defaultSemiBold" | "subtitle" | "link";
 };
 
 export function ThemedText({
   style,
-  lightColor,
-  darkColor,
-  type = 'default',
+  color = "foreground",
+  type = "default",
   ...rest
 }: ThemedTextProps) {
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
+  const { palette } = useTheme();
+
+  const semanticColor =
+    color === "foreground"
+      ? palette.foreground
+      : color === "muted"
+        ? palette.muted
+        : color === "primary"
+          ? palette.primary
+          : color === "secondary"
+            ? palette.secondary
+            : palette.dangerForeground;
 
   return (
     <Text
       style={[
-        { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
+        { color: semanticColor },
+        type === "default" ? styles.default : undefined,
+        type === "title" ? styles.title : undefined,
+        type === "defaultSemiBold" ? styles.defaultSemiBold : undefined,
+        type === "subtitle" ? styles.subtitle : undefined,
+        type === "link" ? [styles.link, { color: palette.primary }] : undefined,
         style,
       ]}
       {...rest}
@@ -41,20 +55,20 @@ const styles = StyleSheet.create({
   defaultSemiBold: {
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     lineHeight: 32,
   },
   subtitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   link: {
     lineHeight: 30,
     fontSize: 16,
-    color: '#0a7ea4',
+    fontWeight: "500",
   },
 });

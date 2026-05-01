@@ -1,14 +1,13 @@
 import LangSwitcher from "@/components/LangSwitcher";
-import { useResolvedTheme, useThemePreference } from "@/src/config/theme";
+import { ThemedText } from "@/components/themed-text";
 import { useAuthStore } from "@/src/store/auth.store";
 import { useThemeStore, type ThemePreference } from "@/src/store/theme.store";
-import { darkColors } from "@/src/theme/colors.dark";
-import { lightColors } from "@/src/theme/colors.light";
+import { useTheme, useThemePreference } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, Switch, Text, View } from "react-native";
+import { Pressable, ScrollView, Switch, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -47,57 +46,35 @@ function ScalePressable({
   );
 }
 
-function SectionHeader({
-  title,
-  mutedColor,
-}: {
-  title: string;
-  mutedColor: string;
-}) {
+function SectionHeader({ title }: { title: string }) {
   return (
-    <Text
+    <ThemedText
+      color="muted"
       className="px-1 pb-3 pt-6 text-xs font-bold uppercase tracking-wider"
-      style={{ color: mutedColor }}
     >
       {title}
-    </Text>
+    </ThemedText>
   );
 }
 
 export default function SettingsTabScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { palette } = useTheme();
   const themePreference = useThemePreference();
   const setThemePreference = useThemeStore((s) => s.setTheme);
-  const resolvedTheme = useResolvedTheme();
-  const isDark = resolvedTheme === "dark";
-
-  const palette = useMemo(() => {
-    const base = isDark ? darkColors : lightColors;
-    return {
-      ...base,
-      border: isDark ? "#334155" : "#e2e8f0",
-      divider: isDark ? "#1e293b" : "#f1f5f9",
-      iconSurface: isDark ? "#1e293b" : "#f1f5f9",
-      radioOff: isDark ? "#475569" : "#e2e8f0",
-      chevron: isDark ? "#64748b" : "#94a3b8",
-      versionMuted: isDark ? "#64748b" : "#94a3b8",
-      dangerBg: isDark ? "rgba(239, 68, 68, 0.15)" : "rgba(239, 68, 68, 0.1)",
-      cardShadowOpacity: isDark ? 0.25 : 0.05,
-    };
-  }, [isDark]);
 
   const selectTheme = (next: ThemePreference) => setThemePreference(next);
 
   const [pushNotifications, setPushNotifications] = useState(true);
   const [soundEffects, setSoundEffects] = useState(true);
   const logout = useAuthStore((s) => s.logout);
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: palette.background }}
       edges={["top"]}
     >
-      {/* Header */}
       <View
         className="flex-row items-center justify-between px-4 pb-2 pt-4"
         style={{
@@ -117,12 +94,9 @@ export default function SettingsTabScreen() {
             color={palette.foreground}
           />
         </Pressable>
-        <Text
-          className="flex-1 pr-12 text-center text-lg font-bold leading-tight tracking-tight"
-          style={{ color: palette.foreground }}
-        >
+        <ThemedText className="flex-1 pr-12 text-center text-lg font-bold leading-tight tracking-tight">
           {t("settings")}
-        </Text>
+        </ThemedText>
       </View>
 
       <ScrollView
@@ -130,10 +104,8 @@ export default function SettingsTabScreen() {
         contentContainerStyle={{ paddingBottom: 100, paddingHorizontal: 16 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Appearance */}
-        <SectionHeader title={t("appearance")} mutedColor={palette.muted} />
+        <SectionHeader title={t("appearance")} />
         <View className="flex-row gap-3">
-          {/* Light */}
           <ScalePressable
             onPress={() => selectTheme("light")}
             style={{
@@ -146,7 +118,7 @@ export default function SettingsTabScreen() {
               borderColor:
                 themePreference === "light" ? palette.primary : "transparent",
               backgroundColor: palette.card,
-              shadowColor: "#000",
+              shadowColor: palette.shadow,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: palette.cardShadowOpacity,
               shadowRadius: 2,
@@ -163,12 +135,9 @@ export default function SettingsTabScreen() {
                 color={palette.primary}
               />
             </View>
-            <Text
-              className="text-sm font-semibold"
-              style={{ color: palette.foreground }}
-            >
+            <ThemedText className="text-sm font-semibold">
               {t("light")}
-            </Text>
+            </ThemedText>
             <View className="flex-row items-center justify-center">
               <View
                 style={{
@@ -197,7 +166,7 @@ export default function SettingsTabScreen() {
               </View>
             </View>
           </ScalePressable>
-          {/* Dark */}
+
           <ScalePressable
             onPress={() => selectTheme("dark")}
             style={{
@@ -210,7 +179,7 @@ export default function SettingsTabScreen() {
               borderColor:
                 themePreference === "dark" ? palette.primary : "transparent",
               backgroundColor: palette.card,
-              shadowColor: "#000",
+              shadowColor: palette.shadow,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: palette.cardShadowOpacity,
               shadowRadius: 2,
@@ -227,12 +196,9 @@ export default function SettingsTabScreen() {
                 color={palette.muted}
               />
             </View>
-            <Text
-              className="text-sm font-semibold"
-              style={{ color: palette.foreground }}
-            >
+            <ThemedText className="text-sm font-semibold">
               {t("dark")}
-            </Text>
+            </ThemedText>
             <View className="flex-row items-center justify-center">
               <View
                 style={{
@@ -261,7 +227,7 @@ export default function SettingsTabScreen() {
               </View>
             </View>
           </ScalePressable>
-          {/* System */}
+
           <ScalePressable
             onPress={() => selectTheme("system")}
             style={{
@@ -274,7 +240,7 @@ export default function SettingsTabScreen() {
               borderColor:
                 themePreference === "system" ? palette.primary : "transparent",
               backgroundColor: palette.card,
-              shadowColor: "#000",
+              shadowColor: palette.shadow,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: palette.cardShadowOpacity,
               shadowRadius: 2,
@@ -291,12 +257,9 @@ export default function SettingsTabScreen() {
                 color={palette.muted}
               />
             </View>
-            <Text
-              className="text-sm font-semibold"
-              style={{ color: palette.foreground }}
-            >
+            <ThemedText className="text-sm font-semibold">
               {t("system")}
-            </Text>
+            </ThemedText>
             <View className="flex-row items-center justify-center">
               <View
                 style={{
@@ -327,11 +290,10 @@ export default function SettingsTabScreen() {
           </ScalePressable>
         </View>
 
-        <SectionHeader title={t("language")} mutedColor={palette.muted} />
+        <SectionHeader title={t("language")} />
         <LangSwitcher />
 
-        {/* Preferences */}
-        <SectionHeader title={t("preferences")} mutedColor={palette.muted} />
+        <SectionHeader title={t("preferences")} />
         <View
           className="overflow-hidden rounded-2xl shadow-sm"
           style={{ backgroundColor: palette.card }}
@@ -351,22 +313,19 @@ export default function SettingsTabScreen() {
                   color={palette.foreground}
                 />
               </View>
-              <Text
+              <ThemedText
                 className="flex-1 text-base font-medium"
-                style={{ color: palette.foreground }}
                 numberOfLines={1}
               >
                 {t("push_notifications")}
-              </Text>
+              </ThemedText>
             </View>
-            <View>
-              <Switch
-                value={pushNotifications}
-                onValueChange={setPushNotifications}
-                trackColor={{ false: palette.radioOff, true: palette.primary }}
-                thumbColor={isDark ? "#e2e8f0" : "#ffffff"}
-              />
-            </View>
+            <Switch
+              value={pushNotifications}
+              onValueChange={setPushNotifications}
+              trackColor={{ false: palette.radioOff, true: palette.primary }}
+              thumbColor={palette.switchThumb}
+            />
           </View>
           <View className="min-h-[60px] flex-row items-center justify-between gap-4 px-4">
             <View className="flex-row flex-1 items-center gap-4">
@@ -380,54 +339,23 @@ export default function SettingsTabScreen() {
                   color={palette.foreground}
                 />
               </View>
-              <Text
+              <ThemedText
                 className="flex-1 text-base font-medium"
-                style={{ color: palette.foreground }}
                 numberOfLines={1}
               >
                 {t("sound_effects")}
-              </Text>
+              </ThemedText>
             </View>
-            <View>
-              <Switch
-                value={soundEffects}
-                onValueChange={setSoundEffects}
-                trackColor={{ false: palette.radioOff, true: palette.primary }}
-                thumbColor={isDark ? "#e2e8f0" : "#ffffff"}
-              />
-            </View>
-          </View>
-          {/* <Pressable
-            onPress={() => setHapticFeedback(!hapticFeedback)}
-            className="flex-row items-center justify-between px-4 py-3 active:bg-slate-50"
-          >
-            <View className="flex-row items-center gap-4">
-              <View className="h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-                <MaterialIcons name="vibration" size={22} color={PRIMARY} />
-              </View>
-
-              <View>
-                <Text className="text-[16px] font-bold text-slate-900">
-                  {t("haptic_feedback")}
-                </Text>
-                <Text className="text-[12px] text-slate-400 font-medium">
-                  {t("vibrate_on_tap_and_errors")}
-                </Text>
-              </View>
-            </View>
-
             <Switch
-              value={hapticFeedback}
-              onValueChange={setHapticFeedback}
-              trackColor={{ false: "#cbd5e1", true: PRIMARY }}
-              thumbColor={Platform.OS === "android" ? "#ffffff" : undefined}
-              ios_backgroundColor="#cbd5e1"
+              value={soundEffects}
+              onValueChange={setSoundEffects}
+              trackColor={{ false: palette.radioOff, true: palette.primary }}
+              thumbColor={palette.switchThumb}
             />
-          </Pressable> */}
+          </View>
         </View>
 
-        {/* Support */}
-        <SectionHeader title={t("support")} mutedColor={palette.muted} />
+        <SectionHeader title={t("support")} />
         <View
           className="overflow-hidden rounded-2xl shadow-sm"
           style={{ backgroundColor: palette.card }}
@@ -435,9 +363,7 @@ export default function SettingsTabScreen() {
           <Pressable
             className="min-h-[60px] flex-row items-center justify-between gap-4"
             style={({ pressed }) =>
-              pressed
-                ? { backgroundColor: isDark ? "#1e293b" : "#f8fafc" }
-                : undefined
+              pressed ? { backgroundColor: palette.surfacePressed } : undefined
             }
             onPress={() => router.push("/conversations")}
           >
@@ -448,13 +374,12 @@ export default function SettingsTabScreen() {
               >
                 <MaterialIcons name="help" size={22} color={palette.primary} />
               </View>
-              <Text
+              <ThemedText
                 className="flex-1 text-base font-medium"
-                style={{ color: palette.foreground }}
                 numberOfLines={1}
               >
                 {t("help_and_support")}
-              </Text>
+              </ThemedText>
             </View>
             <MaterialIcons
               name="chevron-right"
@@ -466,9 +391,7 @@ export default function SettingsTabScreen() {
           <Pressable
             className="min-h-[60px] flex-row items-center justify-between gap-4"
             style={({ pressed }) =>
-              pressed
-                ? { backgroundColor: isDark ? "#1e293b" : "#f8fafc" }
-                : undefined
+              pressed ? { backgroundColor: palette.surfacePressed } : undefined
             }
           >
             <View className="flex-row flex-1 items-center gap-4 px-4">
@@ -482,13 +405,12 @@ export default function SettingsTabScreen() {
                   color={palette.primary}
                 />
               </View>
-              <Text
+              <ThemedText
                 className="flex-1 text-base font-medium"
-                style={{ color: palette.foreground }}
                 numberOfLines={1}
               >
                 {t("privacy_policy")}
-              </Text>
+              </ThemedText>
             </View>
             <MaterialIcons
               name="chevron-right"
@@ -498,7 +420,6 @@ export default function SettingsTabScreen() {
           </Pressable>
         </View>
 
-        {/* Log Out */}
         <View className="mt-12 pb-10">
           <ScalePressable
             onPress={async () => {
@@ -517,18 +438,22 @@ export default function SettingsTabScreen() {
             }}
           >
             <View className="flex-row items-center justify-center gap-2">
-              <MaterialIcons name="logout" size={22} color="#dc2626" />
-              <Text className="text-base font-bold text-red-600">
+              <MaterialIcons
+                name="logout"
+                size={22}
+                color={palette.dangerForeground}
+              />
+              <ThemedText type="defaultSemiBold" color="destructive">
                 {t("logout")}
-              </Text>
+              </ThemedText>
             </View>
           </ScalePressable>
-          <Text
+          <ThemedText
             className="mt-6 text-center text-sm"
             style={{ color: palette.versionMuted }}
           >
             {t("version")} 2.4.0 (Build 108)
-          </Text>
+          </ThemedText>
         </View>
       </ScrollView>
     </SafeAreaView>
