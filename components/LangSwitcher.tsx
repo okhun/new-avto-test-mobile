@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, Pressable, Text, View } from "react-native";
 
-const PRIMARY = "#137fec";
+import { useTheme } from "@/src/theme";
 
 type Lang = "uz" | "uz-Cyrl" | "ru";
 
@@ -27,6 +27,7 @@ function resolveActiveLang(code: string): Lang {
 
 export default function LangSwitcher({ className }: LangSwitcherProps) {
   const { i18n } = useTranslation();
+  const { palette } = useTheme();
 
   const currentLang = useMemo(
     () => resolveActiveLang(i18n.resolvedLanguage ?? i18n.language),
@@ -43,10 +44,12 @@ export default function LangSwitcher({ className }: LangSwitcherProps) {
 
   return (
     <View
-      className={clsx(
-        "w-full max-w-sm flex-row rounded-2xl border border-slate-200 bg-slate-100 p-1",
-        className
-      )}
+      className={clsx("w-full max-w-sm flex-row rounded-2xl p-1", className)}
+      style={{
+        backgroundColor: palette.iconSurface,
+        borderWidth: 1,
+        borderColor: palette.border,
+      }}
       accessibilityRole="radiogroup"
       accessibilityLabel="Ilova tili"
     >
@@ -65,10 +68,10 @@ export default function LangSwitcher({ className }: LangSwitcherProps) {
             style={
               isActive
                 ? {
-                    backgroundColor: "#ffffff",
-                    shadowColor: "#0f172a",
+                    backgroundColor: palette.card,
+                    shadowColor: palette.shadow,
                     shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.08,
+                    shadowOpacity: palette.cardShadowOpacity,
                     shadowRadius: 3,
                     elevation: 2,
                   }
@@ -79,11 +82,10 @@ export default function LangSwitcher({ className }: LangSwitcherProps) {
               numberOfLines={1}
               adjustsFontSizeToFit
               minimumFontScale={0.85}
-              className={clsx(
-                "text-center text-[13px] font-extrabold tracking-tight",
-                isActive ? "" : "text-slate-500"
-              )}
-              style={isActive ? { color: PRIMARY } : undefined}
+              className="text-center text-[13px] font-extrabold tracking-tight"
+              style={{
+                color: isActive ? palette.primary : palette.muted,
+              }}
             >
               {lang.label}
             </Text>
