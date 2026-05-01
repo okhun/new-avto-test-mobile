@@ -1,16 +1,28 @@
+import { useTheme } from "@/src/theme";
 import React from "react";
 import { View } from "react-native";
-import { CONV } from "../constants/theme";
 
 export function NewTicketSkeleton() {
+  const { palette } = useTheme();
+
+  const Line = ({
+    height,
+    className = "",
+  }: {
+    height: number;
+    className?: string;
+  }) => (
+    <View
+      className={`rounded-xl ${className}`}
+      style={{ height, width: "100%", backgroundColor: palette.divider }}
+    />
+  );
+
   return (
-    <View className="px-4 pt-4" style={{ backgroundColor: CONV.BG }}>
-      <View
-        className="mb-4 h-12 rounded-xl bg-slate-200"
-        style={{ width: "100%" }}
-      />
-      <View className="h-40 rounded-xl bg-slate-200" />
-      <View className="mt-6 h-14 rounded-xl bg-slate-200" />
+    <View className="px-4 pt-4" style={{ backgroundColor: palette.background }}>
+      <Line height={48} className="mb-4" />
+      <Line height={160} />
+      <Line height={56} className="mt-6" />
     </View>
   );
 }
