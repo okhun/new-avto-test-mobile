@@ -1,6 +1,7 @@
 import { API_CONFIG } from "@/src/utils/constants";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Image, ScrollView, Text, View } from "react-native";
 import type { UserBadge } from "../types/dashboard.types";
 
@@ -17,16 +18,16 @@ function badgeIconUri(iconUrl: string | null | undefined): string | undefined {
 }
 
 export function HomeBadgesSection({ badges }: Props) {
+  const { t } = useTranslation();
   if (!badges.length) {
     return (
       <View className="px-5 py-2">
         <Text className="text-lg font-extrabold tracking-tight text-slate-900">
-          Nishonlar
+          {t("badges")}
         </Text>
         <View className="mt-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-6">
           <Text className="text-center text-sm text-slate-500">
-            Hozircha nishon yo&apos;q. Mashq va imtihonlar bilan nishonlarni
-            yig&apos;ing.
+            {t("no_badges")}
           </Text>
         </View>
       </View>
@@ -37,7 +38,7 @@ export function HomeBadgesSection({ badges }: Props) {
     <View className="mt-2 py-2">
       <View className="mb-2 flex-row items-center justify-between px-5">
         <Text className="text-lg font-extrabold tracking-tight text-slate-900">
-          Nishonlar
+          {t("badges")}
         </Text>
         <View className="rounded-full bg-amber-100 px-2.5 py-0.5">
           <Text className="text-xs font-bold text-amber-800">
@@ -85,7 +86,7 @@ export function HomeBadgesSection({ badges }: Props) {
                 {isNew ? (
                   <View className="absolute right-1 top-1 rounded bg-amber-500 px-1">
                     <Text className="text-[8px] font-bold text-white">
-                      YANGI
+                      {t("new")}
                     </Text>
                   </View>
                 ) : null}
@@ -94,7 +95,7 @@ export function HomeBadgesSection({ badges }: Props) {
                 className="text-center text-[11px] font-bold text-slate-700"
                 numberOfLines={2}
               >
-                {ub.badge?.name ?? "Nishon"}
+                {t(`badge.${ub.badge?.type}`) ?? t("badge")}
               </Text>
             </View>
           );

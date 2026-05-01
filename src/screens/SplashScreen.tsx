@@ -1,5 +1,6 @@
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import Animated, {
   FadeIn,
@@ -82,7 +83,7 @@ function PulseDot({ delayMs }: { delayMs: number }) {
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   const logoScale = useSharedValue(0.7);
   const logoOpacity = useSharedValue(0);
-
+  const { t } = useTranslation();
   useEffect(() => {
     // Entrance animations
     logoScale.value = withSpring(1, { damping: 12, stiffness: 90 });
@@ -139,7 +140,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
 
             <Animated.View entering={FadeInDown.delay(500).duration(800)}>
               <Text className="mt-4 text-center text-lg font-bold text-slate-400 tracking-wide">
-                LEARN • PRACTICE • PASS
+                {t("learn")} • {t("practice")} • {t("pass_the_exam")}
               </Text>
             </Animated.View>
           </View>
@@ -164,7 +165,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             </View>
 
             <Text className="mt-5 text-[11px] font-black uppercase tracking-[3px] text-slate-300">
-              Starting Engines
+              {t("starting_engines")}
             </Text>
           </Animated.View>
         </View>

@@ -8,6 +8,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Application from "expo-application";
 import { useRouter } from "expo-router";
 import React, { useCallback, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -111,6 +112,7 @@ function extractApiError(error: unknown): string {
 
 export default function AuthScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<"login" | "register">("login");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -184,7 +186,7 @@ export default function AuthScreen() {
         return;
       }
       if (result.reason === "error") {
-        setServerError(result.message ?? "Google login amalga oshmadi");
+        setServerError(result.message ?? t("google_login_failed"));
       }
     } catch (e) {
       setServerError(extractApiError(e));
@@ -205,7 +207,7 @@ export default function AuthScreen() {
         return;
       }
       if (result.reason === "error") {
-        setServerError(result.message ?? "Telegram login amalga oshmadi");
+        setServerError(result.message ?? t("telegram_login_failed"));
       }
     } catch (e) {
       setServerError(extractApiError(e));
@@ -229,7 +231,7 @@ export default function AuthScreen() {
       { deviceId, platform: Platform.OS as "ios" | "android" },
       {
         onSuccess: () => router.replace("/(tabs)"),
-        onError: (e) => Alert.alert("Error", extractApiError(e)),
+        onError: (e) => Alert.alert(t("error"), extractApiError(e)),
       }
     );
   };
@@ -258,25 +260,25 @@ export default function AuthScreen() {
               <Ionicons name="car-sport" size={32} color="white" />
             </View>
             <Text className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900">
-              Auto Test
+              Avto Test
             </Text>
             <Text className="text-base text-slate-500">
-              Master your driving theory
+              {t("master_your_driving_theory")}
             </Text>
           </Animated.View>
 
           {/* Tab Switcher */}
           <View className="mb-8 flex-row rounded-2xl bg-slate-100 p-1.5">
-            {(["login", "register"] as const).map((t) => (
+            {(["login", "register"] as const).map((tabType) => (
               <Pressable
-                key={t}
-                onPress={() => switchTab(t)}
-                className={`flex-1 items-center rounded-xl py-3 ${tab === t ? "bg-white " : ""}`}
+                key={tabType}
+                onPress={() => switchTab(tabType)}
+                className={`flex-1 items-center rounded-xl py-3 ${tab === tabType ? "bg-white " : ""}`}
               >
                 <Text
-                  className={`text-sm font-bold ${tab === t ? "text-blue-600" : "text-slate-500"}`}
+                  className={`text-sm font-bold ${tab === tabType ? "text-blue-600" : "text-slate-500"}`}
                 >
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                  {t(`${tabType}`)}
                 </Text>
               </Pressable>
             ))}
@@ -299,7 +301,7 @@ export default function AuthScreen() {
             {tab === "register" && (
               <View>
                 <Text className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Full Name
+                  {t("display_name")}
                 </Text>
                 <TextInput
                   placeholder="John Doe"
@@ -316,7 +318,7 @@ export default function AuthScreen() {
 
             <View>
               <Text className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">
-                Email Address
+                {t("email_address")}
               </Text>
               <TextInput
                 ref={usernameRef}
@@ -335,7 +337,7 @@ export default function AuthScreen() {
 
             <View>
               <Text className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">
-                Password
+                {t("password")}
               </Text>
               <View className="relative">
                 <TextInput
@@ -372,7 +374,7 @@ export default function AuthScreen() {
                 <ActivityIndicator color="white" />
               ) : (
                 <Text className="text-lg font-bold text-white">
-                  {tab === "login" ? "Sign In" : "Create Account"}
+                  {tab === "login" ? t("sign_in") : t("create_account")}
                 </Text>
               )}
             </ScaleButton>
@@ -382,7 +384,7 @@ export default function AuthScreen() {
           <View className="my-10 flex-row items-center">
             <View className="h-[1px] flex-1 bg-slate-100" />
             <Text className="px-4 text-xs font-bold uppercase tracking-widest text-slate-400">
-              Social Login
+              {t("social_login")}
             </Text>
             <View className="h-[1px] flex-1 bg-slate-100" />
           </View>
@@ -435,7 +437,7 @@ export default function AuthScreen() {
                       className="mr-2"
                     />
                     <Text className="text-sm font-bold text-blue-600">
-                      Continue as Guest
+                      {t("continue_as_guest")}
                     </Text>
                   </>
                 )}

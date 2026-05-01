@@ -3,6 +3,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import type { ExamHistoryEntry } from "../types/dashboard.types";
 import {
@@ -31,21 +32,25 @@ type Props = {
 
 function statusVisual(entry: ExamHistoryEntry) {
   if (entry.isPassed) {
-    return { color: SUCCESS, label: "O'tgan", icon: "check-circle" as const };
+    return { color: SUCCESS, label: "passed", icon: "check-circle" as const };
   }
   if (
     entry.status === "failed" ||
     (entry.status === "completed" && !entry.isPassed)
   ) {
-    return { color: ERROR, label: "O'tmagan", icon: "cancel" as const };
+    return { color: ERROR, label: "failed", icon: "cancel" as const };
   }
   if (entry.status === "in_progress") {
-    return { color: "#f59e0b", label: "Jarayonda", icon: "timelapse" as const };
+    return {
+      color: "#f59e0b",
+      label: "in_progress",
+      icon: "timelapse" as const,
+    };
   }
   if (entry.status === "timed_out") {
     return {
       color: ERROR,
-      label: "Vaqt tugagan",
+      label: "timed_out",
       icon: "hourglass-empty" as const,
     };
   }
@@ -54,7 +59,7 @@ function statusVisual(entry: ExamHistoryEntry) {
 
 export function HomeRecentExamsSection({ tests, total, loading }: Props) {
   const router = useRouter();
-
+  const { t } = useTranslation();
   const onViewAll = useCallback(() => {
     router.push("/(tabs)/exams");
   }, [router]);
@@ -70,12 +75,12 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
     <View className="mt-6 px-5 pb-2">
       <View className="mb-3 flex-row items-center justify-between">
         <Text className="text-lg font-extrabold tracking-tight text-slate-900">
-          So&apos;nggi imtihonlar
+          {t("recent_exams")}
         </Text>
         {total > 0 ? (
           <Pressable onPress={onViewAll} hitSlop={8}>
             <Text className="text-sm font-bold" style={{ color: PRIMARY }}>
-              Barchasi ({total})
+              {t("all")} ({total})
             </Text>
           </Pressable>
         ) : null}
@@ -84,13 +89,12 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
       {loading ? (
         <View className="items-center py-6">
           <ActivityIndicator size="small" color={PRIMARY} />
-          <Text className="mt-2 text-xs text-slate-400">Yuklanmoqda…</Text>
+          <Text className="mt-2 text-xs text-slate-400">{t("loading")}</Text>
         </View>
       ) : tests.length === 0 ? (
         <View className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-8">
           <Text className="text-center text-sm text-slate-500">
-            Hozircha imtihon tarixi yo&apos;q. &quot;Imtihon&quot;
-            bo&apos;limidan yangi urinish boshlang.
+            {t("no_exam_history_yet")}
           </Text>
           <Pressable
             onPress={onViewAll}
@@ -98,7 +102,7 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
             style={{ backgroundColor: `${PRIMARY}18` }}
           >
             <Text className="text-sm font-bold" style={{ color: PRIMARY }}>
-              Imtihonlarga o&apos;tish
+              {t("go_to_exams")}
             </Text>
           </Pressable>
         </View>
@@ -165,7 +169,7 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                     <View className="mt-3">
                       <View className="mb-1.5 flex-row items-end justify-between">
                         <Text className="text-xs font-semibold text-slate-500">
-                          To&apos;g&apos;ri javoblar
+                          {t("correct_answers")}
                         </Text>
                         <Text className="text-sm font-bold text-slate-800">
                           {correct}
@@ -199,12 +203,12 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                           className="text-[11px] font-bold"
                           style={{ color: st.color }}
                         >
-                          {st.label}
+                          {t(`${st.label}`)}
                         </Text>
                       </View>
                       <View className="flex-row items-center gap-0.5">
                         <Text className="text-[11px] font-semibold text-slate-400">
-                          Batafsil
+                          {t("detailed")}
                         </Text>
                         <MaterialCommunityIcons
                           name="chevron-right"
@@ -241,7 +245,7 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                             </Text>
                           </View>
                           <Text className="mt-0.5 text-[10px] font-semibold text-slate-500">
-                            ball
+                            {t("score")}
                           </Text>
                         </View>
                       ) : (
@@ -253,7 +257,7 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
                             —
                           </Text>
                           <Text className="mt-0.5 text-[10px] font-medium text-slate-400">
-                            ball
+                            {t("score")}
                           </Text>
                         </>
                       )}

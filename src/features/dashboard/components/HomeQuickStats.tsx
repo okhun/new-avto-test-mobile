@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import type { Progress, Streak } from "../types/dashboard.types";
 import { formatPercentString } from "../utils/dashboardFormat";
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export function HomeQuickStats({ progress, streak }: Props) {
+  const { t } = useTranslation();
   const acc = formatPercentString(progress.overallAccuracy);
   const tests = progress.totalTestsTaken ?? 0;
   const passed = progress.totalTestsPassed ?? 0;
@@ -19,22 +21,22 @@ export function HomeQuickStats({ progress, streak }: Props) {
       icon: "fire" as const,
       color: "#f97316",
       bg: "#fff7ed",
-      label: "Ketma-ketlik",
-      value: `${streak.currentStreak} kun`,
+      label: t("streak"),
+      value: `${streak.currentStreak} ${t("days")}`,
     },
     {
       icon: "bullseye-arrow" as const,
       color: "#22c55e",
       bg: "#f0fdf4",
-      label: "Aniqlik",
+      label: t("accuracy"),
       value: acc,
     },
     {
       icon: "school" as const,
       color: "#137fec",
       bg: "#eff6ff",
-      label: "Imtihonlar",
-      value: `${passed}/${tests} o'tgan`,
+      label: t("exams"),
+      value: `${passed}/${tests} ${t("passed")}`,
     },
   ];
 

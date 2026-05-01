@@ -9,6 +9,7 @@ import { useAuthStore } from "@/src/store/auth.store";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useExamHistory, useGemificationSummary } from "../hook/useDashboard";
@@ -16,6 +17,7 @@ import { useExamHistory, useGemificationSummary } from "../hook/useDashboard";
 const PRIMARY = "#137fec";
 
 export default function HomeScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const displayName = useAuthStore((s) => s.user?.displayName);
   const avatarUrl = useAuthStore((s) => s.user?.avatarUrl);
@@ -57,14 +59,16 @@ export default function HomeScreen() {
         <View className="flex-1 items-center justify-center">
           <MaterialIcons name="cloud-off" size={48} color="#cbd5e1" />
           <Text className="mt-3 text-center text-base text-slate-600">
-            Ma&apos;lumot yuklanmadi. Internetni tekshiring.
+            {t("data_not_loaded")}
           </Text>
           <Pressable
             onPress={() => refetchSummary()}
             className="mt-5 rounded-2xl px-6 py-3"
             style={{ backgroundColor: PRIMARY }}
           >
-            <Text className="font-bold text-white">Qayta yuklash</Text>
+            <Text className="font-bold text-white">
+              {t("try_again_loading")}
+            </Text>
           </Pressable>
         </View>
       </SafeAreaView>

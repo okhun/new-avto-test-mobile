@@ -1,6 +1,7 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 import type { Progress } from "../types/dashboard.types";
 import {
@@ -17,6 +18,7 @@ type Props = {
 };
 
 export function HomeProgressHero({ progress, onContinue }: Props) {
+  const { t } = useTranslation();
   const accuracy = formatPercentString(progress.overallAccuracy);
   const passRate = formatPassRateString(progress.examPassRate);
   const barW = xpBarWidth(progress.xpProgress ?? 0);
@@ -39,14 +41,14 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
         <View className="flex-row items-center justify-between border-b border-slate-100 pb-5">
           <View className="flex-1 pr-3">
             <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-              Sizning darajangiz
+              {t("your_level")}
             </Text>
             <View className="mt-1 flex-row items-baseline gap-1.5">
               <Text className="text-4xl font-black text-slate-800">
                 {progress.level}
               </Text>
               <Text className="text-sm font-semibold text-slate-500">
-                daraja
+                {t("level")}
               </Text>
             </View>
           </View>
@@ -64,7 +66,7 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
         <View className="py-4">
           <View className="flex-row justify-between">
             <Text className="text-xs font-semibold text-slate-600">
-              XP Progress
+              {t("xp_progress")}
             </Text>
             <Text className="text-xs font-bold text-primary-600">
               {Math.round(progress.totalXp)} /{" "}
@@ -85,7 +87,7 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
           <View className="w-1/2 pr-2">
             <View className="rounded-2xl bg-slate-50 p-3.5">
               <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Aniqlik
+                {t("gamification.stat_accuracy")}
               </Text>
               <Text className="mt-1 text-base font-extrabold text-slate-800">
                 {accuracy}
@@ -97,7 +99,7 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
           <View className="w-1/2 pl-2">
             <View className="rounded-2xl bg-slate-50 p-3.5">
               <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                O&apos;tish darajasi
+                {t("passing_rate")}
               </Text>
               <Text className="mt-1 text-base font-extrabold text-slate-800">
                 {passRate}
@@ -109,7 +111,7 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
           <View className="w-1/2 pr-2">
             <View className="rounded-2xl bg-slate-50 p-3.5">
               <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Eng yaxshi ball
+                {t("gamification.stat_best_score")}
               </Text>
               <Text className="mt-1 text-base font-extrabold text-slate-800">
                 {bestScore}
@@ -121,7 +123,7 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
           <View className="w-1/2 pl-2">
             <View className="rounded-2xl bg-slate-50 p-3.5">
               <Text className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                Javoblar
+                {t("answers")}
               </Text>
               <Text className="mt-1 text-xs font-extrabold text-slate-800">
                 {progress.totalCorrectAnswers} /{" "}
@@ -149,7 +151,7 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
           }}
         >
           <Text className="text-center text-sm font-black uppercase tracking-widest text-white">
-            Biletlar bilan ishlash
+            {t("work_with_tickets")}
           </Text>
         </ScalePressable>
       </View>
