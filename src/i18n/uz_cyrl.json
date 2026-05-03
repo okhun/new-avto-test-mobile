@@ -332,6 +332,8 @@
   "go_to_dashboard": "Бошқарув панелига ўтиш",
   "if_you_are_not_redirected_click_the_button": "Агар йўналтирилмаса, тугмани босинг.",
   "welcome": "Хуш келибсиз",
+  "home_header_greeting": "Салом!",
+  "home_header_level_driver": "{{level}} даражали ҳайдовчи",
   "to_continue_please_login": "Давом этиш учун тизимга киринг",
   "telegram_login_error": "Telegram орқали киришда хатолик юз берди",
   "auth": {

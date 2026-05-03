@@ -11,15 +11,21 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useExamHistory, useGemificationSummary } from "../hook/useDashboard";
+
+/** Absolute tab bar height — keep aligned with `app/(tabs)/_layout.tsx` `tabBarStyle.height`. */
+const TAB_BAR_OVERLAY_HEIGHT = Platform.OS === "ios" ? 88 : 64;
 
 export default function HomeScreen() {
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
-  const displayName = useAuthStore((s) => s.user?.displayName);
   const avatarUrl = useAuthStore((s) => s.user?.avatarUrl);
 
   const {
@@ -89,17 +95,22 @@ export default function HomeScreen() {
   const tests = examData?.tests ?? [];
   const totalExams = examData?.total ?? 0;
 
+  const scrollBottomPadding =
+    TAB_BAR_OVERLAY_HEIGHT +
+    24 +
+    (Platform.OS === "android" ? insets.bottom : 0);
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: palette.background }}
       edges={["top"]}
     >
+      <HomeHeader level={progress.level} avatarUrl={avatarUrl} />
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 32 }}
+        contentContainerStyle={{ paddingBottom: scrollBottomPadding }}
       >
-        <HomeHeader displayName={displayName} avatarUrl={avatarUrl} />
         <HomeProgressHero progress={progress} onContinue={onContinueLearning} />
         <HomeQuickStats progress={progress} streak={streak} />
         <View className="h-1" />

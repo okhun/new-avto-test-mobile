@@ -4,6 +4,7 @@ import {
   useRegister,
 } from "@/src/features/auth/hook/useAuth";
 import { useSocialAuth } from "@/src/features/auth/hook/useSocialAuth";
+import { useTheme } from "@/src/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Application from "expo-application";
 import { useRouter } from "expo-router";
@@ -17,9 +18,11 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StyleProp,
   Text,
   TextInput,
   View,
+  ViewStyle,
 } from "react-native";
 import Animated, {
   FadeInDown,
@@ -34,15 +37,17 @@ function ScaleButton({
   children,
   onPress,
   className,
+  wrapperStyle,
   disabled,
 }: {
   children: React.ReactNode;
   onPress?: () => void;
   className?: string;
+  wrapperStyle?: StyleProp<ViewStyle>;
   disabled?: boolean;
 }) {
   const scale = useSharedValue(1);
-  const style = useAnimatedStyle(() => ({
+  const animatedInner = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
     opacity: disabled ? 0.7 : 1,
   }));
@@ -55,9 +60,10 @@ function ScaleButton({
       }}
       onPressOut={() => (scale.value = withSpring(1, springConfig))}
       className={className}
+      style={wrapperStyle}
     >
       <Animated.View
-        style={style}
+        style={animatedInner}
         className="w-full items-center justify-center"
       >
         {children}
@@ -113,6 +119,11 @@ function extractApiError(error: unknown): string {
 export default function AuthScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { palette, isDark } = useTheme();
+
+  const errorBorder = isDark ? "rgba(248,113,113,0.55)" : "#fecaca";
+  const orbTR = isDark ? "rgba(96,165,250,0.12)" : "rgba(219,234,254,0.85)";
+  const orbBL = isDark ? "rgba(129,140,248,0.14)" : "rgba(224,231,255,0.7)";
   const [tab, setTab] = useState<"login" | "register">("login");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
@@ -239,11 +250,17 @@ export default function AuthScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-white"
+      className="flex-1"
+      style={{ backgroundColor: palette.background }}
     >
-      {/* Decorative Background Elements */}
-      <View className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-blue-50 opacity-50" />
-      <View className="absolute top-1/2 -left-20 h-40 w-40 rounded-full bg-indigo-50 opacity-40" />
+      <View
+        className="absolute -top-20 -right-20 h-64 w-64 rounded-full opacity-70"
+        style={{ backgroundColor: orbTR }}
+      />
+      <View
+        className="absolute top-1/2 -left-20 h-40 w-40 rounded-full opacity-60"
+        style={{ backgroundColor: orbBL }}
+      />
 
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
@@ -256,27 +273,54 @@ export default function AuthScreen() {
             entering={FadeInDown.delay(100).duration(600)}
             className="mb-10 items-center"
           >
-            <View className="h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-blue-400">
-              <Ionicons name="car-sport" size={32} color="white" />
+            <View
+              className="h-16 w-16 items-center justify-center rounded-2xl"
+              style={{
+                backgroundColor: palette.primary,
+                shadowColor: palette.primary,
+                shadowOffset: { width: 0, height: 8 },
+                shadowOpacity: palette.cardShadowOpacity + 0.12,
+                shadowRadius: 12,
+                elevation: 6,
+              }}
+            >
+              <Ionicons
+                name="car-sport"
+                size={32}
+                color={palette.switchThumb}
+              />
             </View>
-            <Text className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900">
+            <Text
+              className="mt-4 text-3xl font-extrabold tracking-tight"
+              style={{ color: palette.foreground }}
+            >
               Avto Test
             </Text>
-            <Text className="text-base text-slate-500">
+            <Text className="text-base" style={{ color: palette.muted }}>
               {t("master_your_driving_theory")}
             </Text>
           </Animated.View>
 
           {/* Tab Switcher */}
-          <View className="mb-8 flex-row rounded-2xl bg-slate-100 p-1.5">
+          <View
+            className="mb-8 flex-row rounded-2xl p-1.5"
+            style={{ backgroundColor: palette.divider }}
+          >
             {(["login", "register"] as const).map((tabType) => (
               <Pressable
                 key={tabType}
                 onPress={() => switchTab(tabType)}
-                className={`flex-1 items-center rounded-xl py-3 ${tab === tabType ? "bg-white " : ""}`}
+                className="flex-1 items-center rounded-xl py-3"
+                style={{
+                  backgroundColor:
+                    tab === tabType ? palette.card : "transparent",
+                }}
               >
                 <Text
-                  className={`text-sm font-bold ${tab === tabType ? "text-blue-600" : "text-slate-500"}`}
+                  className="text-sm font-bold"
+                  style={{
+                    color: tab === tabType ? palette.primary : palette.muted,
+                  }}
                 >
                   {t(`${tabType}`)}
                 </Text>
@@ -290,9 +334,22 @@ export default function AuthScreen() {
             className="gap-y-4"
           >
             {serverError && (
-              <View className="flex-row items-center gap-2 rounded-xl bg-red-50 p-4 border border-red-100">
-                <Ionicons name="alert-circle" size={18} color="#dc2626" />
-                <Text className="flex-1 text-sm font-medium text-red-600">
+              <View
+                className="flex-row items-center gap-2 rounded-xl border p-4"
+                style={{
+                  backgroundColor: palette.dangerBg,
+                  borderColor: isDark ? "rgba(248,113,113,0.35)" : "#fecaca",
+                }}
+              >
+                <Ionicons
+                  name="alert-circle"
+                  size={18}
+                  color={palette.dangerForeground}
+                />
+                <Text
+                  className="flex-1 text-sm font-medium"
+                  style={{ color: palette.dangerForeground }}
+                >
                   {serverError}
                 </Text>
               </View>
@@ -300,7 +357,10 @@ export default function AuthScreen() {
 
             {tab === "register" && (
               <View>
-                <Text className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <Text
+                  className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider"
+                  style={{ color: palette.chevron }}
+                >
                   {t("display_name")}
                 </Text>
                 <TextInput
@@ -310,14 +370,24 @@ export default function AuthScreen() {
                     setDisplayName(t);
                     setErrors((e) => ({ ...e, displayName: undefined }));
                   }}
-                  className={`rounded-2xl border-2 bg-slate-50 px-5 py-4 text-slate-900 ${errors.displayName ? "border-red-200" : "border-transparent focus:border-blue-500"}`}
-                  placeholderTextColor="#94a3b8"
+                  className="rounded-2xl border-2 px-5 py-4"
+                  style={{
+                    borderColor: errors.displayName
+                      ? errorBorder
+                      : palette.border,
+                    backgroundColor: palette.iconSurface,
+                    color: palette.foreground,
+                  }}
+                  placeholderTextColor={palette.chevron}
                 />
               </View>
             )}
 
             <View>
-              <Text className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <Text
+                className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider"
+                style={{ color: palette.chevron }}
+              >
                 {t("email_address")}
               </Text>
               <TextInput
@@ -330,13 +400,21 @@ export default function AuthScreen() {
                 }}
                 autoCapitalize="none"
                 keyboardType="email-address"
-                className={`rounded-2xl border-2 bg-slate-50 px-5 py-4 text-slate-900 ${errors.email ? "border-red-200" : "border-transparent focus:border-blue-500"}`}
-                placeholderTextColor="#94a3b8"
+                className="rounded-2xl border-2 px-5 py-4"
+                style={{
+                  borderColor: errors.email ? errorBorder : palette.border,
+                  backgroundColor: palette.iconSurface,
+                  color: palette.foreground,
+                }}
+                placeholderTextColor={palette.chevron}
               />
             </View>
 
             <View>
-              <Text className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider text-slate-400">
+              <Text
+                className="mb-1.5 ml-1 text-xs font-bold uppercase tracking-wider"
+                style={{ color: palette.chevron }}
+              >
                 {t("password")}
               </Text>
               <View className="relative">
@@ -349,8 +427,13 @@ export default function AuthScreen() {
                     setErrors((e) => ({ ...e, password: undefined }));
                   }}
                   secureTextEntry={!showPassword}
-                  className={`rounded-2xl border-2 bg-slate-50 px-5 py-4 pr-14 text-slate-900 ${errors.password ? "border-red-200" : "border-transparent focus:border-blue-500"}`}
-                  placeholderTextColor="#94a3b8"
+                  className="rounded-2xl border-2 px-5 py-4 pr-14"
+                  style={{
+                    borderColor: errors.password ? errorBorder : palette.border,
+                    backgroundColor: palette.iconSurface,
+                    color: palette.foreground,
+                  }}
+                  placeholderTextColor={palette.chevron}
                 />
                 <Pressable
                   onPress={() => setShowPassword(!showPassword)}
@@ -359,7 +442,7 @@ export default function AuthScreen() {
                   <Ionicons
                     name={showPassword ? "eye-off" : "eye"}
                     size={22}
-                    color="#64748b"
+                    color={palette.muted}
                   />
                 </Pressable>
               </View>
@@ -368,12 +451,24 @@ export default function AuthScreen() {
             <ScaleButton
               onPress={tab === "login" ? handleLogin : handleRegister}
               disabled={isAnyLoading}
-              className="mt-2 rounded-2xl bg-blue-600 py-4 shadow-blue-200"
+              className="mt-2 rounded-2xl py-4"
+              wrapperStyle={{
+                backgroundColor: palette.primary,
+                borderRadius: 16,
+                shadowColor: palette.shadow,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: palette.cardShadowOpacity + 0.14,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
             >
               {isFormLoading ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator color={palette.switchThumb} />
               ) : (
-                <Text className="text-lg font-bold text-white">
+                <Text
+                  className="text-lg font-bold"
+                  style={{ color: palette.switchThumb }}
+                >
                   {tab === "login" ? t("sign_in") : t("create_account")}
                 </Text>
               )}
@@ -382,11 +477,20 @@ export default function AuthScreen() {
 
           {/* Divider */}
           <View className="my-10 flex-row items-center">
-            <View className="h-[1px] flex-1 bg-slate-100" />
-            <Text className="px-4 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <View
+              className="h-[1px] flex-1"
+              style={{ backgroundColor: palette.divider }}
+            />
+            <Text
+              className="px-4 text-xs font-bold uppercase tracking-widest"
+              style={{ color: palette.muted }}
+            >
               {t("social_login")}
             </Text>
-            <View className="h-[1px] flex-1 bg-slate-100" />
+            <View
+              className="h-[1px] flex-1"
+              style={{ backgroundColor: palette.divider }}
+            />
           </View>
 
           {/* Social Buttons */}
@@ -394,14 +498,26 @@ export default function AuthScreen() {
             <ScaleButton
               onPress={handleGoogleLogin}
               disabled={isAnyLoading}
-              className="flex-1 flex-row items-center rounded-2xl border border-slate-200 bg-white py-4"
+              className="flex-1 flex-row items-center rounded-2xl py-4"
+              wrapperStyle={{
+                flex: 1,
+                borderWidth: 1,
+                borderColor: palette.border,
+                backgroundColor: palette.card,
+                borderRadius: 16,
+              }}
             >
               {socialLoading === "google" ? (
                 <ActivityIndicator color="#4285F4" />
               ) : (
                 <>
                   <Ionicons name="logo-google" size={20} color="#4285F4" />
-                  <Text className="ml-2 font-bold text-slate-700">Google</Text>
+                  <Text
+                    className="ml-2 font-bold"
+                    style={{ color: palette.foreground }}
+                  >
+                    Google
+                  </Text>
                 </>
               )}
             </ScaleButton>
@@ -409,13 +525,23 @@ export default function AuthScreen() {
             <ScaleButton
               onPress={handleTelegramLogin}
               disabled={isAnyLoading}
-              className="flex-1 flex-row items-center rounded-2xl bg-[#229ED9] py-4"
+              className="flex-1 flex-row items-center rounded-2xl py-4"
+              wrapperStyle={{
+                flex: 1,
+                backgroundColor: "#229ED9",
+                borderRadius: 16,
+                shadowColor: palette.shadow,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: palette.cardShadowOpacity + 0.08,
+                shadowRadius: 4,
+                elevation: 4,
+              }}
             >
               {socialLoading === "telegram" ? (
-                <ActivityIndicator color="white" />
+                <ActivityIndicator color="#ffffff" />
               ) : (
                 <>
-                  <Ionicons name="paper-plane" size={20} color="white" />
+                  <Ionicons name="paper-plane" size={20} color="#ffffff" />
                   <Text className="ml-2 font-bold text-white">Telegram</Text>
                 </>
               )}
@@ -425,18 +551,24 @@ export default function AuthScreen() {
           {/* Footer */}
           <View className="mt-auto items-center pt-12">
             <ScaleButton onPress={handleGuestLogin} disabled={isAnyLoading}>
-              <View className="flex-row items-center bg-slate-50 px-6 py-3 rounded-full">
+              <View
+                className="flex-row items-center rounded-full px-6 py-3"
+                style={{ backgroundColor: palette.iconSurface }}
+              >
                 {isGuestLoading ? (
-                  <ActivityIndicator color="#3b82f6" size="small" />
+                  <ActivityIndicator color={palette.primary} size="small" />
                 ) : (
                   <>
                     <Ionicons
                       name="person-outline"
                       size={16}
-                      color="#3b82f6"
+                      color={palette.primary}
                       className="mr-2"
                     />
-                    <Text className="text-sm font-bold text-blue-600">
+                    <Text
+                      className="text-sm font-bold"
+                      style={{ color: palette.primary }}
+                    >
                       {t("continue_as_guest")}
                     </Text>
                   </>

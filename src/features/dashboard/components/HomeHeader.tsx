@@ -1,89 +1,103 @@
 import { resolveAvatarUrl } from "@/src/features/auth/utils/avatarUrl";
 import { useTheme } from "@/src/theme";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Image, Pressable, Text, View } from "react-native";
 
+const AVATAR_PLACEHOLDER_BG = "#2c3e50";
+
 type Props = {
-  displayName?: string;
+  /** Driving / gamification level (shown as subtitle). */
+  level: number;
   avatarUrl?: string | null;
 };
 
-export function HomeHeader({ displayName, avatarUrl }: Props) {
-  const { palette } = useTheme();
+export function HomeHeader({ level, avatarUrl }: Props) {
+  const { palette, isDark } = useTheme();
   const router = useRouter();
-  const name = displayName?.trim() || "Foydalanuvchi";
   const avatarUri = resolveAvatarUrl(avatarUrl);
   const { t } = useTranslation();
-  const iconSurface = {
-    shadowColor: palette.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: palette.cardShadowOpacity,
-    shadowRadius: 8,
-    elevation: 2,
-  };
+  const levelSafe = Number.isFinite(level) && level > 0 ? level : 1;
+  // const topAccent = `${palette.primary}55`;
+
   return (
-    <View className="flex-row items-center justify-between px-5 pb-2 pt-1">
-      <View className="min-w-0 flex-1 pr-2">
-        <Text className="text-sm font-medium" style={{ color: palette.muted }}>
-          {t("welcome")},
-        </Text>
-        <Text
-          className="mt-0.5 text-2xl font-extrabold tracking-tight"
-          style={{ color: palette.foreground }}
-          numberOfLines={1}
-        >
-          {name} 👋
-        </Text>
-      </View>
-      <View className="flex-row items-center gap-2">
+    <View
+      pointerEvents="box-none"
+      style={{
+        backgroundColor: palette.card,
+        borderTopLeftRadius: 22,
+        borderTopRightRadius: 22,
+        paddingHorizontal: 20,
+        paddingTop: 16,
+        paddingBottom: 18,
+        // borderTopWidth: 1,
+        // borderTopColor: topAccent,
+        shadowColor: palette.shadow,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: palette.cardShadowOpacity + 0.04,
+        shadowRadius: 8,
+        elevation: 3,
+        zIndex: 20,
+      }}
+    >
+      <View className="flex-row items-center justify-between">
         <Pressable
-          className="h-11 w-11 items-center justify-center rounded-2xl border"
-          style={{
-            ...iconSurface,
-            borderColor: palette.border,
-            backgroundColor: palette.card,
-            shadowOpacity: palette.cardShadowOpacity,
-          }}
-          hitSlop={8}
+          onPress={() => router.push("/(tabs)/profile")}
+          className="min-w-0 flex-1 flex-row items-center gap-3 active:opacity-85"
+          hitSlop={4}
+          accessibilityRole="button"
+          accessibilityLabel={t("profile")}
         >
-          <MaterialIcons
-            name="notifications-none"
-            size={24}
-            color={palette.foreground}
-          />
+          <View
+            className="items-center justify-center overflow-hidden rounded-full"
+            style={{
+              width: 52,
+              height: 52,
+              backgroundColor: AVATAR_PLACEHOLDER_BG,
+              borderWidth: 2,
+              borderColor: isDark ? `${palette.primary}44` : "#e8eef5",
+            }}
+          >
+            {avatarUri ? (
+              <Image
+                source={{ uri: avatarUri }}
+                style={{ width: 52, height: 52 }}
+                resizeMode="cover"
+              />
+            ) : (
+              <MaterialIcons name="person" size={28} color="#ffffff" />
+            )}
+          </View>
+          <View className="min-w-0 flex-1 gap-1">
+            <Text
+              className="text-2xl font-extrabold tracking-tight"
+              style={{ color: palette.foreground }}
+            >
+              {t("home_header_greeting")}
+            </Text>
+            <Text
+              className="text-[11px] font-semibold tracking-wide"
+              style={{ color: palette.muted }}
+              numberOfLines={1}
+            >
+              {t("home_header_level_driver", { level: levelSafe })}
+            </Text>
+          </View>
         </Pressable>
 
         <Pressable
-          onPress={() => router.push("/(tabs)/profile")}
-          className="h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border"
-          style={{
-            ...iconSurface,
-            borderColor: palette.border,
-            backgroundColor: palette.card,
-            shadowOpacity: palette.cardShadowOpacity + 0.03,
-            elevation: 3,
-          }}
-          hitSlop={8}
+          hitSlop={12}
+          className="shrink-0 p-2"
           accessibilityRole="button"
-          accessibilityLabel="Profilga o'tish"
+          accessibilityLabel={t("push_notifications")}
+          onPress={() => {
+            /* future: notifications */
+          }}
         >
-          {avatarUri ? (
-            <Image
-              source={{ uri: avatarUri }}
-              className="h-full w-full"
-              resizeMode="cover"
-            />
-          ) : (
-            <View
-              className="h-full w-full items-center justify-center"
-              style={{ backgroundColor: palette.iconSurface }}
-            >
-              <MaterialIcons name="person" size={22} color={palette.muted} />
-            </View>
-          )}
+          <Ionicons name="notifications" size={26} color={palette.primary} />
         </Pressable>
       </View>
     </View>

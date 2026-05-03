@@ -330,6 +330,8 @@
   "go_to_dashboard": "Перейти в панель управления",
   "if_you_are_not_redirected_click_the_button": "Если перенаправление не произошло, нажмите кнопку.",
   "welcome": "Добро пожаловать",
+  "home_header_greeting": "Привет!",
+  "home_header_level_driver": "водитель {{level}} уровня",
   "to_continue_please_login": "Чтобы продолжить, войдите в систему",
   "telegram_login_error": "Произошла ошибка при входе через Telegram",
   "auth": {
