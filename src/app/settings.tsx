@@ -1,6 +1,7 @@
 import LangSwitcher from "@/components/LangSwitcher";
 import { ThemedText } from "@/components/themed-text";
 import { useAuthStore } from "@/src/store/auth.store";
+import { usePreferencesStore } from "@/src/store/preferences.store";
 import { useThemeStore, type ThemePreference } from "@/src/store/theme.store";
 import { useTheme, useThemePreference } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -67,7 +68,10 @@ export default function SettingsTabScreen() {
   const selectTheme = (next: ThemePreference) => setThemePreference(next);
 
   const [pushNotifications, setPushNotifications] = useState(true);
-  const [soundEffects, setSoundEffects] = useState(true);
+  const soundEffectsEnabled = usePreferencesStore((s) => s.soundEffectsEnabled);
+  const setSoundEffectsEnabled = usePreferencesStore(
+    (s) => s.setSoundEffectsEnabled
+  );
   const logout = useAuthStore((s) => s.logout);
 
   return (
@@ -347,8 +351,8 @@ export default function SettingsTabScreen() {
               </ThemedText>
             </View>
             <Switch
-              value={soundEffects}
-              onValueChange={setSoundEffects}
+              value={soundEffectsEnabled}
+              onValueChange={setSoundEffectsEnabled}
               trackColor={{ false: palette.radioOff, true: palette.primary }}
               thumbColor={palette.switchThumb}
             />

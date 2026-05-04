@@ -18,6 +18,8 @@ import type {
   TestResponse,
 } from "@/src/features/practice/types/practice.types";
 import { TestMode } from "@/src/features/practice/types/practice.types";
+import { playAnswerFeedbackSound } from "@/src/features/practice/utils/playAnswerFeedbackSound";
+import { usePreferencesStore } from "@/src/store/preferences.store";
 import { useTheme } from "@/src/theme";
 import { API_CONFIG } from "@/src/utils/constants";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -94,6 +96,7 @@ function mergeSubmitIntoAttempt(
 export default function ExamTicketScreen() {
   const { t } = useTranslation();
   const { palette, isDark } = useTheme();
+  const soundEffectsEnabled = usePreferencesStore((s) => s.soundEffectsEnabled);
   const { mutateAsync: startTicketAsync } = useStartTicket();
   const { mutateAsync: submitAnswerAsync, isPending: isSubmitting } =
     useSubmitAnswer();
@@ -347,6 +350,12 @@ export default function ExamTicketScreen() {
       setResults((prev) => ({ ...prev, [resp.questionId]: result }));
       setFeedbackQId(resp.questionId);
 
+      if (soundEffectsEnabled && !result.isSkipped) {
+        void playAnswerFeedbackSound(
+          result.isCorrect ? "correct" : "incorrect"
+        );
+      }
+
       const finishExam =
         isExamMode &&
         result.isExamFinished &&
@@ -433,6 +442,7 @@ export default function ExamTicketScreen() {
     isExamMode,
     exitToList,
     refetchAttempt,
+    soundEffectsEnabled,
   ]);
 
   const renderQuestion = useCallback(

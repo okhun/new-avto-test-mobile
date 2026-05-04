@@ -18,7 +18,7 @@ const memoryFallback = new Map<string, string>();
  * Falls back to an in-memory map when it is not (e.g. mismatched Expo/native build,
  * or "Native module is null" errors) so setTheme never rejects.
  */
-function createResilientStorage(): StateStorage {
+export function createResilientStorage(): StateStorage {
   return {
     getItem: async (name: string): Promise<string | null> => {
       try {
