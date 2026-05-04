@@ -1,10 +1,9 @@
-import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import { COLORS } from "@/src/features/practice/constants/theme";
 import type { Answer } from "@/src/features/practice/types/practice.types";
 import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
-import { Text } from "react-native";
+import { Pressable, Text } from "react-native";
 
 export type FeedbackKind = null | "correct" | "incorrect" | "reveal";
 
@@ -56,7 +55,7 @@ export function AnswerOption({
   }
 
   return (
-    <ScalePressable
+    <Pressable
       onPress={onPress}
       disabled={disabled}
       style={{
@@ -80,7 +79,7 @@ export function AnswerOption({
           fontWeight: isSelected || feedback ? "600" : "500",
           lineHeight: 22,
         }}
-        className="!text-wrap"
+        className="text-wrap!"
       >
         {answer.text}
       </Text>
@@ -90,6 +89,6 @@ export function AnswerOption({
       {feedback === "incorrect" && (
         <MaterialIcons name="cancel" size={22} color={COLORS.ERROR} />
       )}
-    </ScalePressable>
+    </Pressable>
   );
 }

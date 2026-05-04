@@ -27,7 +27,7 @@ export function MyRankFooter({
   const rankLabel = formatRankDisplay(rank);
   const xpLabel = formatLeaderboardXp(totalXp);
 
-  const barBg = isDark ? "rgba(245, 158, 11, 0.22)" : "#fbbf24";
+  const barBg = isDark ? "rgba(245, 158, 11, 0.90)" : "#fbbf24";
   const badgeBg = isDark
     ? "rgba(254, 243, 199, 0.12)"
     : "rgba(180, 83, 9, 0.25)";

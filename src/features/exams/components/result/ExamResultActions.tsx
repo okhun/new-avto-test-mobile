@@ -33,13 +33,15 @@ export function ExamResultActions({
           paddingVertical: 14,
         }}
       >
-        <MaterialIcons name="replay" size={22} color={palette.switchThumb} />
-        <Text
-          className="text-base font-bold"
-          style={{ color: palette.switchThumb }}
-        >
-          {t("retake")} ({retakeLabel})
-        </Text>
+        <View className="flex flex-row gap-2">
+          <MaterialIcons name="replay" size={22} color={palette.switchThumb} />
+          <Text
+            className="text-base font-bold"
+            style={{ color: palette.switchThumb }}
+          >
+            {t("retake")} ({retakeLabel})
+          </Text>
+        </View>
       </ScalePressable>
 
       <ScalePressable
@@ -56,13 +58,15 @@ export function ExamResultActions({
           borderColor: palette.border,
         }}
       >
-        <MaterialIcons name="list-alt" size={22} color={palette.foreground} />
-        <Text
-          className="text-base font-semibold"
-          style={{ color: palette.foreground }}
-        >
-          {t("exam_history")}
-        </Text>
+        <View className="flex flex-row gap-2">
+          <MaterialIcons name="list-alt" size={22} color={palette.foreground} />
+          <Text
+            className="text-base font-semibold"
+            style={{ color: palette.foreground }}
+          >
+            {t("exam_history")}
+          </Text>
+        </View>
       </ScalePressable>
     </View>
   );

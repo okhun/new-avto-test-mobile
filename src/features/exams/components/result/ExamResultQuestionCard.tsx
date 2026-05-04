@@ -1,15 +1,19 @@
-import { ANSWER_LABELS } from "@/src/features/practice/constants/theme";
+import { ImagePreview } from "@/src/components/ui/ImagePreview";
+import {
+  ANSWER_LABELS,
+  SCREEN_WIDTH,
+} from "@/src/features/practice/constants/theme";
 import type { Answer } from "@/src/features/practice/types/practice.types";
 import { useTheme } from "@/src/theme";
 import { API_CONFIG } from "@/src/utils/constants";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 const SUCCESS = "#22c55e";
 const ERROR = "#ef4444";
-
+const IMAGE_HEIGHT = (SCREEN_WIDTH - 32) * (9 / 16);
 type Props = {
   questionOrder: number;
   questionText: string;
@@ -104,15 +108,13 @@ export function ExamResultQuestionCard({
 
       <View className="px-4 py-4">
         {uri ? (
-          <Image
-            source={{ uri }}
-            className="mb-4 w-full rounded-xl"
-            style={{
-              aspectRatio: 16 / 9,
-              backgroundColor: palette.iconSurface,
-            }}
-            resizeMode="contain"
-          />
+          <View className="mb-4">
+            <ImagePreview
+              uri={uri}
+              width={SCREEN_WIDTH - 32}
+              height={IMAGE_HEIGHT}
+            />
+          </View>
         ) : null}
 
         <View className="gap-2.5">
@@ -145,7 +147,7 @@ export function ExamResultQuestionCard({
                 className="flex-row gap-3 rounded-xl border-2 px-3 py-3"
                 style={{ borderColor, backgroundColor: bg }}
               >
-                <View
+                {/* <View
                   className="h-8 w-8 items-center justify-center rounded-lg"
                   style={{
                     backgroundColor: showCorrect
@@ -161,7 +163,7 @@ export function ExamResultQuestionCard({
                   >
                     {label}
                   </Text>
-                </View>
+                </View> */}
                 <Text
                   className="min-w-0 flex-1 text-[15px] font-semibold leading-snug"
                   style={{ color: labelColor }}

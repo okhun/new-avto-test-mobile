@@ -42,8 +42,13 @@ export function ImagePreview({ uri, width, height }: ImagePreviewProps) {
         <View className="overflow-hidden rounded-xl border border-slate-200 shadow-md">
           <Image
             source={{ uri }}
-            style={{ width, height, backgroundColor: "#e2e8f0" }}
-            resizeMode="cover"
+            style={{
+              width,
+              height,
+              backgroundColor: "#e2e8f0",
+              alignSelf: "center",
+            }}
+            resizeMode="contain"
           />
           <View
             style={styles.expandHint}

@@ -25,17 +25,17 @@ const BADGE_DARK: Record<
 > = {
   1: {
     text: "G\u0027olib",
-    bg: "rgba(234, 179, 8, 0.28)",
+    bg: "rgba(234, 179, 8)",
     textColor: "#fde047",
   },
   2: {
     text: "2-orin",
-    bg: "rgba(148, 163, 184, 0.22)",
+    bg: "rgba(148, 163, 184)",
     textColor: "#e2e8f0",
   },
   3: {
     text: "3-orin",
-    bg: "rgba(249, 115, 22, 0.25)",
+    bg: "rgba(249, 115, 22)",
     textColor: "#fdba74",
   },
 };
