@@ -1,3 +1,4 @@
+import { getAcceptLanguage } from "@/src/lib/api-client";
 import { STORAGE_KEYS } from "@/src/utils/constants";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
@@ -43,6 +44,13 @@ const clearTokens = async () => {
 
 api.interceptors.request.use(
   async (config) => {
+    const lang = getAcceptLanguage();
+    if (typeof config.headers.set === "function") {
+      config.headers.set("Accept-Language", lang);
+    } else {
+      (config.headers as Record<string, string>)["Accept-Language"] = lang;
+    }
+
     const token = await getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
