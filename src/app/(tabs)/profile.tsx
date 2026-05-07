@@ -1,3 +1,4 @@
+import { LogoutConfirmModal } from "@/src/components/ui/LogoutConfirmModal";
 import { resolveAvatarUrl } from "@/src/features/auth/utils/avatarUrl";
 import { ProfileBadgesPreview } from "@/src/features/badges/components/ProfileBadgesPreview";
 import { useMyRank } from "@/src/features/leaderboard/hook/useLeaderBoard";
@@ -6,7 +7,7 @@ import { useAuthStore } from "@/src/store/auth.store";
 import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, {
@@ -74,6 +75,7 @@ export default function ProfileTabScreen() {
   ] as const;
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const user = useAuthStore((s) => s.user);
   const { data: myRank, isPending: myRankLoading } = useMyRank();
 
@@ -238,10 +240,7 @@ export default function ProfileTabScreen() {
 
         <View className="p-6 pb-12">
           <ScalePressable
-            onPress={async () => {
-              await logout();
-              router.replace("/auth");
-            }}
+            onPress={() => setShowLogoutConfirm(true)}
             style={{
               width: "100%",
               paddingVertical: 16,
@@ -260,6 +259,15 @@ export default function ProfileTabScreen() {
           </ScalePressable>
         </View>
       </ScrollView>
+      <LogoutConfirmModal
+        visible={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={async () => {
+          setShowLogoutConfirm(false);
+          await logout();
+          router.replace("/auth");
+        }}
+      />
     </SafeAreaView>
   );
 }

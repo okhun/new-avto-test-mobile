@@ -1,5 +1,6 @@
 import LangSwitcher from "@/components/LangSwitcher";
 import { ThemedText } from "@/components/themed-text";
+import { LogoutConfirmModal } from "@/src/components/ui/LogoutConfirmModal";
 import { useAuthStore } from "@/src/store/auth.store";
 import { usePreferencesStore } from "@/src/store/preferences.store";
 import { useThemeStore, type ThemePreference } from "@/src/store/theme.store";
@@ -68,6 +69,7 @@ export default function SettingsTabScreen() {
   const selectTheme = (next: ThemePreference) => setThemePreference(next);
 
   const [pushNotifications, setPushNotifications] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const soundEffectsEnabled = usePreferencesStore((s) => s.soundEffectsEnabled);
   const setSoundEffectsEnabled = usePreferencesStore(
     (s) => s.setSoundEffectsEnabled
@@ -426,10 +428,7 @@ export default function SettingsTabScreen() {
 
         <View className="mt-12 pb-10">
           <ScalePressable
-            onPress={async () => {
-              await logout();
-              router.replace("/auth");
-            }}
+            onPress={() => setShowLogoutConfirm(true)}
             style={{
               width: "100%",
               height: 56,
@@ -460,6 +459,15 @@ export default function SettingsTabScreen() {
           </ThemedText>
         </View>
       </ScrollView>
+      <LogoutConfirmModal
+        visible={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        onConfirm={async () => {
+          setShowLogoutConfirm(false);
+          await logout();
+          router.replace("/auth");
+        }}
+      />
     </SafeAreaView>
   );
 }

@@ -1,10 +1,12 @@
+import LangSwitcher from "@/components/LangSwitcher";
 import {
   useGuestLogin,
   useLogin,
   useRegister,
 } from "@/src/features/auth/hook/useAuth";
 import { useSocialAuth } from "@/src/features/auth/hook/useSocialAuth";
-import { useTheme } from "@/src/theme";
+import { useThemeStore, type ThemePreference } from "@/src/store/theme.store";
+import { useTheme, useThemePreference } from "@/src/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as Application from "expo-application";
 import { useRouter } from "expo-router";
@@ -120,6 +122,8 @@ export default function AuthScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { palette, isDark } = useTheme();
+  const themePreference = useThemePreference();
+  const setThemePreference = useThemeStore((s) => s.setTheme);
 
   const errorBorder = isDark ? "rgba(248,113,113,0.55)" : "#fecaca";
   const orbTR = isDark ? "rgba(96,165,250,0.12)" : "rgba(219,234,254,0.85)";
@@ -151,6 +155,8 @@ export default function AuthScreen() {
     setErrors({});
     setServerError("");
   }, []);
+
+  const selectTheme = (next: ThemePreference) => setThemePreference(next);
 
   const switchTab = (newTab: "login" | "register") => {
     setTab(newTab);
@@ -271,7 +277,7 @@ export default function AuthScreen() {
           {/* Header */}
           <Animated.View
             entering={FadeInDown.delay(100).duration(600)}
-            className="mb-10 items-center"
+            className="mb-8 items-center"
           >
             <View
               className="h-16 w-16 items-center justify-center rounded-2xl"
@@ -299,6 +305,101 @@ export default function AuthScreen() {
             <Text className="text-base" style={{ color: palette.muted }}>
               {t("master_your_driving_theory")}
             </Text>
+          </Animated.View>
+
+          <Animated.View
+            entering={FadeInDown.delay(150).duration(600)}
+            className="mb-8 rounded-2xl border p-4"
+            style={{
+              borderColor: palette.border,
+              backgroundColor: palette.card,
+            }}
+          >
+            <View className="mb-3 flex-row items-center justify-between">
+              <Text
+                className="text-xs font-bold uppercase tracking-wider"
+                style={{ color: palette.chevron }}
+              >
+                {t("language")}
+              </Text>
+              <Text
+                className="text-xs font-bold uppercase tracking-wider"
+                style={{ color: palette.chevron }}
+              >
+                {t("appearance")}
+              </Text>
+            </View>
+            <View className="flex-row gap-3">
+              <View className="flex-1">
+                <LangSwitcher className="w-full max-w-none" />
+              </View>
+              <View
+                className="flex-row rounded-2xl border p-1"
+                style={{
+                  borderColor: palette.border,
+                  backgroundColor: palette.iconSurface,
+                }}
+              >
+                <Pressable
+                  onPress={() => selectTheme("light")}
+                  className="h-9 w-9 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor:
+                      themePreference === "light"
+                        ? palette.card
+                        : "transparent",
+                  }}
+                >
+                  <Ionicons
+                    name="sunny"
+                    size={18}
+                    color={
+                      themePreference === "light"
+                        ? palette.primary
+                        : palette.muted
+                    }
+                  />
+                </Pressable>
+                <Pressable
+                  onPress={() => selectTheme("dark")}
+                  className="h-9 w-9 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor:
+                      themePreference === "dark" ? palette.card : "transparent",
+                  }}
+                >
+                  <Ionicons
+                    name="moon"
+                    size={18}
+                    color={
+                      themePreference === "dark"
+                        ? palette.primary
+                        : palette.muted
+                    }
+                  />
+                </Pressable>
+                <Pressable
+                  onPress={() => selectTheme("system")}
+                  className="h-9 w-9 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor:
+                      themePreference === "system"
+                        ? palette.card
+                        : "transparent",
+                  }}
+                >
+                  <Ionicons
+                    name="phone-portrait"
+                    size={18}
+                    color={
+                      themePreference === "system"
+                        ? palette.primary
+                        : palette.muted
+                    }
+                  />
+                </Pressable>
+              </View>
+            </View>
           </Animated.View>
 
           {/* Tab Switcher */}

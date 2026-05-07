@@ -365,7 +365,7 @@ export default function TicketsListScreen() {
             className="mt-3 text-sm font-medium"
             style={{ color: palette.muted }}
           >
-            Loading tickets…
+            {t("loading")}
           </Text>
         </View>
       </SafeAreaView>

@@ -34,6 +34,7 @@ import React, {
 import { useTranslation } from "react-i18next";
 import {
   FlatList,
+  Modal,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -122,6 +123,7 @@ export default function ExamTicketScreen() {
   const [nowMs, setNowMs] = useState(Date.now());
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showFailModal, setShowFailModal] = useState(false);
+  const [showExitConfirmModal, setShowExitConfirmModal] = useState(false);
   const [examSnapshot, setExamSnapshot] = useState({
     correctAnswers: 0,
     totalQuestions: 20,
@@ -296,6 +298,14 @@ export default function ExamTicketScreen() {
       router.replace("/(tabs)/tickets");
     }
   }, [isExamMode, router]);
+
+  const requestExit = useCallback(() => {
+    if (isExamMode) {
+      setShowExitConfirmModal(true);
+      return;
+    }
+    exitToList();
+  }, [isExamMode, exitToList]);
 
   const refetchAttempt = useCallback(async (attemptId: string) => {
     const data = await getExamResult(attemptId);
@@ -617,7 +627,7 @@ export default function ExamTicketScreen() {
             {isExamMode ? t("exam_not_loaded") : t("ticket_not_found")}
           </Text>
           <Pressable
-            onPress={exitToList}
+            onPress={requestExit}
             className="rounded-xl px-6 py-3"
             style={{ backgroundColor: palette.primary }}
           >
@@ -646,7 +656,7 @@ export default function ExamTicketScreen() {
         }}
       >
         <Pressable
-          onPress={exitToList}
+          onPress={requestExit}
           className="h-10 w-10 items-center justify-center rounded-full active:opacity-70"
           hitSlop={8}
         >
@@ -744,6 +754,84 @@ export default function ExamTicketScreen() {
 
       {isExamMode && (
         <>
+          <Modal
+            transparent
+            visible={showExitConfirmModal}
+            animationType="fade"
+            onRequestClose={() => setShowExitConfirmModal(false)}
+          >
+            <View className="flex-1 items-center justify-center bg-black/50 px-6">
+              <View
+                className="w-full max-w-md rounded-2xl border p-5"
+                style={{
+                  backgroundColor: palette.card,
+                  borderColor: palette.border,
+                }}
+              >
+                <View className="items-center">
+                  <View
+                    className="mb-3 h-14 w-14 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: isDark
+                        ? "rgba(239,68,68,0.18)"
+                        : "rgba(239,68,68,0.1)",
+                    }}
+                  >
+                    <MaterialIcons
+                      name="logout"
+                      size={28}
+                      color={palette.dangerForeground}
+                    />
+                  </View>
+                  <Text
+                    className="text-center text-lg font-bold"
+                    style={{ color: palette.foreground }}
+                  >
+                    {t("exit_exam")}
+                  </Text>
+                  <Text
+                    className="mt-2 text-center text-sm"
+                    style={{ color: palette.muted }}
+                  >
+                    {t("back_to_study")}
+                  </Text>
+                </View>
+
+                <View className="mt-5 flex-row gap-3">
+                  <Pressable
+                    onPress={() => setShowExitConfirmModal(false)}
+                    className="flex-1 items-center justify-center rounded-xl border py-3"
+                    style={{
+                      borderColor: palette.border,
+                      backgroundColor: palette.card,
+                    }}
+                  >
+                    <Text
+                      className="text-sm font-semibold"
+                      style={{ color: palette.muted }}
+                    >
+                      {t("cancel")}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setShowExitConfirmModal(false);
+                      exitToList();
+                    }}
+                    className="flex-1 items-center justify-center rounded-xl py-3"
+                    style={{ backgroundColor: palette.dangerBg }}
+                  >
+                    <Text
+                      className="text-sm font-bold"
+                      style={{ color: palette.dangerForeground }}
+                    >
+                      {t("exit_test")}
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </Modal>
           <ExamSuccessModal
             visible={showSuccessModal}
             correctAnswers={examSnapshot.correctAnswers}
