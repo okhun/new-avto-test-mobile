@@ -35,10 +35,6 @@ function computeStats(tickets: TicketHistory[]) {
   return { passed, failed, remaining, total: tickets.length };
 }
 
-function formatTicketNumber(num: number): string {
-  return `Ticket ${String(num).padStart(2, "0")}`;
-}
-
 // --- Stat card ---
 
 function StatCard({
@@ -52,26 +48,41 @@ function StatCard({
   value: number;
   label: string;
 }) {
-  const { palette } = useTheme();
+  const { palette, isDark } = useTheme();
+  const iconSurface = isDark ? `${iconColor}2B` : `${iconColor}18`;
   return (
     <View
-      className="flex-1 flex-col gap-1 rounded-2xl border p-4"
+      className="flex-1 rounded-2xl border px-3 py-3"
       style={{
         backgroundColor: palette.card,
         borderColor: palette.border,
+        shadowColor: palette.shadow,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: palette.cardShadowOpacity,
+        shadowRadius: 6,
+        elevation: 2,
       }}
     >
-      <View className="mb-1">
-        <MaterialIcons name={icon} size={20} color={iconColor} />
+      <View className="mb-2 flex-row items-center justify-between">
+        <View
+          className="h-8 w-8 items-center justify-center rounded-xl"
+          style={{ backgroundColor: iconSurface }}
+        >
+          <MaterialIcons name={icon} size={18} color={iconColor} />
+        </View>
+        <View
+          className="h-1.5 w-9 rounded-full"
+          style={{ backgroundColor: iconColor }}
+        />
       </View>
       <Text
-        className="text-2xl font-bold leading-tight"
+        className="text-xl font-extrabold leading-tight"
         style={{ color: palette.foreground }}
       >
         {value}
       </Text>
       <Text
-        className="text-[10px] font-semibold uppercase tracking-wider"
+        className="mt-1 text-[10px] font-semibold uppercase tracking-wider"
         style={{ color: palette.muted }}
       >
         {label}
@@ -377,13 +388,22 @@ export default function TicketsListScreen() {
       style={{ flex: 1, backgroundColor: palette.background }}
       edges={["top"]}
     >
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 120 }}
-        showsVerticalScrollIndicator={false}
+      <View
+        className="border-b px-4 pb-3 pt-2"
+        style={{
+          borderBottomColor: palette.border,
+          backgroundColor: palette.background,
+        }}
       >
+        <Text
+          className="px-1 text-2xl font-extrabold tracking-tight"
+          style={{ color: palette.foreground }}
+        >
+          {t("all_tests")}
+        </Text>
+
         {/* Stats */}
-        <View className="flex-row gap-3 px-4 py-4">
+        <View className="mt-3 flex-row gap-3">
           <StatCard
             icon="check-circle"
             iconColor={SUCCESS}
@@ -409,8 +429,7 @@ export default function TicketsListScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingVertical: 8,
+            paddingVertical: 10,
             gap: 8,
           }}
         >
@@ -424,7 +443,13 @@ export default function TicketsListScreen() {
             />
           ))}
         </ScrollView>
+      </View>
 
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Ticket grid */}
         {filteredTickets.length === 0 ? (
           <EmptyState />
