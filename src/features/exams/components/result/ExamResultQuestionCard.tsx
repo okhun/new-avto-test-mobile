@@ -111,7 +111,7 @@ export function ExamResultQuestionCard({
           <View className="mb-4">
             <ImagePreview
               uri={uri}
-              width={SCREEN_WIDTH - 32}
+              width={SCREEN_WIDTH - 68}
               height={IMAGE_HEIGHT}
             />
           </View>
