@@ -2,8 +2,15 @@ import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import { useTheme } from "@/src/theme";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
+import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import {
   ActivityIndicator,
   FlatList,
@@ -135,12 +142,45 @@ function EmptyState() {
   );
 }
 
-function ListFooter({ isLoading }: { isLoading: boolean }) {
+/** FlatList calls onEndReached on mount when content is shorter than the viewport; only load more after real scroll. */
+const SCROLL_GATE_PX = 48;
+
+function ExamHistoryListFooter({
+  hasNextPage,
+  isFetchingNextPage,
+  onLoadMore,
+}: {
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  onLoadMore: () => void;
+}) {
   const { palette } = useTheme();
-  if (!isLoading) return null;
+  const { t } = useTranslation();
+  if (isFetchingNextPage) {
+    return (
+      <View className="items-center py-6">
+        <ActivityIndicator size="small" color={palette.primary} />
+      </View>
+    );
+  }
+  if (!hasNextPage) return null;
   return (
-    <View className="items-center py-6">
-      <ActivityIndicator size="small" color={palette.primary} />
+    <View className="px-4 pb-6 pt-2">
+      <Pressable
+        onPress={onLoadMore}
+        className="items-center rounded-2xl border py-3"
+        style={{
+          borderColor: palette.border,
+          backgroundColor: palette.card,
+        }}
+      >
+        <Text
+          className="text-sm font-semibold"
+          style={{ color: palette.primary }}
+        >
+          {t("exam_history_load_more")}
+        </Text>
+      </Pressable>
     </View>
   );
 }
@@ -149,6 +189,7 @@ export default function ExamsScreen() {
   const { t } = useTranslation();
   const { palette } = useTheme();
   const router = useRouter();
+  const hasUserScrolledForNextPage = useRef(false);
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
   const FILTERS: ReadonlyArray<{ id: FilterId; label: string }> = [
     { id: "all", label: t("view_all") },
@@ -172,6 +213,10 @@ export default function ExamsScreen() {
     refetch,
     isRefetching,
   } = useExamHistoryInfinite(queryParams);
+
+  useEffect(() => {
+    hasUserScrolledForNextPage.current = false;
+  }, [activeFilter]);
 
   useFocusEffect(
     useCallback(() => {
@@ -197,8 +242,22 @@ export default function ExamsScreen() {
   }, [entries]);
 
   const handleLoadMore = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+    if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const handleScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (e.nativeEvent.contentOffset.y >= SCROLL_GATE_PX) {
+        hasUserScrolledForNextPage.current = true;
+      }
+    },
+    []
+  );
+
+  const handleEndReached = useCallback(() => {
+    if (!hasUserScrolledForNextPage.current) return;
+    handleLoadMore();
+  }, [handleLoadMore]);
 
   const renderItem = useCallback(
     ({ item }: { item: ExamHistoryEntry }) => (
@@ -308,8 +367,10 @@ export default function ExamsScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 120, gap: 12, paddingTop: 12 }}
         showsVerticalScrollIndicator={false}
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.4}
+        onScroll={handleScroll}
+        scrollEventThrottle={400}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.35}
         refreshControl={
           <RefreshControl
             refreshing={isRefetching && !isFetchingNextPage}
@@ -318,7 +379,13 @@ export default function ExamsScreen() {
           />
         }
         ListEmptyComponent={<EmptyState />}
-        ListFooterComponent={<ListFooter isLoading={isFetchingNextPage} />}
+        ListFooterComponent={
+          <ExamHistoryListFooter
+            hasNextPage={!!hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onLoadMore={handleLoadMore}
+          />
+        }
       />
 
       <View className="absolute bottom-0 left-0 right-0 px-6 pb-24 pt-2">

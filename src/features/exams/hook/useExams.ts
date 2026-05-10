@@ -23,8 +23,26 @@ export const useExamHistoryInfinite = (
       getExamHistory({ ...params, page: pageParam, limit: PAGE_SIZE }),
     initialPageParam: 1,
     getNextPageParam: (lastPage, allPages) => {
-      const loaded = allPages.length * PAGE_SIZE;
-      return loaded < lastPage.total ? allPages.length + 1 : undefined;
+      const itemCount = lastPage.tests?.length ?? 0;
+      if (itemCount === 0) return undefined;
+
+      const totalLoaded = allPages.reduce(
+        (sum, page) => sum + (page.tests?.length ?? 0),
+        0
+      );
+
+      if (
+        typeof lastPage.total === "number" &&
+        lastPage.total > 0 &&
+        totalLoaded >= lastPage.total
+      ) {
+        return undefined;
+      }
+
+      // Short page ⇒ server has no further rows (given a correct limit).
+      if (itemCount < PAGE_SIZE) return undefined;
+
+      return allPages.length + 1;
     },
     retry: false,
     staleTime: 0,

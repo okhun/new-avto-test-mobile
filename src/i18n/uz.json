@@ -278,6 +278,7 @@
   "exam_history_description": "Natijangizni tahlil qiling va yaxshilash kerak bo'lgan jihatlarni aniqlang.",
   "exam_history_no_results": "Imtihonlar topilmadi. Birinchi imtihonni boshlang!",
   "exam_history_back_to_exams": "Imtihonlar sahifasiga qaytish",
+  "exam_history_load_more": "Yana yuklash",
   "total_exams": "Umumiy imtihonlar soni",
   "average_score": "O'rtacha ball",
   "pass_rate": "Muvaffaqiyat foizi",
