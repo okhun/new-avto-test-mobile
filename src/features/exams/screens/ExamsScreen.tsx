@@ -9,7 +9,6 @@ import {
   FlatList,
   Pressable,
   RefreshControl,
-  ScrollView,
   Text,
   View,
 } from "react-native";
@@ -153,7 +152,7 @@ export default function ExamsScreen() {
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
   const FILTERS: ReadonlyArray<{ id: FilterId; label: string }> = [
     { id: "all", label: t("view_all") },
-    { id: "passed", label: t("passed") },
+    { id: "passed", label: t("completed") },
     { id: "failed", label: t("failed") },
     { id: "in_progress", label: t("in_progress") },
   ];
@@ -284,7 +283,7 @@ export default function ExamsScreen() {
           />
         </View> */}
 
-        <ScrollView
+        {/* <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
@@ -300,14 +299,14 @@ export default function ExamsScreen() {
               onPress={() => setActiveFilter(f.id)}
             />
           ))}
-        </ScrollView>
+        </ScrollView> */}
       </View>
 
       <FlatList
         data={entries}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 120, gap: 12 }}
+        contentContainerStyle={{ paddingBottom: 120, gap: 12, paddingTop: 12 }}
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.4}
