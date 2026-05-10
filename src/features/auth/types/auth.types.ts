@@ -50,6 +50,13 @@ export interface User {
   deletedAt: string | null; // or Date
 }
 
+/** Response shape for `POST /auth/refresh` (rotates refresh token). */
+export interface RefreshTokensResponse {
+  accessToken: string;
+  refreshToken: string;
+  user?: User;
+}
+
 export interface GuestLoginDto {
   deviceId: string;
   deviceFingerprint?: string;

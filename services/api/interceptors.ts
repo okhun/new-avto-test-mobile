@@ -1,46 +1,133 @@
+import type { RefreshTokensResponse } from "@/src/features/auth/types/auth.types";
 import { getAcceptLanguage } from "@/src/lib/api-client";
-import { STORAGE_KEYS } from "@/src/utils/constants";
-import axios from "axios";
+import { useAuthStore } from "@/src/store/auth.store";
+import { API_CONFIG, STORAGE_KEYS } from "@/src/utils/constants";
+import axios, {
+  type AxiosError,
+  type InternalAxiosRequestConfig,
+  isAxiosError,
+} from "axios";
 import * as SecureStore from "expo-secure-store";
 import { api } from "./axios";
 
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (token: string | null) => void;
-  reject: (error: unknown) => void;
-}> = [];
+type RetriedConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
-let onLogoutCallback: (() => void) | null = null;
+/** Concurrent 401 responses share one refresh + rotation (matches web `$api`). */
+let refreshPromise: Promise<string> | null = null;
 
-export function setLogoutCallback(cb: () => void) {
+let onLogoutCallback: (() => void | Promise<void>) | null = null;
+
+export function setLogoutCallback(cb: (() => void | Promise<void>) | null) {
   onLogoutCallback = cb;
 }
 
-const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
+const PUBLIC_AUTH_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/auth/guest",
+  "/auth/oauth",
+  "/auth/telegram",
+  "/auth/phone/",
+  "/auth/refresh",
+  "/auth/logout",
+] as const;
 
-const getAccessToken = async () =>
-  await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_TOKEN);
+function combinedRequestUrl(config: InternalAxiosRequestConfig): string {
+  const base = config.baseURL ?? api.defaults.baseURL ?? "";
+  const path = config.url ?? "";
+  return `${base}${path}`;
+}
+
+function shouldSkipRefreshForUrl(config: InternalAxiosRequestConfig): boolean {
+  const url = combinedRequestUrl(config);
+  return PUBLIC_AUTH_PATHS.some((p) => url.includes(p));
+}
+
+function setRequestBearerAndLanguage(
+  config: InternalAxiosRequestConfig,
+  accessToken: string
+) {
+  const authHeader = `Bearer ${accessToken}`;
+  const lang = getAcceptLanguage();
+  if (typeof config.headers?.set === "function") {
+    config.headers.set("Authorization", authHeader);
+    config.headers.set("Accept-Language", lang);
+    return;
+  }
+  Object.assign(config.headers as Record<string, string>, {
+    Authorization: authHeader,
+    "Accept-Language": lang,
+  });
+}
+
+function setApiDefaultBearer(accessToken: string) {
+  const common = api.defaults.headers.common;
+  if (typeof common === "object" && common !== null) {
+    (common as Record<string, string>).Authorization = `Bearer ${accessToken}`;
+  }
+}
 
 const getRefreshToken = () =>
   SecureStore.getItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
 
-const setAccessToken = (token: string) =>
-  SecureStore.setItemAsync(STORAGE_KEYS.AUTH_TOKEN, token);
+/** Uses plain axios so this never loops through interceptors (avoids refresh-on-refresh). */
+async function refreshTokensByBody(
+  refreshToken: string
+): Promise<RefreshTokensResponse> {
+  const { data } = await axios.post<RefreshTokensResponse>(
+    `${API_CONFIG.BASE_URL}/auth/refresh`,
+    { refreshToken },
+    {
+      timeout: API_CONFIG.TIMEOUT,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Accept-Language": getAcceptLanguage(),
+      },
+    }
+  );
+  return data;
+}
 
-const clearTokens = async () => {
-  await SecureStore.deleteItemAsync(STORAGE_KEYS.AUTH_TOKEN);
-  await SecureStore.deleteItemAsync(STORAGE_KEYS.REFRESH_TOKEN);
-  await SecureStore.deleteItemAsync(STORAGE_KEYS.USER_DATA);
-};
+async function refreshAccessTokenChain(): Promise<string> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const rt = await getRefreshToken();
+    if (!rt) throw new Error("No refresh token");
+
+    const data = await refreshTokensByBody(rt);
+    const store = useAuthStore.getState();
+
+    await store.setAccessToken(data.accessToken);
+    await store.setRefreshToken(data.refreshToken);
+
+    if (data.user) {
+      await store.setUser({
+        id: data.user.id,
+        displayName: data.user.displayName,
+        email: data.user.email,
+        phoneNumber: data.user.phoneNumber,
+        avatarUrl: data.user.avatarUrl,
+        provider: data.user.provider,
+        isGuest: data.user.isGuest,
+      });
+    }
+
+    setApiDefaultBearer(data.accessToken);
+
+    return data.accessToken;
+  })().finally(() => {
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
+}
+
+async function logoutFromInterceptor() {
+  if (onLogoutCallback) await Promise.resolve(onLogoutCallback());
+  else await useAuthStore.getState().logout();
+}
 
 api.interceptors.request.use(
   async (config) => {
@@ -51,9 +138,14 @@ api.interceptors.request.use(
       (config.headers as Record<string, string>)["Accept-Language"] = lang;
     }
 
-    const token = await getAccessToken();
+    const token = await SecureStore.getItemAsync(STORAGE_KEYS.AUTH_TOKEN);
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (typeof config.headers.set === "function") {
+        config.headers.set("Authorization", `Bearer ${token}`);
+      } else {
+        (config.headers as Record<string, string>).Authorization =
+          `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -62,51 +154,36 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return api(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-
-      try {
-        const refreshToken = await getRefreshToken();
-        if (!refreshToken) {
-          throw new Error("No refresh token available");
-        }
-
-        const response = await axios.post(
-          `${api.defaults.baseURL}/auth/refresh`,
-          { refreshToken }
-        );
-
-        const newAccessToken = response.data.accessToken;
-        await setAccessToken(newAccessToken);
-        api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
-        processQueue(null, newAccessToken);
-
-        return api(originalRequest);
-      } catch (err) {
-        processQueue(err, null);
-        await clearTokens();
-        onLogoutCallback?.();
-        return Promise.reject(err);
-      } finally {
-        isRefreshing = false;
-      }
+  async (error: AxiosError & { config?: RetriedConfig }) => {
+    if (!isAxiosError(error) || !error.config) {
+      return Promise.reject(error);
     }
 
-    return Promise.reject(error);
+    const originalRequest = error.config as RetriedConfig;
+    const status = error.response?.status;
+
+    if (status !== 401) {
+      return Promise.reject(error);
+    }
+
+    if (shouldSkipRefreshForUrl(originalRequest)) {
+      return Promise.reject(error);
+    }
+
+    if (originalRequest._retry) {
+      await logoutFromInterceptor();
+      return Promise.reject(error);
+    }
+
+    originalRequest._retry = true;
+
+    try {
+      const accessToken = await refreshAccessTokenChain();
+      setRequestBearerAndLanguage(originalRequest, accessToken);
+      return api(originalRequest);
+    } catch {
+      await logoutFromInterceptor();
+      return Promise.reject(error);
+    }
   }
 );
