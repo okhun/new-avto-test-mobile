@@ -24,7 +24,8 @@ export function HomeQuickStats({ progress, streak }: Props) {
       color: "#f97316",
       bg: isDark ? "rgba(249,115,22,0.22)" : "#fff7ed",
       label: t("streak"),
-      value: `${streak.currentStreak} ${t("days")}`,
+      // value: `${streak.currentStreak} ${t("days")}`,
+      value: t("days_streak", { count: streak.currentStreak }),
     },
     {
       icon: "bullseye-arrow" as const,

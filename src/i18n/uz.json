@@ -728,5 +728,6 @@
   "learn": "O'rganish",
   "practice": "Amalga oshirish",
   "pass_the_exam": "Imtihon topshirish",
-  "starting_engines": "Ishga tushirish"
+  "starting_engines": "Ishga tushirish",
+  "timed_out": "Vaqt tugadi"
 }

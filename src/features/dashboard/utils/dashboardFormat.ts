@@ -1,3 +1,5 @@
+import i18n from "@/src/i18n";
+
 /** Parse API percentage string; handles "62.5" or "0.65" (fraction). */
 export function formatPercentString(
   value: string | undefined,
@@ -16,9 +18,16 @@ export function formatPassRateString(value: string | undefined): string {
   return formatPercentString(value, "0");
 }
 
+function getDateLocale(): string {
+  const lang = (i18n.resolvedLanguage ?? i18n.language ?? "uz").toLowerCase();
+  if (lang === "ru" || lang.startsWith("ru-")) return "ru-RU";
+  if (lang === "uz-cyrl" || lang.includes("cyrl")) return "uz-Cyrl-UZ";
+  return "uz-UZ";
+}
+
 export function formatDateShort(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleDateString("uz-UZ", {
+  return d.toLocaleDateString(getDateLocale(), {
     day: "numeric",
     month: "short",
   });

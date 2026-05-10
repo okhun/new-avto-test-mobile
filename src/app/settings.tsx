@@ -133,7 +133,10 @@ export default function SettingsTabScreen() {
           >
             <View
               className="h-10 w-10 items-center justify-center rounded-full"
-              style={{ backgroundColor: `${palette.primary}1A` }}
+              style={{
+                backgroundColor: `${palette.primary}1A`,
+                alignSelf: "center",
+              }}
             >
               <MaterialIcons
                 name="wb-sunny"
@@ -194,7 +197,10 @@ export default function SettingsTabScreen() {
           >
             <View
               className="h-10 w-10 items-center justify-center rounded-full"
-              style={{ backgroundColor: palette.iconSurface }}
+              style={{
+                backgroundColor: palette.iconSurface,
+                alignSelf: "center",
+              }}
             >
               <MaterialIcons
                 name="nights-stay"
@@ -255,7 +261,10 @@ export default function SettingsTabScreen() {
           >
             <View
               className="h-10 w-10 items-center justify-center rounded-full"
-              style={{ backgroundColor: palette.iconSurface }}
+              style={{
+                backgroundColor: palette.iconSurface,
+                alignSelf: "center",
+              }}
             >
               <MaterialIcons
                 name="brightness-6"

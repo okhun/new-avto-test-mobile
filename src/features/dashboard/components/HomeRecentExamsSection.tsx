@@ -15,14 +15,6 @@ import {
 const SUCCESS = "#22c55e";
 const ERROR = "#ef4444";
 
-const MODE_UZ: Record<string, string> = {
-  practice: "Amaliyot",
-  exam: "Imtihon",
-  ticket: "Bilet",
-  weak_topics: "Zaif",
-  marathon: "Marafon",
-};
-
 type Props = {
   tests: ExamHistoryEntry[];
   total: number;
@@ -64,6 +56,14 @@ export function HomeRecentExamsSection({ tests, total, loading }: Props) {
   const router = useRouter();
   const { t } = useTranslation();
   const { palette } = useTheme();
+
+  const MODE_UZ: Record<string, string> = {
+    practice: "Amaliyot",
+    exam: t("exam"),
+    ticket: t("ticket"),
+    weak_topics: "Zaif",
+    marathon: "Marafon",
+  };
 
   const onViewAll = useCallback(() => {
     router.push("/(tabs)/exams");
