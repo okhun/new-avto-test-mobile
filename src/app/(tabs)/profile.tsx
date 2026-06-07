@@ -5,6 +5,7 @@ import { useMyRank } from "@/src/features/leaderboard/hook/useLeaderBoard";
 import { formatRankDisplay } from "@/src/features/leaderboard/utils/leaderboardUi";
 import { useAuthStore } from "@/src/store/auth.store";
 import { useTheme } from "@/src/theme";
+import { useTabBarMetrics } from "@/src/utils/tab-bar";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -51,6 +52,7 @@ function ScalePressable({
 export default function ProfileTabScreen() {
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const { scrollBottomPadding } = useTabBarMetrics();
   const MENU_ITEMS = [
     {
       id: "edit",
@@ -92,7 +94,7 @@ export default function ProfileTabScreen() {
     >
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: scrollBottomPadding }}
         showsVerticalScrollIndicator={false}
       >
         <View className="items-center px-6 pt-8 pb-10">

@@ -1,5 +1,6 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import { useTheme } from "@/src/theme";
+import { useTabBarMetrics } from "@/src/utils/tab-bar";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, {
@@ -188,6 +189,7 @@ function ExamHistoryListFooter({
 export default function ExamsScreen() {
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const { floatingActionListPadding, floatingActionBottom } = useTabBarMetrics();
   const router = useRouter();
   const hasUserScrolledForNextPage = useRef(false);
   const [activeFilter, setActiveFilter] = useState<FilterId>("all");
@@ -365,7 +367,11 @@ export default function ExamsScreen() {
         data={entries}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 120, gap: 12, paddingTop: 12 }}
+        contentContainerStyle={{
+          paddingBottom: floatingActionListPadding,
+          gap: 12,
+          paddingTop: 12,
+        }}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={400}
@@ -388,7 +394,10 @@ export default function ExamsScreen() {
         }
       />
 
-      <View className="absolute bottom-0 left-0 right-0 px-6 pb-24 pt-2">
+      <View
+        className="absolute left-0 right-0 px-6 pt-2"
+        style={{ bottom: floatingActionBottom }}
+      >
         <ScalePressable
           onPress={() => router.push("/exams/start")}
           style={{

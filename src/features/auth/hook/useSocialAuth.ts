@@ -153,6 +153,7 @@ export function useSocialAuth() {
   const loginWithTelegram = useCallback(async (): Promise<SocialAuthResult> => {
     try {
       const botId = process.env.EXPO_PUBLIC_TELEGRAM_BOT_ID;
+      console.log("botId", botId);
       if (!botId) {
         return {
           ok: false,
@@ -160,11 +161,13 @@ export function useSocialAuth() {
           message: "Telegram bot ID topilmadi",
         };
       }
-
+      const telegramAllowedDomain = "https://avto-test.uz";
+      console.log("redirectUri", redirectUri);
       const authUrl =
         "https://oauth.telegram.org/auth" +
         `?bot_id=${encodeURIComponent(botId)}` +
-        `&origin=${encodeURIComponent(redirectUri)}` +
+        `&origin=${encodeURIComponent(telegramAllowedDomain)}` + // <-- Verified domain goes here
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         "&embed=1";
 
       const result = await WebBrowser.openAuthSessionAsync(

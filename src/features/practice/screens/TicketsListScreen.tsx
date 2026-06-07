@@ -1,5 +1,6 @@
 import { ScalePressable } from "@/src/components/ui/ScalePressable";
 import { useTheme } from "@/src/theme";
+import { useTabBarMetrics } from "@/src/utils/tab-bar";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
@@ -317,6 +318,7 @@ export default function TicketsListScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { palette } = useTheme();
+  const { floatingActionListPadding, floatingActionBottom } = useTabBarMetrics();
   useFocusEffect(
     useCallback(() => {
       refetch();
@@ -447,7 +449,7 @@ export default function TicketsListScreen() {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: floatingActionListPadding }}
         showsVerticalScrollIndicator={false}
       >
         {/* Ticket grid */}
@@ -479,7 +481,10 @@ export default function TicketsListScreen() {
       </ScrollView>
 
       {/* Start Random Exam */}
-      <View className="absolute bottom-0 left-0 right-0 px-6 pb-24 pt-2">
+      <View
+        className="absolute left-0 right-0 px-6 pt-2"
+        style={{ bottom: floatingActionBottom }}
+      >
         <ScalePressable
           onPress={() =>
             router.push({
