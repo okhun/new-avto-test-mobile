@@ -18,6 +18,11 @@ export const GOOGLE_CONFIG = {
   ANDROID_CLIENT_ID:
     process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "sdfsd",
   WEB_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "sdfsd",
+  /**
+   * Expo Go only: https redirect registered in Google Cloud Console (Web client).
+   * Defaults to https://auth.expo.io/@owner/slug when owner+slug exist in app config.
+   */
+  EXPO_REDIRECT_URI: process.env.EXPO_PUBLIC_GOOGLE_EXPO_REDIRECT_URI,
 };
 
 export const TELEGRAM_CONFIG = {

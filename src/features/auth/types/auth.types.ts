@@ -74,7 +74,10 @@ export interface SocialAuthCallbackDto {
 
 export interface OAuthLoginDto {
   provider: "google";
-  accessToken: string;
+  /** OIDC ID token (preferred, verified server-side). Provide this OR accessToken. */
+  idToken?: string;
+  /** Legacy access token (validated via userinfo). Provide this OR idToken. */
+  accessToken?: string;
   deviceId?: string;
 }
 
