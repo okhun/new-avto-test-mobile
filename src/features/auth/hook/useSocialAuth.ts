@@ -1,69 +1,20 @@
 import { api } from "@/services/api/axios";
 import {
-  oauthLogin,
+  googleMobileExchange,
   telegramBotPoll,
   telegramBotStart,
 } from "@/src/features/auth/api/auth.api";
 import type { GetMeResponse } from "@/src/features/auth/types/auth.types";
 import { useAuthStore } from "@/src/store/auth.store";
-import { GOOGLE_CONFIG } from "@/src/utils/constants";
+import { API_CONFIG } from "@/src/utils/constants";
 import * as Application from "expo-application";
 import * as AuthSession from "expo-auth-session";
-import * as Google from "expo-auth-session/providers/google";
-import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { Platform } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
-
-/** True when running inside the Expo Go app (not a dev/production build). */
-const isExpoGo =
-  Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
-
-/**
- * Expo Go cannot use native iOS/Android Google client IDs — Google rejects the
- * dynamic `exp://` redirect with Error 400 invalid_request. Use the Web client
- * ID with a stable https://auth.expo.io/@owner/slug redirect instead.
- */
-function resolveExpoGoRedirectUri(): string {
-  if (GOOGLE_CONFIG.EXPO_REDIRECT_URI) {
-    return GOOGLE_CONFIG.EXPO_REDIRECT_URI;
-  }
-  const owner = Constants.expoConfig?.owner;
-  const slug = Constants.expoConfig?.slug;
-  if (owner && slug) {
-    return `https://auth.expo.io/@${owner}/${slug}`;
-  }
-  return AuthSession.makeRedirectUri({
-    scheme: "avtotestmobile",
-    path: "redirect",
-  });
-}
-
-function buildGoogleAuthRequestConfig() {
-  if (isExpoGo) {
-    const redirectUri = resolveExpoGoRedirectUri();
-    if (__DEV__) {
-      console.log(
-        "[Google Auth] Expo Go — using Web client ID, redirectUri:",
-        redirectUri,
-      );
-    }
-    return {
-      clientId: GOOGLE_CONFIG.WEB_CLIENT_ID,
-      webClientId: GOOGLE_CONFIG.WEB_CLIENT_ID,
-      redirectUri,
-    };
-  }
-
-  return {
-    webClientId: GOOGLE_CONFIG.WEB_CLIENT_ID,
-    iosClientId: GOOGLE_CONFIG.IOS_CLIENT_ID,
-    androidClientId: GOOGLE_CONFIG.ANDROID_CLIENT_ID,
-  };
-}
 
 type SocialAuthResult =
   | { ok: true }
@@ -125,60 +76,79 @@ const TELEGRAM_POLL_INTERVAL_MS = 2_000;
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function useSocialAuth() {
-  const googleAuthConfig = useMemo(() => buildGoogleAuthRequestConfig(), []);
-
-  // ID-token flow: Google returns an OIDC `id_token` we hand to the backend for
-  // cryptographic verification. In Expo Go we force the Web client ID + https
-  // redirect; in EAS builds the provider uses the iOS/Android client IDs.
-  const [googleRequest, , promptGoogleAsync] =
-    Google.useIdTokenAuthRequest(googleAuthConfig);
-
+  /**
+   * Google login via the backend Passport bridge (same server-side flow as web).
+   *
+   * Avoids auth.expo.io and native client-ID redirect issues in Expo Go:
+   *   1. open `${API}/auth/google/mobile/login?redirect=<deepLink>` in browser
+   *   2. backend runs Passport Google OAuth → callback issues one-time code
+   *   3. deep link returns `?code=` → exchange for JWT tokens
+   */
   const loginWithGoogle = useCallback(async (): Promise<SocialAuthResult> => {
-    if (!googleRequest) {
-      return {
-        ok: false,
-        reason: "error",
-        message: "Google OAuth sozlamalari topilmadi",
-      };
+    const redirectUri = AuthSession.makeRedirectUri({
+      scheme: "avtotestmobile",
+      path: "google-auth",
+    });
+
+    const authUrl =
+      `${API_CONFIG.BASE_URL}/auth/google/mobile/login` +
+      `?redirect=${encodeURIComponent(redirectUri)}`;
+
+    if (__DEV__) {
+      console.log("[Google Auth] backend bridge, redirectUri:", redirectUri);
     }
 
     try {
-      const result = await promptGoogleAsync();
-      if (result.type !== "success") {
+      const result = await WebBrowser.openAuthSessionAsync(
+        authUrl,
+        redirectUri,
+      );
+
+      if (result.type === "cancel" || result.type === "dismiss") {
         return { ok: false, reason: "cancel" };
       }
 
-      const idToken = result.params?.id_token;
-      if (!idToken) {
+      if (result.type !== "success" || !result.url) {
         return {
           ok: false,
           reason: "error",
-          message: "Google ID token olinmadi",
+          message: "Google login amalga oshmadi",
         };
       }
 
-      const deviceId = await resolveDeviceId();
-      const { data } = await oauthLogin({
-        provider: "google",
-        idToken,
-        deviceId,
-      });
+      const { queryParams } = Linking.parse(result.url);
+      const code = queryParams?.code;
+      const error = queryParams?.error;
 
+      if (error) {
+        return {
+          ok: false,
+          reason: "error",
+          message: typeof error === "string" ? error : "Google auth failed",
+        };
+      }
+
+      if (typeof code !== "string" || !code) {
+        return {
+          ok: false,
+          reason: "error",
+          message: "Google kod olinmadi",
+        };
+      }
+
+      const { data } = await googleMobileExchange({ code });
       await persistAuthAndUser(data.accessToken, data.refreshToken);
       return { ok: true };
     } catch (error) {
       return { ok: false, reason: "error", message: parseSocialError(error) };
     }
-  }, [googleRequest, promptGoogleAsync]);
+  }, []);
 
   /**
    * Native Telegram login via the bot (no registered web domain required):
    *   1. ask the backend for a nonce + `t.me/<bot>?start=<nonce>` deep link
    *   2. open Telegram so the user taps "Start"
    *   3. poll the backend until the bot webhook has issued our tokens
-   *
-   * Works in Expo Go, dev builds and standalone on both iOS and Android, and
-   * gracefully falls back to web Telegram if the app isn't installed.
    */
   const loginWithTelegram = useCallback(async (): Promise<SocialAuthResult> => {
     try {
@@ -191,16 +161,12 @@ export function useSocialAuth() {
         };
       }
 
-      // Open the Telegram app (universal link) if installed, else the browser.
       try {
         await Linking.openURL(start.botUrl);
       } catch {
         await WebBrowser.openBrowserAsync(start.botUrl);
       }
 
-      // Poll until the webhook fulfils the nonce or we hit the timeout. The
-      // wall-clock deadline keeps working even if the OS suspends timers while
-      // the app is backgrounded in Telegram.
       const deadline = Date.now() + TELEGRAM_AUTH_TIMEOUT_MS;
       while (Date.now() < deadline) {
         await delay(TELEGRAM_POLL_INTERVAL_MS);
@@ -223,7 +189,6 @@ export function useSocialAuth() {
             message: "Telegram login muddati tugadi, qayta urinib ko'ring",
           };
         }
-        // status === "pending" -> keep polling
       }
 
       return {

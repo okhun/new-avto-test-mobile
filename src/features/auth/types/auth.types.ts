@@ -124,3 +124,8 @@ export interface TelegramBotPollResponse {
 export interface TelegramOidcExchangeDto {
   code: string;
 }
+
+/** Body for `POST /auth/google/mobile/exchange`. */
+export interface GoogleMobileExchangeDto {
+  code: string;
+}
