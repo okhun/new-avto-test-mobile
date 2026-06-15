@@ -1,5 +1,9 @@
 import { api } from "@/services/api/axios";
-import { oauthLogin, telegramAuth } from "@/src/features/auth/api/auth.api";
+import {
+  oauthLogin,
+  telegramBotPoll,
+  telegramBotStart,
+} from "@/src/features/auth/api/auth.api";
 import type { GetMeResponse } from "@/src/features/auth/types/auth.types";
 import { useAuthStore } from "@/src/store/auth.store";
 import { GOOGLE_CONFIG } from "@/src/utils/constants";
@@ -15,7 +19,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 type SocialAuthResult =
   | { ok: true }
-  | { ok: false; reason: "cancel" | "error"; message?: string };
+  | { ok: false; reason: "cancel" | "error" | "timeout"; message?: string };
 
 async function resolveDeviceId(): Promise<string | undefined> {
   try {
@@ -65,39 +69,12 @@ async function persistAuthAndUser(accessToken: string, refreshToken: string) {
   }
 }
 
-function buildTelegramPayload(url: string) {
-  const parsed = Linking.parse(url);
-  const query = parsed.queryParams ?? {};
+/** Total time to wait for the user to tap "Start" in Telegram and return. */
+const TELEGRAM_AUTH_TIMEOUT_MS = 180_000; // 3 minutes
+/** How often we ask the backend whether the bot login completed. */
+const TELEGRAM_POLL_INTERVAL_MS = 2_000;
 
-  const idRaw = query.id;
-  const authDateRaw = query.auth_date;
-  const hashRaw = query.hash;
-  const firstNameRaw = query.first_name;
-
-  const id = Number(idRaw);
-  const auth_date = Number(authDateRaw);
-  const hash = typeof hashRaw === "string" ? hashRaw : "";
-  const first_name = typeof firstNameRaw === "string" ? firstNameRaw : "";
-
-  if (
-    !Number.isFinite(id) ||
-    !Number.isFinite(auth_date) ||
-    !hash ||
-    !first_name
-  ) {
-    throw new Error("Telegram javobi noto'g'ri formatda keldi");
-  }
-
-  return {
-    id,
-    first_name,
-    last_name: typeof query.last_name === "string" ? query.last_name : "",
-    username: typeof query.username === "string" ? query.username : "",
-    photo_url: typeof query.photo_url === "string" ? query.photo_url : "",
-    auth_date,
-    hash,
-  };
-}
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export function useSocialAuth() {
   const redirectUri = useMemo(() => AuthSession.makeRedirectUri(), []);
@@ -150,43 +127,70 @@ export function useSocialAuth() {
     }
   }, [googleRequest, promptGoogleAsync]);
 
+  /**
+   * Native Telegram login via the bot (no registered web domain required):
+   *   1. ask the backend for a nonce + `t.me/<bot>?start=<nonce>` deep link
+   *   2. open Telegram so the user taps "Start"
+   *   3. poll the backend until the bot webhook has issued our tokens
+   *
+   * Works in Expo Go, dev builds and standalone on both iOS and Android, and
+   * gracefully falls back to web Telegram if the app isn't installed.
+   */
   const loginWithTelegram = useCallback(async (): Promise<SocialAuthResult> => {
     try {
-      const botId = process.env.EXPO_PUBLIC_TELEGRAM_BOT_ID;
-      console.log("botId", botId);
-      if (!botId) {
+      const { data: start } = await telegramBotStart();
+      if (!start?.nonce || !start?.botUrl) {
         return {
           ok: false,
           reason: "error",
-          message: "Telegram bot ID topilmadi",
+          message: "Telegram login boshlanmadi",
         };
       }
-      const telegramAllowedDomain = "https://avto-test.uz";
-      console.log("redirectUri", redirectUri);
-      const authUrl =
-        "https://oauth.telegram.org/auth" +
-        `?bot_id=${encodeURIComponent(botId)}` +
-        `&origin=${encodeURIComponent(telegramAllowedDomain)}` + // <-- Verified domain goes here
-        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        "&embed=1";
 
-      const result = await WebBrowser.openAuthSessionAsync(
-        authUrl,
-        redirectUri
-      );
-
-      if (result.type !== "success" || !result.url) {
-        return { ok: false, reason: "cancel" };
+      // Open the Telegram app (universal link) if installed, else the browser.
+      try {
+        await Linking.openURL(start.botUrl);
+      } catch {
+        await WebBrowser.openBrowserAsync(start.botUrl);
       }
 
-      const payload = buildTelegramPayload(result.url);
-      const { data } = await telegramAuth(payload);
-      await persistAuthAndUser(data.accessToken, data.refreshToken);
-      return { ok: true };
+      // Poll until the webhook fulfils the nonce or we hit the timeout. The
+      // wall-clock deadline keeps working even if the OS suspends timers while
+      // the app is backgrounded in Telegram.
+      const deadline = Date.now() + TELEGRAM_AUTH_TIMEOUT_MS;
+      while (Date.now() < deadline) {
+        await delay(TELEGRAM_POLL_INTERVAL_MS);
+
+        const { data } = await telegramBotPoll(start.nonce);
+
+        if (
+          data.status === "ready" &&
+          data.accessToken &&
+          data.refreshToken
+        ) {
+          await persistAuthAndUser(data.accessToken, data.refreshToken);
+          return { ok: true };
+        }
+
+        if (data.status === "expired") {
+          return {
+            ok: false,
+            reason: "error",
+            message: "Telegram login muddati tugadi, qayta urinib ko'ring",
+          };
+        }
+        // status === "pending" -> keep polling
+      }
+
+      return {
+        ok: false,
+        reason: "timeout",
+        message: "Telegram orqali kirish vaqti tugadi",
+      };
     } catch (error) {
       return { ok: false, reason: "error", message: parseSocialError(error) };
     }
-  }, [redirectUri]);
+  }, []);
 
   return {
     loginWithGoogle,

@@ -223,7 +223,8 @@ export default function AuthScreen() {
         router.replace("/(tabs)");
         return;
       }
-      if (result.reason === "error") {
+      // "cancel" is intentionally silent; surface real errors and timeouts.
+      if (result.reason === "error" || result.reason === "timeout") {
         setServerError(result.message ?? t("telegram_login_failed"));
       }
     } catch (e) {

@@ -7,6 +7,9 @@ import type {
   OAuthLoginDto,
   RegisterDto,
   TelegramAuthDto,
+  TelegramBotPollResponse,
+  TelegramBotStartResponse,
+  TelegramMobileExchangeDto,
   UpdateProfileDto,
 } from "@/src/features/auth/types/auth.types";
 import { API_CONFIG, STORAGE_KEYS } from "@/src/utils/constants";
@@ -89,3 +92,20 @@ export const oauthLogin = (data: OAuthLoginDto) =>
 
 export const telegramAuth = (data: TelegramAuthDto) =>
   api.post<AuthResponse>("/auth/telegram", data);
+
+/**
+ * Exchange the one-time code from the Telegram mobile bridge for tokens.
+ * Pairs with `GET /auth/telegram/mobile/login` + `/callback` on the backend.
+ */
+export const telegramMobileExchange = (data: TelegramMobileExchangeDto) =>
+  api.post<AuthResponse>("/auth/telegram/mobile/exchange", data);
+
+/** Begin native Telegram bot login: returns a nonce + t.me deep link. */
+export const telegramBotStart = () =>
+  api.post<TelegramBotStartResponse>("/auth/telegram/mobile/bot/start");
+
+/** Poll native bot login status until tokens are ready. */
+export const telegramBotPoll = (nonce: string) =>
+  api.get<TelegramBotPollResponse>("/auth/telegram/mobile/bot/poll", {
+    params: { nonce },
+  });

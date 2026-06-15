@@ -87,3 +87,29 @@ export interface TelegramAuthDto {
   auth_date: number;
   hash: string;
 }
+
+/**
+ * Body for `POST /auth/telegram/mobile/exchange`. The app trades the one-time
+ * `code` it received on the deep link (plus the `state` it generated) for the
+ * real tokens. Keeps the access/refresh tokens out of the browser URL.
+ */
+export interface TelegramMobileExchangeDto {
+  code: string;
+  state: string;
+}
+
+/** Response of `POST /auth/telegram/mobile/bot/start` (native bot login). */
+export interface TelegramBotStartResponse {
+  /** Secret session id; also the `?start=` payload sent to the bot. */
+  nonce: string;
+  /** `https://t.me/<bot>?start=<nonce>` deep link to open. */
+  botUrl: string;
+}
+
+/** Response of `GET /auth/telegram/mobile/bot/poll`. */
+export interface TelegramBotPollResponse {
+  status: "pending" | "ready" | "expired";
+  accessToken?: string;
+  refreshToken?: string;
+  user?: User;
+}

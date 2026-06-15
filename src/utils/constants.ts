@@ -19,3 +19,15 @@ export const GOOGLE_CONFIG = {
     process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? "sdfsd",
   WEB_CLIENT_ID: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "sdfsd",
 };
+
+export const TELEGRAM_CONFIG = {
+  /**
+   * URL of the backend Telegram bridge `login` page. It MUST be served from a
+   * domain registered with @BotFather (the Login Widget refuses other domains).
+   * Defaults to the API host; override with EXPO_PUBLIC_TELEGRAM_BRIDGE_URL if
+   * the bridge is proxied under the verified web domain (e.g. avto-test.uz).
+   */
+  BRIDGE_LOGIN_URL:
+    process.env.EXPO_PUBLIC_TELEGRAM_BRIDGE_URL ||
+    `${API_CONFIG.BASE_URL}/auth/telegram/mobile/login`,
+};
