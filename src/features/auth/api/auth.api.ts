@@ -10,6 +10,7 @@ import type {
   TelegramBotPollResponse,
   TelegramBotStartResponse,
   TelegramMobileExchangeDto,
+  TelegramOidcExchangeDto,
   UpdateProfileDto,
 } from "@/src/features/auth/types/auth.types";
 import { API_CONFIG, STORAGE_KEYS } from "@/src/utils/constants";
@@ -109,3 +110,10 @@ export const telegramBotPoll = (nonce: string) =>
   api.get<TelegramBotPollResponse>("/auth/telegram/mobile/bot/poll", {
     params: { nonce },
   });
+
+/**
+ * Telegram OIDC: trade the one-time code (from the redirect deep link) for
+ * tokens. Pairs with `GET /auth/telegram/login` + `/callback` on the backend.
+ */
+export const telegramExchange = (data: TelegramOidcExchangeDto) =>
+  api.post<AuthResponse>("/auth/telegram/exchange", data);

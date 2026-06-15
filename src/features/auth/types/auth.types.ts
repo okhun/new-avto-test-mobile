@@ -113,3 +113,11 @@ export interface TelegramBotPollResponse {
   refreshToken?: string;
   user?: User;
 }
+
+/**
+ * Body for `POST /auth/telegram/exchange` (Telegram OIDC). The app trades the
+ * one-time `code` it received on the redirect deep link for the real tokens.
+ */
+export interface TelegramOidcExchangeDto {
+  code: string;
+}

@@ -5,6 +5,7 @@ import {
   useRegister,
 } from "@/src/features/auth/hook/useAuth";
 import { useSocialAuth } from "@/src/features/auth/hook/useSocialAuth";
+import { useTelegramAuth } from "@/src/features/auth/hook/useTelegramAuth";
 import { useThemeStore, type ThemePreference } from "@/src/store/theme.store";
 import { useTheme, useThemePreference } from "@/src/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -142,7 +143,8 @@ export default function AuthScreen() {
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const guestLoginMutation = useGuestLogin();
-  const { loginWithGoogle, loginWithTelegram } = useSocialAuth();
+  const { loginWithGoogle } = useSocialAuth();
+  const { loginWithTelegram } = useTelegramAuth();
 
   const usernameRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
