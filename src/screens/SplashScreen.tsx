@@ -30,22 +30,22 @@ function PulseDot({ delayMs, color }: { delayMs: number; color: string }) {
       withRepeat(
         withSequence(
           withTiming(1.4, { duration: 600 }),
-          withTiming(1, { duration: 600 })
+          withTiming(1, { duration: 600 }),
         ),
         -1,
-        true
-      )
+        true,
+      ),
     );
     opacity.value = withDelay(
       delayMs,
       withRepeat(
         withSequence(
           withTiming(1, { duration: 600 }),
-          withTiming(0.4, { duration: 600 })
+          withTiming(0.4, { duration: 600 }),
         ),
         -1,
-        true
-      )
+        true,
+      ),
     );
   }, [delayMs, scale, opacity]);
 
@@ -100,7 +100,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
         },
         default: {},
       }) ?? {},
-    [palette.primary, palette.cardShadowOpacity, isDark]
+    [palette.primary, palette.cardShadowOpacity, isDark],
   );
 
   const orbTopRight = isDark
@@ -155,7 +155,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                 className="text-center text-5xl font-black tracking-tighter"
                 style={{ color: palette.foreground }}
               >
-                Auto<Text style={{ color: palette.primary }}>Test</Text>
+                Avto<Text style={{ color: palette.primary }}>Test</Text>
               </Text>
             </Animated.View>
 

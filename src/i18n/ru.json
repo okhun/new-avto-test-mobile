@@ -729,5 +729,7 @@
   "practice": "Практика",
   "pass_the_exam": "Сдать экзамен",
   "starting_engines": "Запуск двигателя",
-  "timed_out": "Время истекло"
+  "timed_out": "Время истекло",
+  "guest_account": "Гость",
+  "registered_user": "Зарегистрированный пользователь"
 }

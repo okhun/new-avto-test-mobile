@@ -730,5 +730,7 @@
   "practice": "Amalga oshirish",
   "pass_the_exam": "Imtihon topshirish",
   "starting_engines": "Ishga tushirish",
-  "timed_out": "Vaqt tugadi"
+  "timed_out": "Vaqt tugadi",
+  "guest_account": "Mehmon rejimida",
+  "registered_user": "Ro'yxatdan o'tilgan foydalanuvchi"
 }

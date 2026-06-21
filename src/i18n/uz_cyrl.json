@@ -730,5 +730,7 @@
   "practice": "Амалга ошириш",
   "pass_the_exam": "Имтиҳон топшириш",
   "starting_engines": "Ишга тушириш",
-  "timed_out": "Вақт тугади"
+  "timed_out": "Вақт тугади",
+  "guest_account": "Меҳмон режимида",
+  "registered_user": "Рўйхатдан ўтилган фойдаланувчи"
 }

@@ -96,7 +96,7 @@ function validateLogin(email: string, password: string): FormErrors | null {
 function validateRegister(
   displayName: string,
   email: string,
-  password: string
+  password: string,
 ): FormErrors | null {
   const errors: FormErrors = {};
   if (!displayName.trim()) errors.displayName = "Name is required";
@@ -175,7 +175,7 @@ export default function AuthScreen() {
       {
         onSuccess: () => router.replace("/(tabs)"),
         onError: (error) => setServerError(extractApiError(error)),
-      }
+      },
     );
   };
 
@@ -189,7 +189,7 @@ export default function AuthScreen() {
       {
         onSuccess: () => router.replace("/(tabs)"),
         onError: (error) => setServerError(extractApiError(error)),
-      }
+      },
     );
   };
 
@@ -252,7 +252,7 @@ export default function AuthScreen() {
       {
         onSuccess: () => router.replace("/(tabs)"),
         onError: (e) => Alert.alert(t("error"), extractApiError(e)),
-      }
+      },
     );
   };
 
