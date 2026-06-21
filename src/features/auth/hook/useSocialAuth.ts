@@ -85,9 +85,12 @@ export function useSocialAuth() {
    *   3. deep link returns `?code=` → exchange for JWT tokens
    */
   const loginWithGoogle = useCallback(async (): Promise<SocialAuthResult> => {
+    // Path MUST match an existing expo-router screen (e.g. app/auth.tsx).
+    // Android delivers the OAuth deep link to the router before openAuthSessionAsync
+    // resolves; an unknown path like "google-auth" flashes the Unmatched Route page.
     const redirectUri = AuthSession.makeRedirectUri({
       scheme: "avtotestmobile",
-      path: "google-auth",
+      path: "auth",
     });
 
     const authUrl =
