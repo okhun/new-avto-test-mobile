@@ -1,6 +1,9 @@
 import { HapticTab } from "@/components/haptic-tab";
 import { useTheme } from "@/src/theme";
-import { getTabBarBottomInset, TAB_BAR_CONTENT_HEIGHT } from "@/src/utils/tab-bar";
+import {
+  getTabBarBottomInset,
+  TAB_BAR_CONTENT_HEIGHT,
+} from "@/src/utils/tab-bar";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import { Tabs } from "expo-router";
@@ -169,19 +172,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: t("profile"),
-          tabBarIcon: ({ color }) => (
-            <MaterialIcons
-              name="person"
-              size={Platform.OS === "android" ? ANDROID_ICON_SIZE : 24}
-              color={color}
-            />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="conversations"
         options={({ route }) => {
@@ -198,6 +189,19 @@ export default function TabLayout() {
             ),
             tabBarStyle: hideTabBar ? TAB_BAR_HIDDEN : tabBarStyle,
           };
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: t("profile"),
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons
+              name="person"
+              size={Platform.OS === "android" ? ANDROID_ICON_SIZE : 24}
+              color={color}
+            />
+          ),
         }}
       />
     </Tabs>
