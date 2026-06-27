@@ -28,8 +28,8 @@ export function HomeHeader({ level, avatarUrl }: Props) {
       pointerEvents="box-none"
       style={{
         backgroundColor: palette.card,
-        borderTopLeftRadius: 22,
-        borderTopRightRadius: 22,
+        // borderTopLeftRadius: 22,
+        // borderTopRightRadius: 22,
         paddingHorizontal: 20,
         paddingTop: 16,
         paddingBottom: 18,
@@ -38,8 +38,8 @@ export function HomeHeader({ level, avatarUrl }: Props) {
         shadowColor: palette.shadow,
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: palette.cardShadowOpacity + 0.04,
-        shadowRadius: 8,
-        elevation: 3,
+        // shadowRadius: 8,
+        // elevation: 3,
         zIndex: 20,
       }}
     >

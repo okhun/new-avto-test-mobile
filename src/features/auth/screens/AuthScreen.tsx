@@ -25,6 +25,7 @@ import {
   StyleProp,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
   ViewStyle,
 } from "react-native";
@@ -122,6 +123,8 @@ function extractApiError(error: unknown): string {
 
 export default function AuthScreen() {
   const router = useRouter();
+  const { width: screenWidth } = useWindowDimensions();
+  const contentPadding = screenWidth < 360 ? 16 : screenWidth < 400 ? 20 : 32;
   const { t } = useTranslation();
   const { palette, isDark } = useTheme();
   const themePreference = useThemePreference();
@@ -277,30 +280,15 @@ export default function AuthScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View className="flex-1 px-8 pt-16 pb-10">
+        <View
+          className="flex-1 pt-16 pb-10"
+          style={{ paddingHorizontal: contentPadding }}
+        >
           {/* Header */}
           <Animated.View
             entering={FadeInDown.delay(100).duration(600)}
             className="mb-8 items-center"
           >
-            {/* <View
-              className="h-16 w-16 items-center justify-center rounded-2xl"
-              style={{
-                backgroundColor: palette.primary,
-                shadowColor: palette.primary,
-                shadowOffset: { width: 0, height: 8 },
-                shadowOpacity: palette.cardShadowOpacity + 0.12,
-                shadowRadius: 12,
-                elevation: 6,
-              }}
-            >
-              <Ionicons
-                name="car-sport"
-                size={32}
-                color={palette.switchThumb}
-              />
-            </View> */}
-
             <Image
               source={require("@/assets/images/avtotestlogo.png")}
               className="w-14 h-14 mb-10 rounded-lg"
@@ -315,101 +303,6 @@ export default function AuthScreen() {
             <Text className="text-base" style={{ color: palette.muted }}>
               {t("master_your_driving_theory")}
             </Text>
-          </Animated.View>
-
-          <Animated.View
-            entering={FadeInDown.delay(150).duration(600)}
-            className="mb-8 rounded-2xl border p-4"
-            style={{
-              borderColor: palette.border,
-              backgroundColor: palette.card,
-            }}
-          >
-            <View className="mb-3 flex-row items-center justify-between">
-              <Text
-                className="text-xs font-bold uppercase tracking-wider"
-                style={{ color: palette.chevron }}
-              >
-                {t("language")}
-              </Text>
-              <Text
-                className="text-xs font-bold uppercase tracking-wider"
-                style={{ color: palette.chevron }}
-              >
-                {t("appearance")}
-              </Text>
-            </View>
-            <View className="flex-row gap-3">
-              <View className="flex-1">
-                <LangSwitcher className="w-full max-w-none" />
-              </View>
-              <View
-                className="flex-row rounded-2xl border p-1"
-                style={{
-                  borderColor: palette.border,
-                  backgroundColor: palette.iconSurface,
-                }}
-              >
-                <Pressable
-                  onPress={() => selectTheme("light")}
-                  className="h-9 w-9 items-center justify-center rounded-xl"
-                  style={{
-                    backgroundColor:
-                      themePreference === "light"
-                        ? palette.card
-                        : "transparent",
-                  }}
-                >
-                  <Ionicons
-                    name="sunny"
-                    size={18}
-                    color={
-                      themePreference === "light"
-                        ? palette.primary
-                        : palette.muted
-                    }
-                  />
-                </Pressable>
-                <Pressable
-                  onPress={() => selectTheme("dark")}
-                  className="h-9 w-9 items-center justify-center rounded-xl"
-                  style={{
-                    backgroundColor:
-                      themePreference === "dark" ? palette.card : "transparent",
-                  }}
-                >
-                  <Ionicons
-                    name="moon"
-                    size={18}
-                    color={
-                      themePreference === "dark"
-                        ? palette.primary
-                        : palette.muted
-                    }
-                  />
-                </Pressable>
-                <Pressable
-                  onPress={() => selectTheme("system")}
-                  className="h-9 w-9 items-center justify-center rounded-xl"
-                  style={{
-                    backgroundColor:
-                      themePreference === "system"
-                        ? palette.card
-                        : "transparent",
-                  }}
-                >
-                  <Ionicons
-                    name="phone-portrait"
-                    size={18}
-                    color={
-                      themePreference === "system"
-                        ? palette.primary
-                        : palette.muted
-                    }
-                  />
-                </Pressable>
-              </View>
-            </View>
           </Animated.View>
 
           {/* Tab Switcher */}
@@ -687,6 +580,98 @@ export default function AuthScreen() {
               </View>
             </ScaleButton>
           </View>
+          <Animated.View
+            entering={FadeInDown.delay(150).duration(600)}
+            className="mt-8 rounded-2xl border p-4"
+            style={{
+              borderColor: palette.border,
+              backgroundColor: palette.card,
+            }}
+          >
+            <View className="gap-5">
+              <View className="gap-2">
+                <Text
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ color: palette.chevron }}
+                >
+                  {t("language")}
+                </Text>
+                <LangSwitcher className="w-full max-w-none" />
+              </View>
+
+              <View className="gap-2">
+                <Text
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={{ color: palette.chevron }}
+                >
+                  {t("appearance")}
+                </Text>
+                <View
+                  className="flex-row rounded-2xl border p-1"
+                  style={{
+                    borderColor: palette.border,
+                    backgroundColor: palette.iconSurface,
+                  }}
+                >
+                  {(
+                    [
+                      { key: "light", icon: "sunny", label: t("light") },
+                      { key: "dark", icon: "moon", label: t("dark") },
+                      {
+                        key: "system",
+                        icon: "phone-portrait",
+                        label: t("system"),
+                      },
+                    ] as const
+                  ).map(({ key, icon, label }) => {
+                    const isActive = themePreference === key;
+
+                    return (
+                      <Pressable
+                        key={key}
+                        onPress={() => selectTheme(key)}
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: isActive }}
+                        accessibilityLabel={label}
+                        className="min-w-0 flex-1 items-center justify-center rounded-xl px-1 py-2.5"
+                        style={{
+                          backgroundColor: isActive
+                            ? palette.card
+                            : "transparent",
+                          ...(isActive
+                            ? {
+                                shadowColor: palette.shadow,
+                                shadowOffset: { width: 0, height: 1 },
+                                shadowOpacity: palette.cardShadowOpacity,
+                                shadowRadius: 3,
+                                elevation: 2,
+                              }
+                            : null),
+                        }}
+                      >
+                        <Ionicons
+                          name={icon}
+                          size={18}
+                          color={isActive ? palette.primary : palette.muted}
+                        />
+                        <Text
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.75}
+                          className="mt-1 text-center text-[11px] font-extrabold"
+                          style={{
+                            color: isActive ? palette.primary : palette.muted,
+                          }}
+                        >
+                          {label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            </View>
+          </Animated.View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
