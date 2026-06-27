@@ -72,7 +72,7 @@ export default function SettingsTabScreen() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const soundEffectsEnabled = usePreferencesStore((s) => s.soundEffectsEnabled);
   const setSoundEffectsEnabled = usePreferencesStore(
-    (s) => s.setSoundEffectsEnabled
+    (s) => s.setSoundEffectsEnabled,
   );
   const logout = useAuthStore((s) => s.logout);
 
@@ -335,12 +335,14 @@ export default function SettingsTabScreen() {
                 {t("push_notifications")}
               </ThemedText>
             </View>
-            <Switch
-              value={pushNotifications}
-              onValueChange={setPushNotifications}
-              trackColor={{ false: palette.radioOff, true: palette.primary }}
-              thumbColor={palette.switchThumb}
-            />
+            <View>
+              <Switch
+                value={pushNotifications}
+                onValueChange={setPushNotifications}
+                trackColor={{ false: palette.radioOff, true: palette.primary }}
+                thumbColor={palette.switchThumb}
+              />
+            </View>
           </View>
           <View className="min-h-[60px] flex-row items-center justify-between gap-4 px-4">
             <View className="flex-row flex-1 items-center gap-4">
@@ -361,12 +363,14 @@ export default function SettingsTabScreen() {
                 {t("sound_effects")}
               </ThemedText>
             </View>
-            <Switch
-              value={soundEffectsEnabled}
-              onValueChange={setSoundEffectsEnabled}
-              trackColor={{ false: palette.radioOff, true: palette.primary }}
-              thumbColor={palette.switchThumb}
-            />
+            <View>
+              <Switch
+                value={soundEffectsEnabled}
+                onValueChange={setSoundEffectsEnabled}
+                trackColor={{ false: palette.radioOff, true: palette.primary }}
+                thumbColor={palette.switchThumb}
+              />
+            </View>
           </View>
         </View>
 

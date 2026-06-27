@@ -1,3 +1,4 @@
+import { ExplanationDrawer } from "@/src/components/ui/ExplanationDrawer";
 import { ImagePreview } from "@/src/components/ui/ImagePreview";
 import "@/src/config/reanimated";
 import { getExamResult } from "@/src/features/practice/api/practice.api";
@@ -77,7 +78,7 @@ function examHistoryToAttempt(entry: ExamHistoryEntry): TestAttempt {
 
 function mergeSubmitIntoAttempt(
   attempt: TestAttempt,
-  result: SubmitAnswerResult
+  result: SubmitAnswerResult,
 ): TestAttempt {
   const responses = attempt.responses.map((r) => ({ ...r }));
   const idx = responses.findIndex((r) => r.id === result.id);
@@ -116,7 +117,7 @@ export default function ExamTicketScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, SubmitAnswerResult>>(
-    {}
+    {},
   );
   const [feedbackQId, setFeedbackQId] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
@@ -147,9 +148,9 @@ export default function ExamTicketScreen() {
   const answeredCount = useMemo(
     () =>
       responses.filter(
-        (r) => r.isCorrect !== null || r.isSkipped || r.answeredAt !== null
+        (r) => r.isCorrect !== null || r.isSkipped || r.answeredAt !== null,
       ).length,
-    [responses]
+    [responses],
   );
 
   const progress = total > 0 ? (answeredCount / total) * 100 : 0;
@@ -233,12 +234,12 @@ export default function ExamTicketScreen() {
         if (cancelled) return;
         const data: TestAttempt = (raw as { data?: TestAttempt }).data ?? raw;
         const sorted = [...(data.responses ?? [])].sort(
-          (a, b) => a.questionOrder - b.questionOrder
+          (a, b) => a.questionOrder - b.questionOrder,
         );
         setAttempt({ ...data, responses: sorted.map((r) => ({ ...r })) });
 
         const first = sorted.findIndex(
-          (r) => !r.selectedAnswerId && !r.isSkipped
+          (r) => !r.selectedAnswerId && !r.isSkipped,
         );
         if (first > 0) {
           setCurrentIndex(first);
@@ -248,7 +249,7 @@ export default function ExamTicketScreen() {
                 index: first,
                 animated: false,
               }),
-            150
+            150,
           );
         }
       })
@@ -288,7 +289,7 @@ export default function ExamTicketScreen() {
       const i = Math.round(e.nativeEvent.contentOffset.x / SCREEN_WIDTH);
       if (i >= 0 && i < responses.length) setCurrentIndex(i);
     },
-    [responses.length]
+    [responses.length],
   );
 
   const exitToList = useCallback(() => {
@@ -321,17 +322,17 @@ export default function ExamTicketScreen() {
       (r) =>
         r.selectedAnswerId === null &&
         !r.isSkipped &&
-        r.questionOrder > currentOrder
+        r.questionOrder > currentOrder,
     );
     const firstUnanswered = sorted.findIndex(
-      (r) => r.selectedAnswerId === null && !r.isSkipped
+      (r) => r.selectedAnswerId === null && !r.isSkipped,
     );
     const nextIdx =
       idxAfter !== -1 ? idxAfter : firstUnanswered !== -1 ? firstUnanswered : 0;
     setCurrentIndex(nextIdx);
     setTimeout(
       () => listRef.current?.scrollToIndex({ index: nextIdx, animated: true }),
-      100
+      100,
     );
   }, []);
 
@@ -343,7 +344,7 @@ export default function ExamTicketScreen() {
 
     const timeSec = Math.max(
       1,
-      Math.floor((Date.now() - qStart.current) / 1000)
+      Math.floor((Date.now() - qStart.current) / 1000),
     );
 
     try {
@@ -362,7 +363,7 @@ export default function ExamTicketScreen() {
 
       if (soundEffectsEnabled && !result.isSkipped) {
         void playAnswerFeedbackSound(
-          result.isCorrect ? "correct" : "incorrect"
+          result.isCorrect ? "correct" : "incorrect",
         );
       }
 
@@ -373,7 +374,7 @@ export default function ExamTicketScreen() {
 
       if (finishExam) {
         const correct = merged.responses.filter(
-          (r) => r.isCorrect === true
+          (r) => r.isCorrect === true,
         ).length;
         const passingNum = merged.passingScore
           ? parseInt(merged.passingScore, 10)
@@ -404,18 +405,18 @@ export default function ExamTicketScreen() {
           (r) =>
             r.selectedAnswerId === null &&
             !r.isSkipped &&
-            r.questionOrder > currentOrder
+            r.questionOrder > currentOrder,
         );
 
         if (nextInOrder !== -1) {
           const targetOrder = afterMerge[nextInOrder]!.questionOrder;
           const flatIdx = responses.findIndex(
-            (r) => r.questionOrder === targetOrder
+            (r) => r.questionOrder === targetOrder,
           );
           if (flatIdx >= 0) goTo(flatIdx);
         } else {
           const firstUn = afterMerge.findIndex(
-            (r) => r.selectedAnswerId === null && !r.isSkipped
+            (r) => r.selectedAnswerId === null && !r.isSkipped,
           );
           if (firstUn !== -1) goTo(firstUn);
           else if (currentIndex < responses.length - 1) goTo(currentIndex + 1);
@@ -459,7 +460,7 @@ export default function ExamTicketScreen() {
     ({ item, index }: { item: TestResponse; index: number }) => {
       const q = item.question;
       const answers = [...q.answers].sort(
-        (a, b) => a.displayOrder - b.displayOrder
+        (a, b) => a.displayOrder - b.displayOrder,
       );
       const res = results[item.questionId];
       const isCurrent = index === currentIndex;
@@ -509,7 +510,7 @@ export default function ExamTicketScreen() {
 
           {!isExamMode && !!q.explanation && (
             <Pressable
-              onPress={() => setShowExplanation((v) => !v)}
+              onPress={() => setShowExplanation(true)}
               className="mt-4 flex-row items-center gap-2 self-start rounded-xl border px-3 py-2"
               style={{
                 borderColor: isDark ? "rgba(251,191,36,0.35)" : "#fde68a",
@@ -525,33 +526,14 @@ export default function ExamTicketScreen() {
                 className="text-sm font-bold"
                 style={{ color: isDark ? "#fcd34d" : "#92400e" }}
               >
-                {showExplanation
-                  ? t("hide_explanation")
-                  : t("show_explanation")}
+                {t("show_explanation")}
               </Text>
               <MaterialIcons
-                name={showExplanation ? "expand-less" : "expand-more"}
+                name="expand-more"
                 size={22}
                 color={isDark ? "#fbbf24" : "#92400e"}
               />
             </Pressable>
-          )}
-
-          {!isExamMode && showExplanation && !!q.explanation && (
-            <View
-              className="mt-3 rounded-xl border p-3"
-              style={{
-                borderColor: palette.border,
-                backgroundColor: palette.card,
-              }}
-            >
-              <Text
-                className="text-sm leading-relaxed"
-                style={{ color: palette.foreground }}
-              >
-                {q.explanation}
-              </Text>
-            </View>
           )}
 
           <View className="mt-5 gap-3">
@@ -588,13 +570,12 @@ export default function ExamTicketScreen() {
       results,
       feedbackQId,
       isExamMode,
-      showExplanation,
       showSuccessModal,
       showFailModal,
       palette,
       isDark,
       t,
-    ]
+    ],
   );
 
   if (isStarting) {
@@ -740,7 +721,6 @@ export default function ExamTicketScreen() {
           selectedAnswerId,
           results,
           feedbackQId,
-          showExplanation,
           showSuccessModal,
           showFailModal,
           palette.foreground,
@@ -750,6 +730,14 @@ export default function ExamTicketScreen() {
 
       {showConfirm && (
         <ConfirmButton onPress={handleConfirm} isSubmitting={isSubmitting} />
+      )}
+
+      {!isExamMode && (
+        <ExplanationDrawer
+          visible={showExplanation}
+          onClose={() => setShowExplanation(false)}
+          explanation={currentResponse?.question.explanation ?? ""}
+        />
       )}
 
       {isExamMode && (

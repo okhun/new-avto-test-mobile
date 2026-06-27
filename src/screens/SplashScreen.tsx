@@ -1,8 +1,7 @@
 import { useTheme } from "@/src/theme";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, Text, View } from "react-native";
+import { Image, Platform, Text, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -126,7 +125,12 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
           <View />
 
           <View className="items-center">
-            <Animated.View
+            <Image
+              source={require("@/assets/images/AndroidBackgroundIcon1024.png")}
+              className="h-40 w-40 rounded-[24px] mb-10 border border-[#3A7BF4]"
+              style={{ width: 160, height: 160 }}
+            />
+            {/* <Animated.View
               style={[logoStyle, logoCardShadow]}
               className="mb-10"
             >
@@ -148,7 +152,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
                   />
                 </View>
               </View>
-            </Animated.View>
+            </Animated.View> */}
 
             <Animated.View entering={FadeInDown.delay(300).duration(800)}>
               <Text

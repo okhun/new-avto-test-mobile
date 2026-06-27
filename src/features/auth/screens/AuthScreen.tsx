@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -282,7 +283,7 @@ export default function AuthScreen() {
             entering={FadeInDown.delay(100).duration(600)}
             className="mb-8 items-center"
           >
-            <View
+            {/* <View
               className="h-16 w-16 items-center justify-center rounded-2xl"
               style={{
                 backgroundColor: palette.primary,
@@ -298,9 +299,15 @@ export default function AuthScreen() {
                 size={32}
                 color={palette.switchThumb}
               />
-            </View>
+            </View> */}
+
+            <Image
+              source={require("@/assets/images/avtotestlogo.png")}
+              className="w-14 h-14 mb-10 rounded-lg"
+            />
+
             <Text
-              className="mt-4 text-3xl font-extrabold tracking-tight"
+              className="mt-2 text-3xl font-extrabold tracking-tight"
               style={{ color: palette.foreground }}
             >
               Avto Test
@@ -614,22 +621,22 @@ export default function AuthScreen() {
               {socialLoading === "google" ? (
                 <ActivityIndicator color="#4285F4" />
               ) : (
-                <>
+                <View className="flex-row items-center gap-2">
                   <Ionicons name="logo-google" size={20} color="#4285F4" />
                   <Text
-                    className="ml-2 font-bold"
+                    className="font-bold"
                     style={{ color: palette.foreground }}
                   >
                     Google
                   </Text>
-                </>
+                </View>
               )}
             </ScaleButton>
 
             <ScaleButton
               onPress={handleTelegramLogin}
               disabled={isAnyLoading}
-              className="flex-1 flex-row items-center rounded-2xl py-4"
+              className="flex-1 flex-row items-center rounded-2xl"
               wrapperStyle={{
                 flex: 1,
                 backgroundColor: "#229ED9",
@@ -644,10 +651,10 @@ export default function AuthScreen() {
               {socialLoading === "telegram" ? (
                 <ActivityIndicator color="#ffffff" />
               ) : (
-                <>
+                <View className="flex-row items-center gap-2">
                   <Ionicons name="paper-plane" size={20} color="#ffffff" />
-                  <Text className="ml-2 font-bold text-white">Telegram</Text>
-                </>
+                  <Text className="font-bold text-white">Telegram</Text>
+                </View>
               )}
             </ScaleButton>
           </View>

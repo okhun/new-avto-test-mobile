@@ -1,3 +1,4 @@
+import { ExplanationDrawer } from "@/src/components/ui/ExplanationDrawer";
 import { ImagePreview } from "@/src/components/ui/ImagePreview";
 import {
   ANSWER_LABELS,
@@ -7,9 +8,9 @@ import type { Answer } from "@/src/features/practice/types/practice.types";
 import { useTheme } from "@/src/theme";
 import { API_CONFIG } from "@/src/utils/constants";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 
 const SUCCESS = "#22c55e";
 const ERROR = "#ef4444";
@@ -35,22 +36,19 @@ export function ExamResultQuestionCard({
 }: Props) {
   const { t } = useTranslation();
   const { palette, isDark } = useTheme();
+  const [showExplanation, setShowExplanation] = useState(false);
   const sorted = useMemo(
     () => [...answers].sort((a, b) => a.displayOrder - b.displayOrder),
-    [answers]
+    [answers],
   );
 
   const uri = imageUrl ? `${API_CONFIG.API_URL}/images/${imageUrl}.webp` : null;
 
   const neutralBadgeBg = isDark ? palette.iconSurface : "#f1f5f9";
 
-  const explBg = isDark
-    ? "rgba(245, 158, 11, 0.14)"
-    : "rgba(255, 251, 235, 0.92)";
   const explBorder = isDark ? "rgba(251, 191, 36, 0.35)" : "#fde68a";
   const explIcon = isDark ? "#fbbf24" : "#d97706";
   const explTitle = isDark ? "#fcd34d" : "#92400e";
-  const explBody = isDark ? "#fef3c7" : "#78350f";
 
   return (
     <View
@@ -176,35 +174,34 @@ export function ExamResultQuestionCard({
         </View>
 
         {explanation ? (
-          <View
-            className="mt-4 rounded-xl border px-3 py-3"
+          <Pressable
+            onPress={() => setShowExplanation(true)}
+            className="mt-4 flex-row items-center gap-2 self-start rounded-xl border px-3 py-2"
             style={{
-              backgroundColor: explBg,
               borderColor: explBorder,
+              backgroundColor: isDark
+                ? "rgba(251,191,36,0.12)"
+                : "#fffbeb",
             }}
           >
-            <View className="mb-1 flex-row items-center gap-1">
-              <MaterialIcons
-                name="lightbulb-outline"
-                size={18}
-                color={explIcon}
-              />
-              <Text
-                className="text-xs font-bold uppercase"
-                style={{ color: explTitle }}
-              >
-                {t("explanation")}
-              </Text>
-            </View>
-            <Text
-              className="text-sm leading-relaxed"
-              style={{ color: explBody }}
-            >
-              {explanation}
+            <MaterialIcons
+              name="lightbulb-outline"
+              size={20}
+              color={explIcon}
+            />
+            <Text className="text-sm font-bold" style={{ color: explTitle }}>
+              {t("show_explanation")}
             </Text>
-          </View>
+            <MaterialIcons name="expand-more" size={22} color={explIcon} />
+          </Pressable>
         ) : null}
       </View>
+
+      <ExplanationDrawer
+        visible={showExplanation}
+        onClose={() => setShowExplanation(false)}
+        explanation={explanation}
+      />
     </View>
   );
 }
