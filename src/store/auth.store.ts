@@ -62,7 +62,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   loadStoredAuth: async (): Promise<boolean> => {
     try {
-      set({ isLoading: true });
+      set({ isLoading: true, error: null });
       const accessToken = await SecureStore.getItemAsync(
         STORAGE_KEYS.AUTH_TOKEN
       );
@@ -79,8 +79,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error("Failed to load stored auth:", error);
       return false;
-    } finally {
-      set({ isLoading: false });
     }
   },
 }));

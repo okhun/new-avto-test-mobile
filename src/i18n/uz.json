@@ -450,16 +450,16 @@
   "public_offers_description": "Avto Test platformasi ommaviy oferta shartlari. Xizmatlardan foydalanish shartlari va elektron shartnoma.",
   "public_offers_main_description": "Ushbu Ommaviy oferta Avto Test platformasi tomonidan taqdim etiladigan xizmatlardan foydalanish shartlarini belgilaydi. Ushbu sahifa sayt foydalanuvchilari bilan tuziladigan elektron shartnoma hisoblanadi. Saytdan foydalanishni boshlaganingiz orqali siz ushbu oferta shartlariga to'liq rozilik bildirgan hisoblanasiz.",
   "general_rules": {
-    "title": "Umumiy qoidalar",
     "1": "1.1. Ushbu ommaviy oferta Avto Test platformasi tomonidan foydalanuvchilarga taqdim etiladigan xizmatlardan foydalanish shartlarini belgilaydi.",
     "2": "1.2. Saytdan foydalanish foydalanuvchi tomonidan ushbu oferta shartlarini qabul qilganini bildiradi.",
-    "3": "1.3. Agar foydalanuvchi ushbu shartlarga rozi bo'lmasa, sayt xizmatlaridan foydalanishni to'xtatishi kerak."
+    "3": "1.3. Agar foydalanuvchi ushbu shartlarga rozi bo'lmasa, sayt xizmatlaridan foydalanishni to'xtatishi kerak.",
+    "title": "Umumiy qoidalar"
   },
   "service_info": {
-    "title": "Xizmat tavsifi",
     "1": "2.1. Avto Test platformasi foydalanuvchilarga yo'l harakati qoidalari bo'yicha onlayn testlar orqali haydovchilik imtihoniga tayyorlanish imkonini beradi.",
     "2": "2.2. Platforma orqali foydalanuvchilar: avtotest savollarini ishlash, yo'l harakati qoidalarini o'rganish, bilimlarini tekshirish imkoniyatiga ega bo'ldilar.",
-    "3": "2.3. Platformadagi testlar o'quv va tayyorgarlik maqsadida taqdim etiladi."
+    "3": "2.3. Platformadagi testlar o'quv va tayyorgarlik maqsadida taqdim etiladi.",
+    "title": "Xizmat tavsifi"
   },
   "user_rights_and_obligations": {
     "title": "Foydalanuvchining huquq va majburiyatlari",
@@ -470,10 +470,10 @@
     "description": "Avto Test ma'muriyati quyidagi huquqlarga ega: sayt xizmatlarini yangilash yoki o'zgartirish, texnik xizmat ko'rsatish sababli sayt faoliyatini vaqtincha to'xtatish, foydalanish qoidalarini buzgan foydalanuvchilarga cheklov qo'rish."
   },
   "liability_limitation_section": {
-    "title": "Mas'uliyatni cheklash",
     "1": "5.1. Avto Test platformasi taqdim etayotgan testlar o'quv maqsadida yaratilgan.",
     "2": "5.2. Platforma foydalanuvchining rasmiy haydovchilik imtihonidan o'tishini kafolatlamaydi.",
-    "3": "5.3. Saytdan foydalanish natijasida yuzaga kelgan har qanday zarar uchun platforma ma'muriyati javobgar bo'lmaydi."
+    "3": "5.3. Saytdan foydalanish natijasida yuzaga kelgan har qanday zarar uchun platforma ma'muriyati javobgar bo'lmaydi.",
+    "title": "Mas'uliyatni cheklash"
   },
   "intellectual_property_section": {
     "title": "Intellektual mulk",
@@ -732,5 +732,18 @@
   "starting_engines": "Ishga tushirish",
   "timed_out": "Vaqt tugadi",
   "guest_account": "Mehmon rejimida",
-  "registered_user": "Ro'yxatdan o'tilgan foydalanuvchi"
+  "registered_user": "Ro'yxatdan o'tilgan foydalanuvchi",
+  "network": {
+    "offline_title": "Internet aloqasi yo'q",
+    "offline_description": "Yangi ma'lumotlarni yuklab bo'lmadi. Internetga ulanganda avtomatik yangilanadi.",
+    "offline_banner_title": "Internet aloqasi yo'q",
+    "offline_banner_subtitle": "Ba'zi funksiyalar ishlamasligi mumkin. Ulanish tiklanganda avtomatik davom etamiz.",
+    "back_online": "Internet tiklandi",
+    "offline_refresh_blocked": "Internet aloqasi yo'q. Yangilash mumkin emas.",
+    "server_error_title": "Server vaqtincha ishlamayapti",
+    "server_error_description": "Iltimos, birozdan keyin qayta urinib ko'ring.",
+    "answer_saved_locally": "Javob saqlandi. Internet tiklanganda yuboriladi.",
+    "sync_completed": "Sinxronizatsiya yakunlandi",
+    "sync_failed": "Sinxronizatsiya muvaffaqiyatsiz"
+  }
 }

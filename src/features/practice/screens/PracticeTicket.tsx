@@ -157,6 +157,9 @@ export default function PracticeTicketScreen() {
         questionId: resp.questionId,
         answerId: selectedAnswerId,
         timeSpentSeconds: timeSec,
+        responseId: resp.id,
+        questionOrder: resp.questionOrder,
+        testStatus: attempt.status,
       });
 
       setResults((prev) => ({ ...prev, [resp.questionId]: result }));

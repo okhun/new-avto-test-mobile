@@ -1,9 +1,13 @@
 import { api } from "@/services/api/axios";
-import "@/services/api/interceptors";
 import { setLogoutCallback } from "@/services/api/interceptors";
+import "@/services/api/interceptors";
 import "@/src/config/reanimated";
-import type { GetMeResponse } from "@/src/features/auth/types/auth.types";
+import { OfflineBanner } from "@/src/components/network/OfflineBanner";
+import { NetworkSyncBridge } from "@/src/components/network/NetworkSyncBridge";
+import { bootstrapAuthSession } from "@/src/services/auth/bootstrapAuth";
+import { NetworkProvider } from "@/src/providers/NetworkProvider";
 import { QueryProvider } from "@/src/providers";
+import { ToastProvider } from "@/src/providers/ToastProvider";
 import { useAuthStore } from "@/src/store/auth.store";
 import { ThemeProvider } from "@/src/theme";
 import { Stack } from "expo-router";
@@ -18,8 +22,8 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
-function useBootstrapAuth() {
-  const hasInitialized = useRef(false);
+function AppBootstrap() {
+  const startedRef = useRef(false);
 
   useEffect(() => {
     setLogoutCallback(() => {
@@ -28,87 +32,69 @@ function useBootstrapAuth() {
   }, []);
 
   useEffect(() => {
-    if (hasInitialized.current) return;
-    hasInitialized.current = true;
-
-    (async () => {
-      const store = useAuthStore.getState();
-      const hasStored = await store.loadStoredAuth();
-
-      if (hasStored) {
-        try {
-          const { data } = await api.get<GetMeResponse>("/users/me");
-          if (data) {
-            store.setUser({
-              id: data.id,
-              email: data.email,
-              phoneNumber: data.phoneNumber,
-              avatarUrl: data.avatarUrl ?? null,
-              provider: data.provider,
-              isGuest: data.isGuest,
-              displayName: data.displayName,
-            });
-          }
-        } catch {
-          await store.logout();
-        }
-      } else {
-        store.setLoading(false);
-      }
-    })();
+    if (startedRef.current) return;
+    startedRef.current = true;
+    void bootstrapAuthSession();
   }, []);
+
+  return (
+    <>
+      <NetworkSyncBridge />
+      <OfflineBanner />
+    </>
+  );
 }
 
 export default function RootLayout() {
-  useBootstrapAuth();
-
   return (
     <GestureHandlerRootView className="flex-1">
-      <QueryProvider>
-        <SafeAreaProvider>
-          <ThemeProvider>
-            {/* <AuthBootstrapProvider> */}
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="(tabs)"
-                options={{ headerShown: false, animation: "slide_from_left" }}
-              />
-              <Stack.Screen name="auth" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="tickets/[id]"
-                options={{ headerShown: false, animation: "slide_from_right" }}
-              />
-              <Stack.Screen
-                name="exams/start"
-                options={{ headerShown: false, animation: "slide_from_right" }}
-              />
-              <Stack.Screen
-                name="exams/result/[attemptId]"
-                options={{ headerShown: false, animation: "slide_from_right" }}
-              />
-
-              <Stack.Screen
-                name="settings"
-                options={{ headerShown: false, animation: "slide_from_right" }}
-              />
-              <Stack.Screen
-                name="edit-profile"
-                options={{ headerShown: false, animation: "slide_from_right" }}
-              />
-              <Stack.Screen
-                name="leaderboard"
-                options={{ headerShown: false, animation: "slide_from_right" }}
-              />
-              <Stack.Screen
-                name="badges"
-                options={{ headerShown: false, animation: "slide_from_right" }}
-              />
-            </Stack>
-            {/* </AuthBootstrapProvider> */}
-          </ThemeProvider>
-        </SafeAreaProvider>
-      </QueryProvider>
+      <NetworkProvider>
+        <QueryProvider>
+          <SafeAreaProvider>
+            <ThemeProvider>
+              <ToastProvider>
+                <AppBootstrap />
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="(tabs)"
+                    options={{ headerShown: false, animation: "slide_from_left" }}
+                  />
+                  <Stack.Screen name="auth" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="tickets/[id]"
+                    options={{ headerShown: false, animation: "slide_from_right" }}
+                  />
+                  <Stack.Screen
+                    name="exams/start"
+                    options={{ headerShown: false, animation: "slide_from_right" }}
+                  />
+                  <Stack.Screen
+                    name="exams/result/[attemptId]"
+                    options={{ headerShown: false, animation: "slide_from_right" }}
+                  />
+                  <Stack.Screen
+                    name="settings"
+                    options={{ headerShown: false, animation: "slide_from_right" }}
+                  />
+                  <Stack.Screen
+                    name="edit-profile"
+                    options={{ headerShown: false, animation: "slide_from_right" }}
+                  />
+                  <Stack.Screen
+                    name="leaderboard"
+                    options={{ headerShown: false, animation: "slide_from_right" }}
+                  />
+                  <Stack.Screen
+                    name="badges"
+                    options={{ headerShown: false, animation: "slide_from_right" }}
+                  />
+                </Stack>
+              </ToastProvider>
+            </ThemeProvider>
+          </SafeAreaProvider>
+        </QueryProvider>
+      </NetworkProvider>
     </GestureHandlerRootView>
   );
 }

@@ -3,8 +3,8 @@ import {
   getExamResult,
   getTicketsHistory,
   startTicketExam,
-  submitAnswer,
 } from "../api/practice.api";
+import { submitAnswerWithOfflineSupport } from "@/src/services/practice/submitAnswer.service";
 import type {
   StartTicketExamPayload,
   TicketHistory,
@@ -35,7 +35,11 @@ export const useSubmitAnswer = () => {
       questionId: string;
       answerId: string;
       timeSpentSeconds: number;
-    }) => submitAnswer(params.testId, params),
+      responseId: string;
+      questionOrder: number;
+      testStatus: import("../types/practice.types").SubmitAnswerResult["testStatus"];
+    }) => submitAnswerWithOfflineSupport(params),
+    retry: false,
   });
 };
 

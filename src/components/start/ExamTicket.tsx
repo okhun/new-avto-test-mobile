@@ -20,6 +20,8 @@ import type {
 } from "@/src/features/practice/types/practice.types";
 import { TestMode } from "@/src/features/practice/types/practice.types";
 import { playAnswerFeedbackSound } from "@/src/features/practice/utils/playAnswerFeedbackSound";
+import { useToast } from "@/src/providers/ToastProvider";
+import { QueuedSubmitError } from "@/src/services/practice/submitAnswer.service";
 import { usePreferencesStore } from "@/src/store/preferences.store";
 import { useTheme } from "@/src/theme";
 import { API_CONFIG } from "@/src/utils/constants";
@@ -97,6 +99,7 @@ function mergeSubmitIntoAttempt(
 // ─── Main Screen ──────────────────────────────────────────
 export default function ExamTicketScreen() {
   const { t } = useTranslation();
+  const toast = useToast();
   const { palette, isDark } = useTheme();
   const soundEffectsEnabled = usePreferencesStore((s) => s.soundEffectsEnabled);
   const { mutateAsync: startTicketAsync } = useStartTicket();
@@ -353,6 +356,9 @@ export default function ExamTicketScreen() {
         questionId: resp.questionId,
         answerId: selectedAnswerId,
         timeSpentSeconds: timeSec,
+        responseId: resp.id,
+        questionOrder: resp.questionOrder,
+        testStatus: attempt.status,
       });
 
       const merged = mergeSubmitIntoAttempt(attempt, result);
@@ -423,6 +429,33 @@ export default function ExamTicketScreen() {
         }
       }, FEEDBACK_DELAY_MS);
     } catch (e: unknown) {
+      if (e instanceof QueuedSubmitError) {
+        toast.info(t("network.answer_saved_locally"));
+        const result = e.pendingResult;
+        const merged = mergeSubmitIntoAttempt(attempt, result);
+        setAttempt(merged);
+        setResults((prev) => ({ ...prev, [resp.questionId]: result }));
+        setSelectedAnswerId(null);
+        const afterMerge = merged.responses;
+        const currentOrder = resp.questionOrder;
+        const nextInOrder = afterMerge.findIndex(
+          (r) =>
+            r.selectedAnswerId === null &&
+            !r.isSkipped &&
+            r.questionOrder > currentOrder,
+        );
+        if (nextInOrder !== -1) {
+          const targetOrder = afterMerge[nextInOrder]!.questionOrder;
+          const flatIdx = responses.findIndex(
+            (r) => r.questionOrder === targetOrder,
+          );
+          if (flatIdx >= 0) goTo(flatIdx);
+        } else if (currentIndex < responses.length - 1) {
+          goTo(currentIndex + 1);
+        }
+        return;
+      }
+
       const err = e as {
         response?: { data?: { message?: string | string[] } };
         message?: string;
@@ -454,6 +487,8 @@ export default function ExamTicketScreen() {
     exitToList,
     refetchAttempt,
     soundEffectsEnabled,
+    toast,
+    t,
   ]);
 
   const renderQuestion = useCallback(

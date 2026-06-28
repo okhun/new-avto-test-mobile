@@ -1,6 +1,11 @@
 import type { RefreshTokensResponse } from "@/src/features/auth/types/auth.types";
 import { getAcceptLanguage } from "@/src/lib/api-client";
 import { useAuthStore } from "@/src/store/auth.store";
+import {
+  isAuthError,
+  isNetworkOrOfflineError,
+  normalizeApiError,
+} from "@/src/utils/network/errors";
 import { API_CONFIG, STORAGE_KEYS } from "@/src/utils/constants";
 import axios, {
   type AxiosError,
@@ -149,30 +154,30 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(normalizeApiError(error))
 );
 
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError & { config?: RetriedConfig }) => {
     if (!isAxiosError(error) || !error.config) {
-      return Promise.reject(error);
+      return Promise.reject(normalizeApiError(error));
     }
 
     const originalRequest = error.config as RetriedConfig;
     const status = error.response?.status;
 
     if (status !== 401) {
-      return Promise.reject(error);
+      return Promise.reject(normalizeApiError(error));
     }
 
     if (shouldSkipRefreshForUrl(originalRequest)) {
-      return Promise.reject(error);
+      return Promise.reject(normalizeApiError(error));
     }
 
     if (originalRequest._retry) {
       await logoutFromInterceptor();
-      return Promise.reject(error);
+      return Promise.reject(normalizeApiError(error));
     }
 
     originalRequest._retry = true;
@@ -181,9 +186,18 @@ api.interceptors.response.use(
       const accessToken = await refreshAccessTokenChain();
       setRequestBearerAndLanguage(originalRequest, accessToken);
       return api(originalRequest);
-    } catch {
-      await logoutFromInterceptor();
-      return Promise.reject(error);
+    } catch (refreshError) {
+      const normalizedRefresh = normalizeApiError(refreshError);
+
+      if (isNetworkOrOfflineError(normalizedRefresh)) {
+        return Promise.reject(normalizedRefresh);
+      }
+
+      if (isAuthError(normalizedRefresh)) {
+        await logoutFromInterceptor();
+      }
+
+      return Promise.reject(normalizeApiError(error));
     }
   }
 );

@@ -182,7 +182,7 @@ export function HomeProgressHero({ progress, onContinue }: Props) {
                 {t("answers")}
               </Text>
               <Text
-                className="mt-1 text-xs font-extrabold"
+                className="mt-1 text-base font-extrabold"
                 style={{ color: palette.foreground }}
               >
                 {progress.totalCorrectAnswers} /{" "}
