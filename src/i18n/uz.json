@@ -744,6 +744,8 @@
     "server_error_description": "Iltimos, birozdan keyin qayta urinib ko'ring.",
     "answer_saved_locally": "Javob saqlandi. Internet tiklanganda yuboriladi.",
     "sync_completed": "Sinxronizatsiya yakunlandi",
-    "sync_failed": "Sinxronizatsiya muvaffaqiyatsiz"
+    "sync_failed": "Sinxronizatsiya muvaffaqiyatsiz",
+    "exam_start_offline_title": "Imtihonni boshlash uchun internet kerak",
+    "exam_start_offline_description": "Internet ulanishi tiklanganda imtihon avtomatik yuklanadi. Yoki ulanishni tekshirib qayta urinib ko'ring."
   }
 }

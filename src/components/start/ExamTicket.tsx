@@ -20,7 +20,11 @@ import type {
 } from "@/src/features/practice/types/practice.types";
 import { TestMode } from "@/src/features/practice/types/practice.types";
 import { playAnswerFeedbackSound } from "@/src/features/practice/utils/playAnswerFeedbackSound";
+import { OfflineView } from "@/src/components/network/OfflineView";
+import { ServerErrorView } from "@/src/components/network/ServerErrorView";
+import { useNetwork } from "@/src/providers/NetworkProvider";
 import { useToast } from "@/src/providers/ToastProvider";
+import { isNetworkOrOfflineError } from "@/src/utils/network/errors";
 import { QueuedSubmitError } from "@/src/services/practice/submitAnswer.service";
 import { usePreferencesStore } from "@/src/store/preferences.store";
 import { useTheme } from "@/src/theme";
@@ -107,6 +111,7 @@ export default function ExamTicketScreen() {
     useSubmitAnswer();
   const router = useRouter();
   const segments = useSegments();
+  const { isOffline } = useNetwork();
   const isExamMode = segments[0] === "exams";
 
   const params = useLocalSearchParams<{ id?: string; ticketNumber?: string }>();
@@ -117,6 +122,9 @@ export default function ExamTicketScreen() {
 
   const [attempt, setAttempt] = useState<TestAttempt | null>(null);
   const [isStarting, setIsStarting] = useState(true);
+  const [startError, setStartError] = useState<
+    "offline" | "failed" | "missing" | null
+  >(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
   const [results, setResults] = useState<Record<string, SubmitAnswerResult>>(
@@ -137,6 +145,71 @@ export default function ExamTicketScreen() {
   const listRef = useRef<FlatList<TestResponse>>(null);
   const currentIndexRef = useRef(0);
   const qStart = useRef(Date.now());
+  const wasOfflineRef = useRef(isOffline);
+
+  const startAttempt = useCallback(async () => {
+    if (!isExamMode && !ticketId) {
+      setStartError("missing");
+      setIsStarting(false);
+      return;
+    }
+
+    setIsStarting(true);
+    setStartError(null);
+
+    const payload = isExamMode
+      ? { mode: TestMode.EXAM as const }
+      : { mode: TestMode.TICKET as const, ticketId };
+
+    try {
+      const raw = await startTicketAsync(payload);
+      const data: TestAttempt = (raw as { data?: TestAttempt }).data ?? raw;
+      const sorted = [...(data.responses ?? [])].sort(
+        (a, b) => a.questionOrder - b.questionOrder,
+      );
+      setAttempt({ ...data, responses: sorted.map((r) => ({ ...r })) });
+      setStartError(null);
+
+      const first = sorted.findIndex(
+        (r) => !r.selectedAnswerId && !r.isSkipped,
+      );
+      if (first > 0) {
+        setCurrentIndex(first);
+        setTimeout(
+          () =>
+            listRef.current?.scrollToIndex({
+              index: first,
+              animated: false,
+            }),
+          150,
+        );
+      }
+    } catch (error) {
+      setAttempt(null);
+      if (isNetworkOrOfflineError(error)) {
+        setStartError("offline");
+      } else {
+        setStartError("failed");
+      }
+    } finally {
+      setIsStarting(false);
+    }
+  }, [isExamMode, ticketId, startTicketAsync]);
+
+  // ── Start attempt on mount ──
+  useEffect(() => {
+    void startAttempt();
+  }, [startAttempt]);
+
+  // ── Retry start when internet returns ──
+  useEffect(() => {
+    const wasOffline = wasOfflineRef.current;
+    wasOfflineRef.current = isOffline;
+
+    if (wasOffline && !isOffline && !attempt && startError === "offline") {
+      void startAttempt();
+    }
+  }, [isOffline, attempt, startError, startAttempt]);
 
   useEffect(() => {
     currentIndexRef.current = currentIndex;
@@ -221,50 +294,6 @@ export default function ExamTicketScreen() {
       icon: palette.primary,
     };
   }, [timerTone, isDark, palette]);
-
-  // ── Start attempt on mount ──
-  useEffect(() => {
-    if (!isExamMode && !ticketId) return;
-    let cancelled = false;
-    setIsStarting(true);
-
-    const payload = isExamMode
-      ? { mode: TestMode.EXAM as const }
-      : { mode: TestMode.TICKET as const, ticketId };
-
-    startTicketAsync(payload)
-      .then((raw) => {
-        if (cancelled) return;
-        const data: TestAttempt = (raw as { data?: TestAttempt }).data ?? raw;
-        const sorted = [...(data.responses ?? [])].sort(
-          (a, b) => a.questionOrder - b.questionOrder,
-        );
-        setAttempt({ ...data, responses: sorted.map((r) => ({ ...r })) });
-
-        const first = sorted.findIndex(
-          (r) => !r.selectedAnswerId && !r.isSkipped,
-        );
-        if (first > 0) {
-          setCurrentIndex(first);
-          setTimeout(
-            () =>
-              listRef.current?.scrollToIndex({
-                index: first,
-                animated: false,
-              }),
-            150,
-          );
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (!cancelled) setIsStarting(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [ticketId, isExamMode, startTicketAsync]);
 
   // ── Exam countdown ──
   useEffect(() => {
@@ -624,26 +653,77 @@ export default function ExamTicketScreen() {
     );
   }
 
-  if ((!isExamMode && !ticketId) || !attempt || responses.length === 0) {
+  if (startError === "offline") {
     return (
       <SafeAreaView
         style={{ flex: 1, backgroundColor: palette.background }}
         edges={["top"]}
       >
-        <View className="flex-1 items-center justify-center gap-4">
+        <OfflineView
+          title={t("network.exam_start_offline_title")}
+          description={t("network.exam_start_offline_description")}
+          onRetry={() => {
+            if (!isOffline) void startAttempt();
+            else toast.info(t("network.offline_refresh_blocked"));
+          }}
+        />
+        <View className="px-6 pb-8">
+          <Pressable
+            onPress={exitToList}
+            className="items-center rounded-xl border py-3"
+            style={{ borderColor: palette.border }}
+          >
+            <Text className="font-semibold" style={{ color: palette.muted }}>
+              {t("back")}
+            </Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (startError === "failed") {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: palette.background }}
+        edges={["top"]}
+      >
+        <ServerErrorView onRetry={() => void startAttempt()} />
+        <View className="px-6 pb-8">
+          <Pressable
+            onPress={exitToList}
+            className="items-center rounded-xl border py-3"
+            style={{ borderColor: palette.border }}
+          >
+            <Text className="font-semibold" style={{ color: palette.muted }}>
+              {t("back")}
+            </Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (startError === "missing" || !attempt || responses.length === 0) {
+    return (
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: palette.background }}
+        edges={["top"]}
+      >
+        <View className="flex-1 items-center justify-center gap-4 px-6">
           <MaterialIcons
             name="error-outline"
             size={48}
             color={palette.chevron}
           />
           <Text
-            className="text-base font-medium"
+            className="text-center text-base font-medium"
             style={{ color: palette.muted }}
           >
             {isExamMode ? t("exam_not_loaded") : t("ticket_not_found")}
           </Text>
           <Pressable
-            onPress={requestExit}
+            onPress={exitToList}
             className="rounded-xl px-6 py-3"
             style={{ backgroundColor: palette.primary }}
           >
