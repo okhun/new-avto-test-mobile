@@ -9,11 +9,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
+import RenderHTML from "react-native-render-html";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const MAX_HEIGHT = Dimensions.get("window").height * 0.85;
+const HTML_TAG_PATTERN = /<\/?[a-z][\s\S]*>/i;
 
 type ExplanationContentProps = {
   explanation: string;
@@ -26,6 +29,7 @@ export function ExplanationContent({
 }: ExplanationContentProps) {
   const { t } = useTranslation();
   const { isDark } = useTheme();
+  const { width } = useWindowDimensions();
 
   const explBg = isDark
     ? "rgba(245, 158, 11, 0.14)"
@@ -36,6 +40,8 @@ export function ExplanationContent({
   const explBody = isDark ? "#fef3c7" : "#78350f";
 
   if (!explanation) return null;
+
+  const isHtml = HTML_TAG_PATTERN.test(explanation);
 
   return (
     <View
@@ -51,9 +57,67 @@ export function ExplanationContent({
           {t("explanation")}
         </Text>
       </View>
-      <Text className="text-sm leading-relaxed" style={{ color: explBody }}>
-        {explanation}
-      </Text>
+      {isHtml ? (
+        <RenderHTML
+          contentWidth={Math.max(0, width - 64)}
+          source={{ html: explanation }}
+          ignoredStyles={["color", "backgroundColor"]}
+          baseStyle={{
+            color: explBody,
+            fontSize: 14,
+            lineHeight: 21,
+          }}
+          tagsStyles={{
+            p: {
+              marginTop: 0,
+              marginBottom: 8,
+              color: explBody,
+              fontSize: 14,
+              lineHeight: 21,
+            },
+            span: {
+              color: explBody,
+              fontSize: 14,
+              lineHeight: 21,
+            },
+            strong: {
+              color: explBody,
+              fontWeight: "700",
+            },
+            b: {
+              color: explBody,
+              fontWeight: "700",
+            },
+            em: {
+              color: explBody,
+              fontStyle: "italic",
+            },
+            i: {
+              color: explBody,
+              fontStyle: "italic",
+            },
+            ul: {
+              marginTop: 0,
+              marginBottom: 8,
+              color: explBody,
+            },
+            ol: {
+              marginTop: 0,
+              marginBottom: 8,
+              color: explBody,
+            },
+            li: {
+              color: explBody,
+              fontSize: 14,
+              lineHeight: 21,
+            },
+          }}
+        />
+      ) : (
+        <Text className="text-sm leading-relaxed" style={{ color: explBody }}>
+          {explanation}
+        </Text>
+      )}
       {legalRef ? (
         <View
           className="mt-4 flex-row flex-wrap items-center justify-between gap-2 border-t pt-4"
