@@ -733,6 +733,15 @@
   "timed_out": "Vaqt tugadi",
   "guest_account": "Mehmon rejimida",
   "registered_user": "Ro'yxatdan o'tilgan foydalanuvchi",
+  "knowledge": {
+    "no_description": "Tavsif mavjud emas",
+    "used_in_questions": "{{count}} ta savolda ishlatilgan",
+    "sections": {
+      "road_signs": "Yo'l belgilari",
+      "road_markings": "Yo'l chiziqlari",
+      "additional_plates": "Qo'shimcha belgilar"
+    }
+  },
   "network": {
     "offline_title": "Internet aloqasi yo'q",
     "offline_description": "Yangi ma'lumotlarni yuklab bo'lmadi. Internetga ulanganda avtomatik yangilanadi.",

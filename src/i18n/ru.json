@@ -732,6 +732,15 @@
   "timed_out": "Время истекло",
   "guest_account": "Гость",
   "registered_user": "Зарегистрированный пользователь",
+  "knowledge": {
+    "no_description": "Описание отсутствует",
+    "used_in_questions": "Используется в {{count}} вопросах",
+    "sections": {
+      "road_signs": "Дорожные знаки",
+      "road_markings": "Дорожная разметка",
+      "additional_plates": "Дополнительные таблички"
+    }
+  },
   "network": {
     "offline_title": "Нет подключения к интернету",
     "offline_description": "Не удалось загрузить новые данные. Обновление произойдёт автоматически при подключении.",

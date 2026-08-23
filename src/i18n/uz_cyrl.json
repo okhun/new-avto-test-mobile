@@ -733,6 +733,15 @@
   "timed_out": "Вақт тугади",
   "guest_account": "Меҳмон режимида",
   "registered_user": "Рўйхатдан ўтилган фойдаланувчи",
+  "knowledge": {
+    "no_description": "Тавсиф мавжуд эмас",
+    "used_in_questions": "{{count}} та саволда ишлатилган",
+    "sections": {
+      "road_signs": "Йўл белгилари",
+      "road_markings": "Йўл чизиқлари",
+      "additional_plates": "Қўшимча белгилар"
+    }
+  },
   "network": {
     "offline_title": "Интернет алоқаси йўқ",
     "offline_description": "Янги маълумotlarni yuklab bo'lmadi. Internetga ulanganda avtomatik yangilanadi.",

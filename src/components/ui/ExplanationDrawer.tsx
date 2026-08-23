@@ -9,11 +9,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from "react-native";
-import RenderHTML from "react-native-render-html";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ExplanationHtml } from "@/src/components/knowledge-reference/ExplanationHtml";
 
 const MAX_HEIGHT = Dimensions.get("window").height * 0.85;
 const HTML_TAG_PATTERN = /<\/?[a-z][\s\S]*>/i;
@@ -29,7 +28,6 @@ export function ExplanationContent({
 }: ExplanationContentProps) {
   const { t } = useTranslation();
   const { isDark } = useTheme();
-  const { width } = useWindowDimensions();
 
   const explBg = isDark
     ? "rgba(245, 158, 11, 0.14)"
@@ -58,15 +56,9 @@ export function ExplanationContent({
         </Text>
       </View>
       {isHtml ? (
-        <RenderHTML
-          contentWidth={Math.max(0, width - 64)}
-          source={{ html: explanation }}
-          ignoredStyles={["color", "backgroundColor"]}
-          baseStyle={{
-            color: explBody,
-            fontSize: 14,
-            lineHeight: 21,
-          }}
+        <ExplanationHtml
+          html={explanation}
+          color={explBody}
           tagsStyles={{
             p: {
               marginTop: 0,
