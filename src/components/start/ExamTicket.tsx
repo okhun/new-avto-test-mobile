@@ -1,5 +1,6 @@
 import { ExplanationDrawer } from "@/src/components/ui/ExplanationDrawer";
 import { ImagePreview } from "@/src/components/ui/ImagePreview";
+import { ReportFoundMistake } from "@/src/components/start/ReportFoundMistake";
 import "@/src/config/reanimated";
 import { getExamResult } from "@/src/features/practice/api/practice.api";
 import {
@@ -625,6 +626,13 @@ export default function ExamTicketScreen() {
               />
             ))}
           </View>
+
+          {!!item.questionId && (
+            <ReportFoundMistake
+              questionId={item.questionId}
+              questionOrder={item.questionOrder}
+            />
+          )}
         </ScrollView>
       );
     },
@@ -765,22 +773,31 @@ export default function ExamTicketScreen() {
         >
           {headerTitle}
         </Text>
-        {isExamMode && remainingLabel ? (
-          <View
-            className="flex-row items-center gap-1 rounded-xl border px-2.5 py-1.5"
-            style={timerStyles.wrap}
-          >
-            <MaterialIcons name="timer" size={20} color={timerStyles.icon} />
-            <Text
-              className="text-base font-bold tabular-nums"
-              style={{ color: timerStyles.text }}
+        <View className="flex-row items-center gap-1">
+          {currentResponse?.questionId ? (
+            <ReportFoundMistake
+              questionId={currentResponse.questionId}
+              questionOrder={currentResponse.questionOrder}
+              variant="icon"
+            />
+          ) : (
+            <View className="h-10 w-10" />
+          )}
+          {isExamMode && remainingLabel ? (
+            <View
+              className="flex-row items-center gap-1 rounded-xl border px-2.5 py-1.5"
+              style={timerStyles.wrap}
             >
-              {remainingLabel}
-            </Text>
-          </View>
-        ) : (
-          <View className="h-10 w-10" />
-        )}
+              <MaterialIcons name="timer" size={20} color={timerStyles.icon} />
+              <Text
+                className="text-base font-bold tabular-nums"
+                style={{ color: timerStyles.text }}
+              >
+                {remainingLabel}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </View>
 
       <View className="gap-2 px-4 pb-2 pt-2">
